@@ -1,0 +1,131 @@
+
+openapi: 3.0.1
+info:
+  title: Ferre-POS API
+  version: "1.0"
+  description: API RESTful para módulos de Ferre-POS
+
+paths:
+  /api/pos-caja/venta:
+    post:
+      summary: Registrar venta
+      tags: [POS Caja]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Venta'
+      responses:
+        '200':
+          description: Venta registrada correctamente
+
+  /api/pos-caja/venta/{id}:
+    get:
+      summary: Consultar venta por ID
+      tags: [POS Caja]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalle de la venta
+
+  /api/autoatencion/nota-venta:
+    post:
+      summary: Crear nota de venta desde tótem
+      tags: [Autoatención]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotaVenta'
+      responses:
+        '201':
+          description: Nota de venta creada
+
+  /api/autoatencion/nota-venta/{id}/pagar:
+    post:
+      summary: Pagar nota de venta
+      tags: [Autoatención]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pago procesado
+
+  /api/productos:
+    get:
+      summary: Buscar productos
+      tags: [Productos]
+      parameters:
+        - in: query
+          name: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de productos
+
+components:
+  schemas:
+    Venta:
+      type: object
+      properties:
+        cajero_id:
+          type: string
+        nota_venta_id:
+          type: string
+        cliente_rut:
+          type: string
+        tipo_documento:
+          type: string
+        productos:
+          type: array
+          items:
+            type: object
+            properties:
+              producto_id:
+                type: string
+              cantidad:
+                type: integer
+              precio_unitario:
+                type: number
+        total:
+          type: number
+        pagos:
+          type: array
+          items:
+            type: object
+            properties:
+              medio:
+                type: string
+              monto:
+                type: number
+
+    NotaVenta:
+      type: object
+      properties:
+        vendedor_id:
+          type: string
+        cliente_rut:
+          type: string
+        productos:
+          type: array
+          items:
+            type: object
+            properties:
+              producto_id:
+                type: string
+              cantidad:
+                type: integer
+              precio_unitario:
+                type: number

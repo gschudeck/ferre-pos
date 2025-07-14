@@ -1,0 +1,160 @@
+openapi: 3.0.1
+info:
+  title: Ferre-POS API
+  version: 1.0.0
+  description: API REST para gestión de ventas, emisión DTE, productos y proveedores DTE en sistema Ferre-POS
+servers:
+  - url: https://api.ferre-pos.cl
+
+paths:
+  /api/ventas:
+    post:
+      summary: Registrar nueva venta
+      tags: [Ventas]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NuevaVenta'
+      responses:
+        '201':
+          description: Venta registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaVenta'
+
+  /api/dte/emitir:
+    post:
+      summary: Emitir DTE desde una venta
+      tags: [DTE]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                venta_id:
+                  type: string
+      responses:
+        '200':
+          description: Resultado de emisión DTE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaDTE'
+
+  /api/productos/buscar:
+    get:
+      summary: Buscar productos por descripción o código
+      tags: [Productos]
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de productos encontrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Producto'
+
+  /api/proveedores-dte:
+    post:
+      summary: Crear configuración de proveedor DTE
+      tags: [ProveedoresDTE]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProveedorDTE'
+      responses:
+        '201':
+          description: Proveedor creado
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    NuevaVenta:
+      type: object
+      properties:
+        usuario_id:
+          type: string
+        sucursal_id:
+          type: string
+        tipo_documento:
+          type: string
+          enum: [boleta, factura, nota_venta]
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              producto_id:
+                type: string
+              cantidad:
+                type: integer
+              precio_unitario:
+                type: number
+
+    RespuestaVenta:
+      type: object
+      properties:
+        venta_id:
+          type: string
+        total:
+          type: number
+        estado:
+          type: string
+
+    RespuestaDTE:
+      type: object
+      properties:
+        estado:
+          type: string
+        folio:
+          type: integer
+        xml:
+          type: string
+        proveedor:
+          type: string
+
+    Producto:
+      type: object
+      properties:
+        producto_id:
+          type: string
+        descripcion:
+          type: string
+        stock_disponible:
+          type: integer
+
+    ProveedorDTE:
+      type: object
+      properties:
+        sucursal_id:
+          type: string
+        nombre:
+          type: string
+        api_url:
+          type: string
+        api_key:
+          type: string
+        habilitado:
+          type: boolean

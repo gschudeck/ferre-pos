@@ -1,0 +1,161 @@
+# Documento Base: Proyecto Ferre-POS
+
+## [1. Objetivo del Proyecto]
+Diseñar e implementar un sistema de Punto de Venta (POS) altamente eficiente, escalable y conforme a las exigencias legales vigentes en Chile, enfocado en ferreterías urbanas con entre 3 y 50 puntos de venta.
+
+- Cumplimiento normativo ante SII.
+- Integración con Transbank, MercadoPago.
+- API REST para comunicación con ERP.
+- Identificador único por POS para trazabilidad.
+- Cumplimiento de la Ley 21.719 (protección de datos).
+
+## [2. Alcance Funcional]
+
+### 2.1. POS Caja Registradora
+- Interfaz TUI basada en teclado y código de barras (Node.js + blessed).
+- Registro de ventas, descuentos, fidelidad.
+- Emisión DTE: boletas, facturas, guías.
+- Medios de pago: Transbank, MercadoPago, tarjetas prepago.
+- Periféricos: impresora térmica, cajón, lector QR/NFC.
+- Modo offline con reintento de sincronización.
+
+### 2.2. POS Tienda
+- Interfaz gráfica de respuesta rápida.
+- Ventas, promociones, fidelidad.
+- Generación de nota de venta (pagada en caja).
+- Modo offline.
+
+### 2.3. Despacho
+- Interfaz gráfica.
+- Verificación de productos según documento.
+
+### 2.4. Servidor Central
+- Node.js + Fastify, PostgreSQL.
+- API REST, sincronización con servidor de reportes.
+- Fidelización centralizada.
+- Monitoreo, alertas, logs.
+- Control de tasa con fastify-rate-limit.
+
+### 2.5. Servidor de Reportes
+- PostgreSQL/MongoDB + Grafana/Metabase.
+- Sincronización asíncrona desde central.
+- KPI, dashboards, integración con ERP cada 10 min.
+
+## [3. Arquitectura General]
+Modelo cliente-servidor distribuido:
+
+```
+POS Cajas <--> Servidor Local Sucursal <--> Servidor Central Nacional <--> Proveedor DTE
+                                        ↕
+                                  Servidor de Reportes / ERP
+```
+
+## [4. Componentes del Sistema]
+
+### 4.1. POS Caja
+- Hardware: Mini PC, teclado, lector.
+- Software: Linux, Node.js + TUI.
+- REST API.
+- Periféricos: impresora térmica, cajón, lector NFC/QR.
+
+### 4.2. POS Tienda y Despacho
+- Hardware: Mini PC, teclado, mouse.
+- Software: Linux/Windows.
+- REST API.
+- Impresora térmica.
+
+### 4.3. Servidor Local de Sucursal
+- Node.js + Fastify + PostgreSQL.
+- Sincronización con central y proveedor DTE.
+- Control de stock local, alertas y auditoría de sincronización.
+- Modo offline para POS locales.
+
+### 4.4. Servidor Central
+- VPS dedicado o en la nube.
+- PostgreSQL, Node.js + Fastify.
+- Seguridad: SSL, logs, respaldos.
+- Consolida datos de sucursales, stock y DTE.
+
+### 4.5. Servidor de Reportes
+- VPS o nube.
+- PostgreSQL/MongoDB.
+- Dashboards, sincronización ERP, configuración POS.
+
+### 4.6. Orquestador/Monitoreo
+- VPS o nube.
+
+## [5. Flujos Clave]
+
+### 5.1. Venta Caja
+1. Escaneo producto/nota.
+2. Selección de pago.
+3. Generación de DTE.
+4. Impresión comprobante.
+5. Registro en servidor local.
+6. Actualización fidelidad.
+7. Sincronización a central.
+
+### 5.2. Venta Tienda
+1. Escaneo manual.
+2. Nota de venta.
+3. Registro local.
+4. Actualización fidelidad.
+5. Sincronización a central.
+
+### 5.3. Sincronización
+1. ERP actualiza catálogo.
+2. Reflejado en servidor de reportes.
+3. Propagación al servidor central.
+4. Sincronización a servidores locales.
+5. Sincronización a cajas.
+6. Log de sincronización.
+7. Sync ERP cada 10 min.
+
+### 5.4. Control de Stock
+- El stock se gestiona **localmente** para venta y despacho.
+- El stock se **sincroniza** al servidor central cada X minutos.
+- Alertas automáticas si el stock cae bajo 5 unidades.
+
+## [6. Requisitos Técnicos y Regulatorios]
+- Firma electrónica, XML, resolución.
+- Certificación Transbank/MercadoPago.
+- Contingencia offline.
+- Reimpresión.
+- Logs y auditoría.
+- API rate-limit.
+- Trazabilidad fidelización.
+- Parametrización de proveedores DTE por sucursal.
+- Auditoría de sincronización de stock (`historial_stock_sync`).
+
+## [7. Consideraciones Adicionales]
+- ERP y facturación variables.
+- Parametrización fidelización.
+- Múltiples sucursales.
+- Coherencia desde servidor central.
+- Stock multisucursal visible solo para supervisión/consulta.
+
+## [8. Próximos Pasos]
+1. Validar requisitos abiertos.
+2. Diseño de red y servidores.
+3. Modelo de base de datos.
+4. Manual instalación POS/servidores.
+5. Diseño API REST.
+6. Implementación de stock local + replicación.
+7. Dashboard de alertas e historial de cambios de stock.
+
+## [Propuestas Adicionales]
+- CRM básico.
+- Kiosko autoatención.
+- Alertas de stock.
+- App móvil vendedores.
+- Predicción de demanda.
+- WhatsApp Business.
+- Tiempos de atención.
+
+## [Beneficios Esperados]
+- Mayor eficiencia.
+- Cumplimiento normativo automatizado.
+- Mejor experiencia.
+- Fidelización.
+- Escalabilidad y resiliencia.
+- Visibilidad total del inventario y su historial.

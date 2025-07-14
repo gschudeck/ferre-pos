@@ -1,0 +1,92 @@
+
+openapi: 3.0.1
+info:
+  title: Ferre-POS Servidor Central API
+  version: "1.0"
+  description: API RESTful del servidor central de Ferre-POS
+
+paths:
+  /api/sync/ventas:
+    post:
+      summary: Sincronizar ventas desde POS
+      tags: [Sincronización]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/VentaSincronizada'
+      responses:
+        '200':
+          description: Ventas sincronizadas correctamente
+
+  /api/sync/stock:
+    post:
+      summary: Reporte de stock local
+      tags: [Sincronización]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/StockSucursal'
+      responses:
+        '200':
+          description: Stock actualizado
+
+  /api/catalogo:
+    get:
+      summary: Obtener catálogo actualizado
+      tags: [Distribución de Catálogo]
+      responses:
+        '200':
+          description: Lista completa de productos y precios
+
+  /api/promociones:
+    get:
+      summary: Obtener promociones vigentes
+      tags: [Distribución de Promociones]
+      responses:
+        '200':
+          description: Lista de promociones activas
+
+components:
+  schemas:
+    VentaSincronizada:
+      type: object
+      properties:
+        id:
+          type: string
+        sucursal_id:
+          type: string
+        cliente_rut:
+          type: string
+        total:
+          type: number
+        fecha:
+          type: string
+        productos:
+          type: array
+          items:
+            type: object
+            properties:
+              producto_id:
+                type: string
+              cantidad:
+                type: integer
+              precio_unitario:
+                type: number
+
+    StockSucursal:
+      type: object
+      properties:
+        producto_id:
+          type: string
+        sucursal_id:
+          type: string
+        cantidad:
+          type: integer
