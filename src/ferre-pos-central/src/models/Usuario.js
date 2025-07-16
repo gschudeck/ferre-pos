@@ -1,76 +1,131 @@
 /**
  * Modelo Usuario - Sistema Ferre-POS
  * 
- * Maneja todas las operaciones relacionadas con usuarios del sistema,
- * incluyendo autenticación, autorización y gestión de sesiones.
+ * Maneja todas las operaciones relacionadas con usuarios,
+ * autenticación, autorización, perfiles y auditoría de accesos.
  */
 
 const BaseModel = require('./BaseModel')
-const bcrypt = require('bcryptjs')
 const logger = require('../utils/logger')
-const config = require('../config')
+const bcrypt = require('bcrypt')
+const crypto = require('crypto')
 
 class Usuario extends BaseModel {
   constructor() {
     super('usuarios', {
-      rut: { type: 'string', required: true, maxLength: 12 },
-      nombre: { type: 'string', required: true, maxLength: 100 },
-      apellido: { type: 'string', maxLength: 100 },
-      email: { type: 'string', maxLength: 255 },
-      telefono: { type: 'string', maxLength: 20 },
+      rut: { type: 'string', required: true },
+      nombre: { type: 'string', required: true },
+      email: { type: 'string', required: true },
+      telefono: { type: 'string' },
       rol: { type: 'string', required: true },
-      sucursal_id: { type: 'string' },
+      sucursal_id: { type: 'uuid' },
       password_hash: { type: 'string', required: true },
-      salt: { type: 'string', required: true }
+      salt: { type: 'string', required: true },
+      activo: { type: 'boolean', required: true },
+      ultimo_acceso: { type: 'timestamp' },
+      intentos_fallidos: { type: 'integer' },
+      bloqueado_hasta: { type: 'timestamp' },
+      debe_cambiar_password: { type: 'boolean' },
+      token_recuperacion: { type: 'string' },
+      token_recuperacion_expira: { type: 'timestamp' }
     })
   }
 
   /**
-   * Crea un nuevo usuario con contraseña hasheada
+   * Crea un nuevo usuario con validaciones completas
    */
-  async create(userData, options = {}) {
+  async createUsuario(userData, creadorId) {
     try {
-      // Validar RUT único
-      const existingUser = await this.findByRut(userData.rut)
-      if (existingUser) {
-        throw new Error('Ya existe un usuario con este RUT')
-      }
+      return await this.transaction(async (client) => {
+        const {
+          rut,
+          nombre,
+          email,
+          telefono,
+          rol,
+          sucursal_id,
+          password,
+          debe_cambiar_password = true
+        } = userData
 
-      // Validar email único si se proporciona
-      if (userData.email) {
-        const existingEmail = await this.findByEmail(userData.email)
-        if (existingEmail) {
-          throw new Error('Ya existe un usuario con este email')
+        // Validar que el RUT no existe
+        const existeRut = await client.query(
+          'SELECT id FROM usuarios WHERE rut = $1',
+          [rut]
+        )
+        
+        if (existeRut.rows.length > 0) {
+          throw new Error(`Ya existe un usuario con RUT ${rut}`)
         }
-      }
 
-      // Generar salt y hash de la contraseña
-      const salt = await bcrypt.genSalt(config.auth.bcryptRounds)
-      const passwordHash = await bcrypt.hash(userData.password, salt)
+        // Validar que el email no existe
+        const existeEmail = await client.query(
+          'SELECT id FROM usuarios WHERE email = $1',
+          [email]
+        )
+        
+        if (existeEmail.rows.length > 0) {
+          throw new Error(`Ya existe un usuario con email ${email}`)
+        }
 
-      // Preparar datos del usuario
-      const userToCreate = {
-        ...userData,
-        password_hash: passwordHash,
-        salt: salt,
-        activo: true,
-        intentos_fallidos: 0
-      }
+        // Validar rol
+        const rolesValidos = ['admin', 'gerente', 'vendedor', 'cajero']
+        if (!rolesValidos.includes(rol)) {
+          throw new Error(`Rol '${rol}' no es válido`)
+        }
 
-      // Remover la contraseña en texto plano
-      delete userToCreate.password
+        // Validar sucursal si se especifica
+        if (sucursal_id) {
+          const sucursal = await client.query(
+            'SELECT id FROM sucursales WHERE id = $1 AND habilitada = true',
+            [sucursal_id]
+          )
+          
+          if (!sucursal.rows.length) {
+            throw new Error('Sucursal no encontrada o no habilitada')
+          }
+        }
 
-      const newUser = await super.create(userToCreate, options)
+        // Generar hash de contraseña
+        const { hash, salt } = await this.hashPassword(password)
 
-      logger.audit('Usuario creado', {
-        userId: newUser.id,
-        rut: newUser.rut,
-        rol: newUser.rol,
-        sucursalId: newUser.sucursal_id
+        // Crear usuario
+        const query = `
+          INSERT INTO usuarios (
+            rut, nombre, email, telefono, rol, sucursal_id,
+            password_hash, salt, activo, debe_cambiar_password,
+            intentos_fallidos, usuario_creacion
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, $9, 0, $10)
+          RETURNING id, rut, nombre, email, telefono, rol, sucursal_id, 
+                   activo, debe_cambiar_password, fecha_creacion
+        `
+
+        const result = await client.query(query, [
+          rut, nombre, email, telefono, rol, sucursal_id,
+          hash, salt, debe_cambiar_password, creadorId
+        ])
+
+        const usuario = result.rows[0]
+
+        // Registrar en auditoría
+        await this.registrarAuditoria(
+          usuario.id,
+          'USUARIO_CREADO',
+          { rut, nombre, rol, sucursal_id },
+          creadorId,
+          client
+        )
+
+        logger.business('Usuario creado', {
+          usuarioId: usuario.id,
+          rut: usuario.rut,
+          nombre: usuario.nombre,
+          rol: usuario.rol,
+          creadorId
+        })
+
+        return usuario
       })
-
-      // Remover datos sensibles antes de retornar
-      return this.sanitizeUser(newUser)
     } catch (error) {
       logger.error('Error al crear usuario:', error)
       throw error
@@ -78,80 +133,103 @@ class Usuario extends BaseModel {
   }
 
   /**
-   * Busca un usuario por RUT
-   */
-  async findByRut(rut, options = {}) {
-    try {
-      return await this.findOne({ rut }, options)
-    } catch (error) {
-      logger.error('Error al buscar usuario por RUT:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Busca un usuario por email
-   */
-  async findByEmail(email, options = {}) {
-    try {
-      return await this.findOne({ email }, options)
-    } catch (error) {
-      logger.error('Error al buscar usuario por email:', error)
-      throw error
-    }
-  }
-
-  /**
    * Autentica un usuario con RUT y contraseña
    */
-  async authenticate(rut, password) {
+  async autenticarUsuario(rut, password, ipAddress = null) {
     try {
-      const user = await this.findByRut(rut, { includeInactive: false })
-      
-      if (!user) {
-        logger.security('Intento de login con RUT inexistente', { rut })
-        throw new Error('Credenciales inválidas')
-      }
+      return await this.transaction(async (client) => {
+        // Buscar usuario
+        const query = `
+          SELECT id, rut, nombre, email, rol, sucursal_id, password_hash, salt,
+                 activo, ultimo_acceso, intentos_fallidos, bloqueado_hasta,
+                 debe_cambiar_password
+          FROM usuarios
+          WHERE rut = $1
+        `
+        
+        const result = await client.query(query, [rut])
+        
+        if (!result.rows.length) {
+          await this.registrarIntentoAcceso(rut, false, 'USUARIO_NO_ENCONTRADO', ipAddress)
+          throw new Error('Credenciales inválidas')
+        }
 
-      // Verificar si el usuario está bloqueado
-      if (user.bloqueado_hasta && new Date() < new Date(user.bloqueado_hasta)) {
-        const tiempoRestante = Math.ceil((new Date(user.bloqueado_hasta) - new Date()) / 60000)
-        logger.security('Intento de login con usuario bloqueado', {
-          userId: user.id,
-          rut: user.rut,
-          tiempoRestante
+        const usuario = result.rows[0]
+
+        // Verificar si el usuario está activo
+        if (!usuario.activo) {
+          await this.registrarIntentoAcceso(rut, false, 'USUARIO_INACTIVO', ipAddress)
+          throw new Error('Usuario inactivo')
+        }
+
+        // Verificar si el usuario está bloqueado
+        if (usuario.bloqueado_hasta && new Date() < usuario.bloqueado_hasta) {
+          await this.registrarIntentoAcceso(rut, false, 'USUARIO_BLOQUEADO', ipAddress)
+          const tiempoRestante = Math.ceil((usuario.bloqueado_hasta - new Date()) / 60000)
+          throw new Error(`Usuario bloqueado. Intente nuevamente en ${tiempoRestante} minutos`)
+        }
+
+        // Verificar contraseña
+        const passwordValida = await this.verificarPassword(password, usuario.password_hash, usuario.salt)
+        
+        if (!passwordValida) {
+          // Incrementar intentos fallidos
+          const nuevosIntentos = usuario.intentos_fallidos + 1
+          let bloqueadoHasta = null
+          
+          // Bloquear después de 5 intentos fallidos
+          if (nuevosIntentos >= 5) {
+            bloqueadoHasta = new Date(Date.now() + 30 * 60 * 1000) // 30 minutos
+          }
+
+          await client.query(`
+            UPDATE usuarios 
+            SET intentos_fallidos = $1, bloqueado_hasta = $2
+            WHERE id = $3
+          `, [nuevosIntentos, bloqueadoHasta, usuario.id])
+
+          await this.registrarIntentoAcceso(rut, false, 'PASSWORD_INCORRECTA', ipAddress)
+          throw new Error('Credenciales inválidas')
+        }
+
+        // Autenticación exitosa - resetear intentos fallidos y actualizar último acceso
+        await client.query(`
+          UPDATE usuarios 
+          SET intentos_fallidos = 0, bloqueado_hasta = NULL, ultimo_acceso = NOW()
+          WHERE id = $1
+        `, [usuario.id])
+
+        await this.registrarIntentoAcceso(rut, true, 'LOGIN_EXITOSO', ipAddress)
+
+        // Registrar en auditoría
+        await this.registrarAuditoria(
+          usuario.id,
+          'LOGIN_EXITOSO',
+          { ip_address: ipAddress },
+          usuario.id,
+          client
+        )
+
+        logger.business('Login exitoso', {
+          usuarioId: usuario.id,
+          rut: usuario.rut,
+          nombre: usuario.nombre,
+          rol: usuario.rol,
+          ipAddress
         })
-        throw new Error(`Usuario bloqueado. Intente nuevamente en ${tiempoRestante} minutos`)
-      }
 
-      // Verificar contraseña
-      const isValidPassword = await bcrypt.compare(password, user.password_hash)
-      
-      if (!isValidPassword) {
-        await this.incrementFailedAttempts(user.id)
-        logger.security('Intento de login con contraseña incorrecta', {
-          userId: user.id,
-          rut: user.rut,
-          intentos: user.intentos_fallidos + 1
-        })
-        throw new Error('Credenciales inválidas')
-      }
-
-      // Reset intentos fallidos en login exitoso
-      await this.resetFailedAttempts(user.id)
-
-      // Actualizar último acceso
-      await this.updateById(user.id, {
-        ultimo_acceso: new Date()
+        // Retornar datos del usuario sin información sensible
+        return {
+          id: usuario.id,
+          rut: usuario.rut,
+          nombre: usuario.nombre,
+          email: usuario.email,
+          rol: usuario.rol,
+          sucursal_id: usuario.sucursal_id,
+          debe_cambiar_password: usuario.debe_cambiar_password,
+          ultimo_acceso: usuario.ultimo_acceso
+        }
       })
-
-      logger.audit('Login exitoso', {
-        userId: user.id,
-        rut: user.rut,
-        rol: user.rol
-      })
-
-      return this.sanitizeUser(user)
     } catch (error) {
       logger.error('Error en autenticación:', error)
       throw error
@@ -159,46 +237,225 @@ class Usuario extends BaseModel {
   }
 
   /**
-   * Incrementa los intentos fallidos de login
+   * Obtiene un usuario por ID con información completa
    */
-  async incrementFailedAttempts(userId) {
+  async getUsuarioCompleto(id) {
     try {
-      const user = await this.findById(userId)
-      const newAttempts = (user.intentos_fallidos || 0) + 1
+      const query = `
+        SELECT u.id, u.rut, u.nombre, u.email, u.telefono, u.rol, u.sucursal_id,
+               u.activo, u.ultimo_acceso, u.debe_cambiar_password, u.fecha_creacion,
+               u.fecha_modificacion, s.nombre as sucursal_nombre,
+               uc.nombre as creador_nombre
+        FROM usuarios u
+        LEFT JOIN sucursales s ON u.sucursal_id = s.id
+        LEFT JOIN usuarios uc ON u.usuario_creacion = uc.id
+        WHERE u.id = $1
+      `
       
-      const updateData = {
-        intentos_fallidos: newAttempts
+      const result = await this.query(query, [id])
+      
+      if (!result.rows.length) {
+        throw new Error('Usuario no encontrado')
       }
 
-      // Bloquear usuario si excede el máximo de intentos
-      if (newAttempts >= config.auth.maxLoginAttempts) {
-        updateData.bloqueado_hasta = new Date(Date.now() + config.auth.lockoutDuration)
-        
-        logger.security('Usuario bloqueado por exceso de intentos fallidos', {
-          userId,
-          intentos: newAttempts,
-          bloqueadoHasta: updateData.bloqueado_hasta
-        })
-      }
-
-      await this.updateById(userId, updateData)
+      return result.rows[0]
     } catch (error) {
-      logger.error('Error al incrementar intentos fallidos:', error)
+      logger.error('Error al obtener usuario completo:', error)
       throw error
     }
   }
 
   /**
-   * Resetea los intentos fallidos de login
+   * Obtiene lista de usuarios con filtros y paginación
    */
-  async resetFailedAttempts(userId) {
+  async getUsuarios(options = {}) {
     try {
-      await this.updateById(userId, {
-        intentos_fallidos: 0,
-        bloqueado_hasta: null
+      const {
+        sucursalId = null,
+        rol = null,
+        activo = null,
+        busqueda = null,
+        page = 1,
+        limit = 20,
+        orderBy = 'nombre',
+        orderDirection = 'ASC'
+      } = options
+
+      let query = `
+        SELECT u.id, u.rut, u.nombre, u.email, u.telefono, u.rol, u.sucursal_id,
+               u.activo, u.ultimo_acceso, u.fecha_creacion,
+               s.nombre as sucursal_nombre
+        FROM usuarios u
+        LEFT JOIN sucursales s ON u.sucursal_id = s.id
+        WHERE 1=1
+      `
+      
+      const params = []
+      let paramIndex = 1
+
+      if (sucursalId) {
+        query += ` AND u.sucursal_id = $${paramIndex}`
+        params.push(sucursalId)
+        paramIndex++
+      }
+
+      if (rol) {
+        query += ` AND u.rol = $${paramIndex}`
+        params.push(rol)
+        paramIndex++
+      }
+
+      if (activo !== null) {
+        query += ` AND u.activo = $${paramIndex}`
+        params.push(activo)
+        paramIndex++
+      }
+
+      if (busqueda) {
+        query += ` AND (
+          u.nombre ILIKE $${paramIndex} OR 
+          u.email ILIKE $${paramIndex} OR 
+          u.rut ILIKE $${paramIndex}
+        )`
+        params.push(`%${busqueda}%`)
+        paramIndex++
+      }
+
+      // Contar total de registros
+      const countQuery = query.replace(/SELECT.*FROM/, 'SELECT COUNT(*) FROM')
+      const countResult = await this.query(countQuery, params)
+      const total = parseInt(countResult.rows[0].count)
+
+      // Agregar ordenamiento y paginación
+      const validOrderBy = ['nombre', 'email', 'rol', 'fecha_creacion', 'ultimo_acceso']
+      const orderByField = validOrderBy.includes(orderBy) ? orderBy : 'nombre'
+      const direction = orderDirection.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'
+      
+      query += ` ORDER BY u.${orderByField} ${direction}`
+      query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`
+      params.push(limit, (page - 1) * limit)
+
+      const result = await this.query(query, params)
+
+      return {
+        data: result.rows,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      }
+    } catch (error) {
+      logger.error('Error al obtener usuarios:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Actualiza un usuario
+   */
+  async updateUsuario(id, updateData, modificadorId) {
+    try {
+      return await this.transaction(async (client) => {
+        // Verificar que el usuario existe
+        const usuarioExistente = await client.query(
+          'SELECT * FROM usuarios WHERE id = $1',
+          [id]
+        )
+        
+        if (!usuarioExistente.rows.length) {
+          throw new Error('Usuario no encontrado')
+        }
+
+        const usuario = usuarioExistente.rows[0]
+        const cambios = {}
+
+        // Construir query de actualización dinámicamente
+        const setClauses = []
+        const params = []
+        let paramIndex = 1
+
+        // Campos que se pueden actualizar
+        const camposPermitidos = ['nombre', 'email', 'telefono', 'rol', 'sucursal_id', 'activo']
+        
+        for (const campo of camposPermitidos) {
+          if (updateData[campo] !== undefined && updateData[campo] !== usuario[campo]) {
+            setClauses.push(`${campo} = $${paramIndex}`)
+            params.push(updateData[campo])
+            cambios[campo] = { anterior: usuario[campo], nuevo: updateData[campo] }
+            paramIndex++
+          }
+        }
+
+        if (setClauses.length === 0) {
+          throw new Error('No hay cambios para actualizar')
+        }
+
+        // Validaciones específicas
+        if (updateData.email && updateData.email !== usuario.email) {
+          const existeEmail = await client.query(
+            'SELECT id FROM usuarios WHERE email = $1 AND id != $2',
+            [updateData.email, id]
+          )
+          
+          if (existeEmail.rows.length > 0) {
+            throw new Error('Ya existe un usuario con ese email')
+          }
+        }
+
+        if (updateData.rol) {
+          const rolesValidos = ['admin', 'gerente', 'vendedor', 'cajero']
+          if (!rolesValidos.includes(updateData.rol)) {
+            throw new Error(`Rol '${updateData.rol}' no es válido`)
+          }
+        }
+
+        if (updateData.sucursal_id) {
+          const sucursal = await client.query(
+            'SELECT id FROM sucursales WHERE id = $1 AND habilitada = true',
+            [updateData.sucursal_id]
+          )
+          
+          if (!sucursal.rows.length) {
+            throw new Error('Sucursal no encontrada o no habilitada')
+          }
+        }
+
+        // Ejecutar actualización
+        setClauses.push(`fecha_modificacion = NOW()`)
+        setClauses.push(`usuario_modificacion = $${paramIndex}`)
+        params.push(modificadorId)
+        params.push(id)
+
+        const query = `
+          UPDATE usuarios 
+          SET ${setClauses.join(', ')}
+          WHERE id = $${paramIndex + 1}
+          RETURNING id, rut, nombre, email, telefono, rol, sucursal_id, activo
+        `
+
+        const result = await client.query(query, params)
+
+        // Registrar en auditoría
+        await this.registrarAuditoria(
+          id,
+          'USUARIO_ACTUALIZADO',
+          cambios,
+          modificadorId,
+          client
+        )
+
+        logger.business('Usuario actualizado', {
+          usuarioId: id,
+          cambios,
+          modificadorId
+        })
+
+        return result.rows[0]
       })
     } catch (error) {
-      logger.error('Error al resetear intentos fallidos:', error)
+      logger.error('Error al actualizar usuario:', error)
       throw error
     }
   }
@@ -206,35 +463,65 @@ class Usuario extends BaseModel {
   /**
    * Cambia la contraseña de un usuario
    */
-  async changePassword(userId, currentPassword, newPassword) {
+  async cambiarPassword(id, passwordActual, passwordNueva, cambiadoPorId = null) {
     try {
-      const user = await this.findById(userId)
-      
-      if (!user) {
-        throw new Error('Usuario no encontrado')
-      }
+      return await this.transaction(async (client) => {
+        // Obtener usuario
+        const result = await client.query(
+          'SELECT password_hash, salt, debe_cambiar_password FROM usuarios WHERE id = $1',
+          [id]
+        )
+        
+        if (!result.rows.length) {
+          throw new Error('Usuario no encontrado')
+        }
 
-      // Verificar contraseña actual
-      const isValidPassword = await bcrypt.compare(currentPassword, user.password_hash)
-      if (!isValidPassword) {
-        logger.security('Intento de cambio de contraseña con contraseña actual incorrecta', {
-          userId
+        const usuario = result.rows[0]
+
+        // Si no es un cambio forzado por admin, verificar contraseña actual
+        if (!cambiadoPorId || cambiadoPorId === id) {
+          const passwordValida = await this.verificarPassword(
+            passwordActual, 
+            usuario.password_hash, 
+            usuario.salt
+          )
+          
+          if (!passwordValida) {
+            throw new Error('Contraseña actual incorrecta')
+          }
+        }
+
+        // Validar nueva contraseña
+        this.validarPassword(passwordNueva)
+
+        // Generar nuevo hash
+        const { hash, salt } = await this.hashPassword(passwordNueva)
+
+        // Actualizar contraseña
+        await client.query(`
+          UPDATE usuarios 
+          SET password_hash = $1, salt = $2, debe_cambiar_password = false,
+              fecha_modificacion = NOW()
+          WHERE id = $3
+        `, [hash, salt, id])
+
+        // Registrar en auditoría
+        await this.registrarAuditoria(
+          id,
+          'PASSWORD_CAMBIADA',
+          { cambio_forzado: cambiadoPorId && cambiadoPorId !== id },
+          cambiadoPorId || id,
+          client
+        )
+
+        logger.business('Contraseña cambiada', {
+          usuarioId: id,
+          cambiadoPorId: cambiadoPorId || id,
+          forzado: cambiadoPorId && cambiadoPorId !== id
         })
-        throw new Error('Contraseña actual incorrecta')
-      }
 
-      // Generar nuevo hash
-      const salt = await bcrypt.genSalt(config.auth.bcryptRounds)
-      const passwordHash = await bcrypt.hash(newPassword, salt)
-
-      await this.updateById(userId, {
-        password_hash: passwordHash,
-        salt: salt
+        return { success: true }
       })
-
-      logger.audit('Contraseña cambiada', { userId })
-
-      return true
     } catch (error) {
       logger.error('Error al cambiar contraseña:', error)
       throw error
@@ -242,84 +529,286 @@ class Usuario extends BaseModel {
   }
 
   /**
-   * Resetea la contraseña de un usuario (solo admin)
+   * Inicia el proceso de recuperación de contraseña
    */
-  async resetPassword(userId, newPassword, adminUserId) {
+  async iniciarRecuperacionPassword(email) {
     try {
-      const salt = await bcrypt.genSalt(config.auth.bcryptRounds)
-      const passwordHash = await bcrypt.hash(newPassword, salt)
+      return await this.transaction(async (client) => {
+        // Buscar usuario por email
+        const result = await client.query(
+          'SELECT id, rut, nombre, email, activo FROM usuarios WHERE email = $1',
+          [email]
+        )
+        
+        if (!result.rows.length) {
+          // Por seguridad, no revelar si el email existe o no
+          return { success: true, message: 'Si el email existe, recibirá instrucciones' }
+        }
 
-      await this.updateById(userId, {
-        password_hash: passwordHash,
-        salt: salt,
-        intentos_fallidos: 0,
-        bloqueado_hasta: null
+        const usuario = result.rows[0]
+
+        if (!usuario.activo) {
+          throw new Error('Usuario inactivo')
+        }
+
+        // Generar token de recuperación
+        const token = crypto.randomBytes(32).toString('hex')
+        const expira = new Date(Date.now() + 60 * 60 * 1000) // 1 hora
+
+        // Guardar token
+        await client.query(`
+          UPDATE usuarios 
+          SET token_recuperacion = $1, token_recuperacion_expira = $2
+          WHERE id = $3
+        `, [token, expira, usuario.id])
+
+        // Registrar en auditoría
+        await this.registrarAuditoria(
+          usuario.id,
+          'RECUPERACION_PASSWORD_INICIADA',
+          { email },
+          usuario.id,
+          client
+        )
+
+        logger.business('Recuperación de contraseña iniciada', {
+          usuarioId: usuario.id,
+          email: usuario.email
+        })
+
+        // En un sistema real, aquí se enviaría el email
+        // Por ahora retornamos el token para testing
+        return {
+          success: true,
+          message: 'Instrucciones enviadas al email',
+          token: token // Solo para testing, remover en producción
+        }
       })
-
-      logger.audit('Contraseña reseteada por administrador', {
-        userId,
-        adminUserId
-      })
-
-      return true
     } catch (error) {
-      logger.error('Error al resetear contraseña:', error)
+      logger.error('Error al iniciar recuperación de contraseña:', error)
       throw error
     }
   }
 
   /**
-   * Obtiene usuarios por sucursal
+   * Completa el proceso de recuperación de contraseña
    */
-  async findBySucursal(sucursalId, options = {}) {
+  async completarRecuperacionPassword(token, passwordNueva) {
     try {
-      return await this.findAll({
-        where: { sucursal_id: sucursalId },
-        ...options
+      return await this.transaction(async (client) => {
+        // Buscar usuario por token válido
+        const result = await client.query(`
+          SELECT id, rut, nombre, email 
+          FROM usuarios 
+          WHERE token_recuperacion = $1 
+            AND token_recuperacion_expira > NOW()
+            AND activo = true
+        `, [token])
+        
+        if (!result.rows.length) {
+          throw new Error('Token inválido o expirado')
+        }
+
+        const usuario = result.rows[0]
+
+        // Validar nueva contraseña
+        this.validarPassword(passwordNueva)
+
+        // Generar nuevo hash
+        const { hash, salt } = await this.hashPassword(passwordNueva)
+
+        // Actualizar contraseña y limpiar token
+        await client.query(`
+          UPDATE usuarios 
+          SET password_hash = $1, salt = $2, debe_cambiar_password = false,
+              token_recuperacion = NULL, token_recuperacion_expira = NULL,
+              intentos_fallidos = 0, bloqueado_hasta = NULL,
+              fecha_modificacion = NOW()
+          WHERE id = $3
+        `, [hash, salt, usuario.id])
+
+        // Registrar en auditoría
+        await this.registrarAuditoria(
+          usuario.id,
+          'PASSWORD_RECUPERADA',
+          {},
+          usuario.id,
+          client
+        )
+
+        logger.business('Contraseña recuperada exitosamente', {
+          usuarioId: usuario.id,
+          email: usuario.email
+        })
+
+        return { success: true, message: 'Contraseña actualizada exitosamente' }
       })
     } catch (error) {
-      logger.error('Error al buscar usuarios por sucursal:', error)
+      logger.error('Error al completar recuperación de contraseña:', error)
       throw error
     }
   }
 
   /**
-   * Obtiene usuarios por rol
+   * Desactiva un usuario (eliminación lógica)
    */
-  async findByRol(rol, options = {}) {
+  async desactivarUsuario(id, motivo, desactivadoPorId) {
     try {
-      return await this.findAll({
-        where: { rol },
-        ...options
+      return await this.transaction(async (client) => {
+        // Verificar que el usuario existe y está activo
+        const result = await client.query(
+          'SELECT id, rut, nombre, activo FROM usuarios WHERE id = $1',
+          [id]
+        )
+        
+        if (!result.rows.length) {
+          throw new Error('Usuario no encontrado')
+        }
+
+        const usuario = result.rows[0]
+
+        if (!usuario.activo) {
+          throw new Error('Usuario ya está inactivo')
+        }
+
+        // No permitir auto-desactivación
+        if (id === desactivadoPorId) {
+          throw new Error('No puede desactivar su propia cuenta')
+        }
+
+        // Desactivar usuario
+        await client.query(`
+          UPDATE usuarios 
+          SET activo = false, fecha_modificacion = NOW()
+          WHERE id = $1
+        `, [id])
+
+        // Registrar en auditoría
+        await this.registrarAuditoria(
+          id,
+          'USUARIO_DESACTIVADO',
+          { motivo },
+          desactivadoPorId,
+          client
+        )
+
+        logger.business('Usuario desactivado', {
+          usuarioId: id,
+          rut: usuario.rut,
+          nombre: usuario.nombre,
+          motivo,
+          desactivadoPorId
+        })
+
+        return { success: true, message: 'Usuario desactivado exitosamente' }
       })
     } catch (error) {
-      logger.error('Error al buscar usuarios por rol:', error)
+      logger.error('Error al desactivar usuario:', error)
       throw error
     }
   }
 
   /**
-   * Verifica si un usuario tiene un rol específico
+   * Reactiva un usuario
    */
-  async hasRole(userId, role) {
+  async reactivarUsuario(id, reactivadoPorId) {
     try {
-      const user = await this.findById(userId)
-      return user && user.rol === role
+      return await this.transaction(async (client) => {
+        // Verificar que el usuario existe y está inactivo
+        const result = await client.query(
+          'SELECT id, rut, nombre, activo FROM usuarios WHERE id = $1',
+          [id]
+        )
+        
+        if (!result.rows.length) {
+          throw new Error('Usuario no encontrado')
+        }
+
+        const usuario = result.rows[0]
+
+        if (usuario.activo) {
+          throw new Error('Usuario ya está activo')
+        }
+
+        // Reactivar usuario y resetear bloqueos
+        await client.query(`
+          UPDATE usuarios 
+          SET activo = true, intentos_fallidos = 0, bloqueado_hasta = NULL,
+              debe_cambiar_password = true, fecha_modificacion = NOW()
+          WHERE id = $1
+        `, [id])
+
+        // Registrar en auditoría
+        await this.registrarAuditoria(
+          id,
+          'USUARIO_REACTIVADO',
+          {},
+          reactivadoPorId,
+          client
+        )
+
+        logger.business('Usuario reactivado', {
+          usuarioId: id,
+          rut: usuario.rut,
+          nombre: usuario.nombre,
+          reactivadoPorId
+        })
+
+        return { success: true, message: 'Usuario reactivado exitosamente' }
+      })
     } catch (error) {
-      logger.error('Error al verificar rol de usuario:', error)
+      logger.error('Error al reactivar usuario:', error)
       throw error
     }
   }
 
   /**
-   * Verifica si un usuario pertenece a una sucursal específica
+   * Obtiene el historial de accesos de un usuario
    */
-  async belongsToSucursal(userId, sucursalId) {
+  async getHistorialAccesos(usuarioId, options = {}) {
     try {
-      const user = await this.findById(userId)
-      return user && (user.sucursal_id === sucursalId || user.rol === 'admin')
+      const {
+        fechaInicio = null,
+        fechaFin = null,
+        exitosos = null,
+        page = 1,
+        limit = 50
+      } = options
+
+      let query = `
+        SELECT fecha, exitoso, motivo, ip_address
+        FROM intentos_acceso
+        WHERE usuario_rut = (SELECT rut FROM usuarios WHERE id = $1)
+      `
+      
+      const params = [usuarioId]
+      let paramIndex = 2
+
+      if (fechaInicio) {
+        query += ` AND fecha >= $${paramIndex}`
+        params.push(fechaInicio)
+        paramIndex++
+      }
+
+      if (fechaFin) {
+        query += ` AND fecha <= $${paramIndex}`
+        params.push(fechaFin)
+        paramIndex++
+      }
+
+      if (exitosos !== null) {
+        query += ` AND exitoso = $${paramIndex}`
+        params.push(exitosos)
+        paramIndex++
+      }
+
+      query += ` ORDER BY fecha DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`
+      params.push(limit, (page - 1) * limit)
+
+      const result = await this.query(query, params)
+      return result.rows
     } catch (error) {
-      logger.error('Error al verificar sucursal de usuario:', error)
+      logger.error('Error al obtener historial de accesos:', error)
       throw error
     }
   }
@@ -327,46 +816,31 @@ class Usuario extends BaseModel {
   /**
    * Obtiene estadísticas de usuarios
    */
-  async getUserStats() {
+  async getEstadisticasUsuarios(sucursalId = null) {
     try {
-      const baseStats = await this.getStats()
-      
-      // Estadísticas por rol
-      const roleStatsQuery = `
-        SELECT rol, COUNT(*) as count
+      let query = `
+        SELECT 
+          COUNT(*) as total_usuarios,
+          COUNT(*) FILTER (WHERE activo = true) as usuarios_activos,
+          COUNT(*) FILTER (WHERE activo = false) as usuarios_inactivos,
+          COUNT(*) FILTER (WHERE rol = 'admin') as administradores,
+          COUNT(*) FILTER (WHERE rol = 'gerente') as gerentes,
+          COUNT(*) FILTER (WHERE rol = 'vendedor') as vendedores,
+          COUNT(*) FILTER (WHERE rol = 'cajero') as cajeros,
+          COUNT(*) FILTER (WHERE ultimo_acceso >= NOW() - INTERVAL '24 hours') as activos_hoy,
+          COUNT(*) FILTER (WHERE ultimo_acceso >= NOW() - INTERVAL '7 days') as activos_semana
         FROM usuarios
-        WHERE activo = true
-        GROUP BY rol
-        ORDER BY count DESC
       `
-      const roleStatsResult = await this.query(roleStatsQuery)
       
-      // Estadísticas por sucursal
-      const sucursalStatsQuery = `
-        SELECT s.nombre as sucursal, COUNT(u.id) as count
-        FROM usuarios u
-        JOIN sucursales s ON u.sucursal_id = s.id
-        WHERE u.activo = true AND s.habilitada = true
-        GROUP BY s.id, s.nombre
-        ORDER BY count DESC
-      `
-      const sucursalStatsResult = await this.query(sucursalStatsQuery)
-
-      // Usuarios activos en las últimas 24 horas
-      const activeUsersQuery = `
-        SELECT COUNT(*) as active_users
-        FROM usuarios
-        WHERE ultimo_acceso >= NOW() - INTERVAL '24 hours'
-        AND activo = true
-      `
-      const activeUsersResult = await this.query(activeUsersQuery)
-
-      return {
-        ...baseStats,
-        byRole: roleStatsResult.rows,
-        bySucursal: sucursalStatsResult.rows,
-        activeIn24h: parseInt(activeUsersResult.rows[0].active_users)
+      const params = []
+      
+      if (sucursalId) {
+        query += ' WHERE sucursal_id = $1'
+        params.push(sucursalId)
       }
+
+      const result = await this.query(query, params)
+      return result.rows[0]
     } catch (error) {
       logger.error('Error al obtener estadísticas de usuarios:', error)
       throw error
@@ -374,107 +848,131 @@ class Usuario extends BaseModel {
   }
 
   /**
-   * Busca usuarios con filtros avanzados
+   * Genera hash de contraseña con salt
    */
-  async search(filters = {}, options = {}) {
+  async hashPassword(password) {
     try {
-      const {
-        rut,
-        nombre,
-        email,
-        rol,
-        sucursalId,
-        activo = true
-      } = filters
-
-      let query = `
-        SELECT u.*, s.nombre as sucursal_nombre
-        FROM usuarios u
-        LEFT JOIN sucursales s ON u.sucursal_id = s.id
-        WHERE 1=1
-      `
-      const params = []
-
-      if (activo !== undefined) {
-        query += ` AND u.activo = $${params.length + 1}`
-        params.push(activo)
-      }
-
-      if (rut) {
-        query += ` AND u.rut ILIKE $${params.length + 1}`
-        params.push(`%${rut}%`)
-      }
-
-      if (nombre) {
-        query += ` AND (u.nombre ILIKE $${params.length + 1} OR u.apellido ILIKE $${params.length + 1})`
-        params.push(`%${nombre}%`)
-      }
-
-      if (email) {
-        query += ` AND u.email ILIKE $${params.length + 1}`
-        params.push(`%${email}%`)
-      }
-
-      if (rol) {
-        query += ` AND u.rol = $${params.length + 1}`
-        params.push(rol)
-      }
-
-      if (sucursalId) {
-        query += ` AND u.sucursal_id = $${params.length + 1}`
-        params.push(sucursalId)
-      }
-
-      const { orderBy = 'nombre', orderDirection = 'ASC' } = options
-      query += ` ORDER BY u.${orderBy} ${orderDirection}`
-
-      const result = await this.query(query, params)
-      return result.rows.map(user => this.sanitizeUser(user))
+      const salt = await bcrypt.genSalt(12)
+      const hash = await bcrypt.hash(password, salt)
+      return { hash, salt }
     } catch (error) {
-      logger.error('Error en búsqueda de usuarios:', error)
+      logger.error('Error al generar hash de contraseña:', error)
       throw error
     }
   }
 
   /**
-   * Elimina datos sensibles del objeto usuario
+   * Verifica una contraseña contra su hash
    */
-  sanitizeUser(user) {
-    if (!user) return null
-    
-    const sanitized = { ...user }
-    delete sanitized.password_hash
-    delete sanitized.salt
-    delete sanitized.intentos_fallidos
-    delete sanitized.bloqueado_hasta
-    
-    return sanitized
+  async verificarPassword(password, hash, salt) {
+    try {
+      return await bcrypt.compare(password, hash)
+    } catch (error) {
+      logger.error('Error al verificar contraseña:', error)
+      return false
+    }
   }
 
   /**
-   * Obtiene el perfil completo de un usuario
+   * Valida que una contraseña cumple los requisitos
    */
-  async getProfile(userId) {
-    try {
-      const query = `
-        SELECT 
-          u.*,
-          s.nombre as sucursal_nombre,
-          s.direccion as sucursal_direccion
-        FROM usuarios u
-        LEFT JOIN sucursales s ON u.sucursal_id = s.id
-        WHERE u.id = $1 AND u.activo = true
-      `
-      
-      const result = await this.query(query, [userId])
-      
-      if (!result.rows.length) {
-        throw new Error('Usuario no encontrado')
-      }
+  validarPassword(password) {
+    if (!password || password.length < 8) {
+      throw new Error('La contraseña debe tener al menos 8 caracteres')
+    }
 
-      return this.sanitizeUser(result.rows[0])
+    if (!/[A-Z]/.test(password)) {
+      throw new Error('La contraseña debe contener al menos una letra mayúscula')
+    }
+
+    if (!/[a-z]/.test(password)) {
+      throw new Error('La contraseña debe contener al menos una letra minúscula')
+    }
+
+    if (!/[0-9]/.test(password)) {
+      throw new Error('La contraseña debe contener al menos un número')
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      throw new Error('La contraseña debe contener al menos un carácter especial')
+    }
+
+    return true
+  }
+
+  /**
+   * Registra un intento de acceso
+   */
+  async registrarIntentoAcceso(rut, exitoso, motivo, ipAddress = null) {
+    try {
+      await this.query(`
+        INSERT INTO intentos_acceso (usuario_rut, exitoso, motivo, ip_address, fecha)
+        VALUES ($1, $2, $3, $4, NOW())
+      `, [rut, exitoso, motivo, ipAddress])
     } catch (error) {
-      logger.error('Error al obtener perfil de usuario:', error)
+      logger.error('Error al registrar intento de acceso:', error)
+      // No lanzar error para no afectar el flujo principal
+    }
+  }
+
+  /**
+   * Registra eventos en auditoría de usuarios
+   */
+  async registrarAuditoria(usuarioId, accion, detalles, realizadoPorId, client = null) {
+    try {
+      const queryClient = client || this
+
+      await queryClient.query(`
+        INSERT INTO auditoria_usuarios (
+          usuario_id, accion, detalles, realizado_por_id, fecha
+        ) VALUES ($1, $2, $3, $4, NOW())
+      `, [usuarioId, accion, JSON.stringify(detalles), realizadoPorId])
+    } catch (error) {
+      logger.error('Error al registrar auditoría:', error)
+      // No lanzar error para no afectar el flujo principal
+    }
+  }
+
+  /**
+   * Limpia tokens de recuperación expirados
+   */
+  async limpiarTokensExpirados() {
+    try {
+      const result = await this.query(`
+        UPDATE usuarios 
+        SET token_recuperacion = NULL, token_recuperacion_expira = NULL
+        WHERE token_recuperacion_expira < NOW()
+      `)
+
+      logger.info('Tokens de recuperación expirados limpiados', {
+        tokensLimpiados: result.rowCount
+      })
+
+      return result.rowCount
+    } catch (error) {
+      logger.error('Error al limpiar tokens expirados:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Desbloquea usuarios con bloqueo expirado
+   */
+  async desbloquearUsuariosExpirados() {
+    try {
+      const result = await this.query(`
+        UPDATE usuarios 
+        SET bloqueado_hasta = NULL, intentos_fallidos = 0
+        WHERE bloqueado_hasta < NOW()
+      `)
+
+      logger.info('Usuarios desbloqueados automáticamente', {
+        usuariosDesbloqueados: result.rowCount
+      })
+
+      return result.rowCount
+    } catch (error) {
+      logger.error('Error al desbloquear usuarios:', error)
       throw error
     }
   }
