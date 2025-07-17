@@ -1,18 +1,48 @@
 {
   "name": "ferre-pos-api",
-  "version": "1.0.0",
-  "description": "API REST para Sistema Ferre-POS - Servidor Central",
+  "version": "2.0.0",
+  "description": "API REST para Sistema Ferre-POS - Servidor Central con Optimizaciones de Concurrencia",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
+    "start:prod": "NODE_ENV=production node src/server.js",
+    "start:cluster": "NODE_ENV=production pm2 start ecosystem.config.js",
+    "dev": "NODE_ENV=development nodemon src/server.js",
+    "dev:debug": "NODE_ENV=development nodemon --inspect src/server.js",
+    "test": "NODE_ENV=test jest",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "test:coverage": "NODE_ENV=test jest --coverage",
+    "test:integration": "NODE_ENV=test jest --testPathPattern=integration",
+    "test:unit": "NODE_ENV=test jest --testPathPattern=unit",
+    "test:load": "NODE_ENV=test artillery run tests/load/load-test.yml",
+    "lint": "eslint src/ tests/",
+    "lint:fix": "eslint src/ tests/ --fix",
+    "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.js\"",
+    "db:init": "node src/utils/dbInit.js init",
     "db:migrate": "node src/utils/migrate.js",
-    "db:seed": "node src/utils/seed.js"
+    "db:seed": "node src/utils/seed.js",
+    "db:backup": "node src/utils/backup.js",
+    "db:restore": "node src/utils/restore.js",
+    "db:reset": "node src/utils/dbInit.js reset && npm run db:seed",
+    "workers:test": "node tests/workers/test-workers.js",
+    "benchmark": "node tests/benchmark/benchmark.js",
+    "security:audit": "npm audit && snyk test",
+    "security:fix": "npm audit fix",
+    "docs:generate": "jsdoc -c jsdoc.config.json",
+    "docs:serve": "http-server docs/ -p 8080",
+    "build": "npm run lint && npm run test && npm run security:audit",
+    "precommit": "npm run lint:fix && npm run format && npm run test:unit",
+    "prepare": "husky install",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop ecosystem.config.js",
+    "pm2:restart": "pm2 restart ecosystem.config.js",
+    "pm2:logs": "pm2 logs",
+    "pm2:monit": "pm2 monit",
+    "docker:build": "docker build -t ferre-pos-api .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env ferre-pos-api",
+    "docker:compose": "docker-compose up -d",
+    "docker:compose:down": "docker-compose down"
   },
   "keywords": [
     "pos",
@@ -20,41 +50,107 @@
     "api",
     "fastify",
     "postgresql",
-    "nodejs"
+    "nodejs",
+    "multithreading",
+    "workers",
+    "concurrency",
+    "performance",
+    "enterprise"
   ],
   "author": "Manus AI",
   "license": "MIT",
   "dependencies": {
-    "@fastify/cors": "^8.4.0",
+    "@fastify/cors": "^9.0.1",
     "@fastify/helmet": "^11.1.1",
     "@fastify/jwt": "^7.2.4",
     "@fastify/multipart": "^8.0.0",
-    "@fastify/rate-limit": "^9.0.1",
-    "@fastify/swagger": "^8.12.0",
-    "@fastify/swagger-ui": "^2.0.0",
+    "@fastify/rate-limit": "^9.1.0",
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^2.1.0",
+    "@fastify/static": "^6.12.0",
+    "@fastify/compress": "^6.5.0",
+    "@fastify/cookie": "^9.2.0",
+    "@fastify/session": "^10.7.0",
+    "@fastify/redis": "^6.1.1",
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
+    "bull": "^4.12.2",
+    "compression": "^1.7.4",
+    "crypto": "^1.0.1",
     "dotenv": "^16.3.1",
-    "fastify": "^4.24.3",
+    "express-rate-limit": "^7.1.5",
+    "fastify": "^4.25.2",
+    "fastify-plugin": "^4.5.1",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.3.2",
     "joi": "^17.11.0",
+    "jsonwebtoken": "^9.0.2",
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.7",
     "pg": "^8.11.3",
+    "pg-pool": "^3.6.1",
+    "pino": "^8.16.2",
+    "pino-pretty": "^10.2.3",
+    "redis": "^4.6.11",
+    "sharp": "^0.32.6",
     "uuid": "^9.0.1",
-    "winston": "^3.11.0"
+    "validator": "^13.11.0",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1",
+    "xlsx": "^0.18.5",
+    "xml2js": "^0.6.2",
+    "yup": "^1.3.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/bull": "^4.10.0",
+    "@types/compression": "^1.7.5",
     "@types/jest": "^29.5.8",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/multer": "^1.4.11",
     "@types/node": "^20.9.0",
-    "eslint": "^8.53.0",
+    "@types/nodemailer": "^6.4.14",
+    "@types/pg": "^8.10.7",
+    "@types/sharp": "^0.32.0",
+    "@types/supertest": "^2.0.16",
+    "@types/uuid": "^9.0.7",
+    "@types/validator": "^13.11.6",
+    "@types/xml2js": "^0.4.14",
+    "artillery": "^2.0.3",
+    "clinic": "^13.0.0",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jest": "^27.6.0",
     "eslint-plugin-n": "^16.3.1",
+    "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-security": "^1.7.1",
+    "husky": "^8.0.3",
     "jest": "^29.7.0",
+    "jest-extended": "^4.0.2",
+    "jsdoc": "^4.0.2",
+    "lint-staged": "^15.1.0",
     "nodemon": "^3.0.1",
-    "supertest": "^6.3.3"
+    "nyc": "^15.1.0",
+    "pm2": "^5.3.0",
+    "prettier": "^3.1.0",
+    "snyk": "^1.1248.0",
+    "supertest": "^6.3.3",
+    "tap": "^18.5.7",
+    "typescript": "^5.2.2"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.8",
+    "utf-8-validate": "^6.0.3"
   },
   "engines": {
     "node": ">=18.0.0",
-    "npm": ">=8.0.0"
+    "npm": ">=9.0.0"
   },
   "repository": {
     "type": "git",
@@ -63,6 +159,77 @@
   "bugs": {
     "url": "https://github.com/ferre-pos/api/issues"
   },
-  "homepage": "https://github.com/ferre-pos/api#readme"
+  "homepage": "https://github.com/ferre-pos/api#readme",
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run test:unit"
+    }
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/server.js",
+      "!src/config/**",
+      "!src/utils/dbInit.js"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js",
+      "**/tests/**/*.spec.js"
+    ],
+    "setupFilesAfterEnv": [
+      "jest-extended/all"
+    ],
+    "testTimeout": 30000
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src/"
+    ],
+    "ext": "js,json",
+    "ignore": [
+      "tests/",
+      "coverage/",
+      "docs/",
+      "logs/"
+    ],
+    "env": {
+      "NODE_ENV": "development"
+    }
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.js"
+    ],
+    "exclude": [
+      "src/config/**",
+      "src/utils/dbInit.js",
+      "tests/**"
+    ],
+    "reporter": [
+      "text",
+      "html",
+      "lcov"
+    ],
+    "check-coverage": true,
+    "lines": 80,
+    "functions": 80,
+    "branches": 80,
+    "statements": 80
+  }
 }
 

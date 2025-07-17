@@ -1,0 +1,48 @@
+{
+  "source": {
+    "include": [
+      "./src/",
+      "./README.md"
+    ],
+    "includePattern": "\\.(js|jsx)$",
+    "exclude": [
+      "./src/config/",
+      "./node_modules/",
+      "./tests/",
+      "./coverage/"
+    ],
+    "excludePattern": "(test|spec)\\.js$"
+  },
+  "opts": {
+    "destination": "./docs/",
+    "recurse": true,
+    "readme": "./README.md"
+  },
+  "plugins": [
+    "plugins/markdown",
+    "plugins/summarize"
+  ],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "default": {
+      "outputSourceFiles": true,
+      "includeDate": true
+    }
+  },
+  "markdown": {
+    "hardwrap": true,
+    "idInHeadings": true
+  },
+  "metadata": {
+    "title": "Ferre-POS API Documentation",
+    "description": "Documentación completa de la API REST del Sistema Ferre-POS",
+    "version": "2.0.0",
+    "author": "Manus AI"
+  },
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  }
+}
+
