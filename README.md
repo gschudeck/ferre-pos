@@ -18,6 +18,9 @@ Sistema cliente-servidor distribuido con 3 capas:
 - **POS Tienda**: Interfaz gráfica rápida, generación de notas de venta.
 - **Despacho**: Verificación de entregas.
 - **Autoatención**: Kiosko con pantalla táctil, consulta y preventa.
+- **Sincronización: API REST para la sincronizacion de datos con ERP.
+- **Reportes: Obtencion de reportes.
+- **Monitorizacion: Compatible con herramientas de observabilidad.
 
 ## 4. Cumplimiento Normativo
 
@@ -27,9 +30,11 @@ Sistema cliente-servidor distribuido con 3 capas:
 
 ## 5. Tecnología
 
-- Node.js + Fastify, PostgreSQL.
+- GoLang.
+- PostgreSQL.
+- Node.js + Fastify.
 - REST API segura (JWT, rate-limiting).
-- Grafana / Metabase para monitoreo.
+- Grafana / Prometheus / Metabase para monitoreo.
 - Modo offline con reenvío asincrónico.
 
 ## 6. Fidelización
