@@ -18,9 +18,9 @@ Sistema cliente-servidor distribuido con 3 capas:
 - **POS Tienda**: Interfaz gráfica rápida, generación de notas de venta.
 - **Despacho**: Verificación de entregas.
 - **Autoatención**: Kiosko con pantalla táctil, consulta y preventa.
-- **Sincronización: API REST para la sincronizacion de datos con ERP.
-- **Reportes: Obtencion de reportes.
-- **Monitorizacion: Compatible con herramientas de observabilidad.
+- **Sincronización**: API REST para la sincronizacion de datos con ERP.
+- **Reportes**: Obtencion de reportes.
+- **Monitorizacion**: Compatible con herramientas de observabilidad.
 
 ## 4. Cumplimiento Normativo
 
