@@ -1,0 +1,375 @@
+# Configuración Principal del Servidor Central Ferre-POS
+# Este archivo contiene toda la configuración del sistema
+# Puede ser modificado en tiempo real y se recargará automáticamente
+
+# Configuración del Servidor HTTP
+server:
+  host: "0.0.0.0"                    # Dirección IP del servidor
+  port: 8080                         # Puerto del servidor
+  mode: "release"                    # Modo: debug, release, test
+  read_timeout: "30s"                # Timeout de lectura
+  write_timeout: "30s"               # Timeout de escritura
+  idle_timeout: "60s"                # Timeout de inactividad
+  max_header_bytes: 1048576          # Tamaño máximo de headers (1MB)
+  trusted_proxies:                   # IPs de proxies confiables
+    - "127.0.0.1"
+    - "10.0.0.0/8"
+  enable_profiling: false            # Habilitar profiling de Go
+  graceful_timeout: "30s"            # Timeout para shutdown graceful
+
+# Configuración de Bases de Datos por API
+database:
+  pos:
+    host: "localhost"
+    port: 5432
+    user: "ferre_pos_user"
+    password: "secure_password_pos"
+    database: "ferre_pos_central"
+    ssl_mode: "disable"
+    max_open_conns: 50
+    max_idle_conns: 10
+    conn_max_lifetime: 15            # minutos
+    conn_max_idle_time: 5            # minutos
+    log_level: "warn"
+    slow_threshold: 100              # milisegundos
+  
+  sync:
+    host: "localhost"
+    port: 5432
+    user: "ferre_sync_user"
+    password: "secure_password_sync"
+    database: "ferre_pos_central"
+    ssl_mode: "disable"
+    max_open_conns: 20
+    max_idle_conns: 5
+    conn_max_lifetime: 60            # minutos
+    conn_max_idle_time: 15           # minutos
+    log_level: "warn"
+    slow_threshold: 500              # milisegundos
+  
+  labels:
+    host: "localhost"
+    port: 5432
+    user: "ferre_labels_user"
+    password: "secure_password_labels"
+    database: "ferre_pos_central"
+    ssl_mode: "disable"
+    max_open_conns: 15
+    max_idle_conns: 3
+    conn_max_lifetime: 45            # minutos
+    conn_max_idle_time: 10           # minutos
+    log_level: "warn"
+    slow_threshold: 300              # milisegundos
+  
+  reports:
+    host: "localhost"
+    port: 5432
+    user: "ferre_reports_user"
+    password: "secure_password_reports"
+    database: "ferre_pos_central"
+    ssl_mode: "disable"
+    max_open_conns: 30
+    max_idle_conns: 8
+    conn_max_lifetime: 45            # minutos
+    conn_max_idle_time: 10           # minutos
+    log_level: "warn"
+    slow_threshold: 1000             # milisegundos
+
+# Configuración específica por API
+apis:
+  pos:
+    enabled: true
+    base_path: "/api/pos"
+    max_concurrent_users: 100
+    session_timeout: "8h"
+    max_products_per_query: 1000
+    cache_products_ttl: "30m"
+    allow_offline_mode: true
+    offline_data_retention: "168h"   # 7 días
+    require_terminal_auth: true
+    max_venta_items: 100
+    enable_fidelizacion: true
+    rate_limiting:
+      enabled: true
+      requests_per_minute: 200
+      burst_size: 20
+      cleanup_interval: "5m"
+  
+  sync:
+    enabled: true
+    base_path: "/api/sync"
+    max_concurrent_syncs: 5
+    sync_interval: "15m"
+    batch_size: 100
+    max_retries: 3
+    retry_backoff_multiplier: 2.0
+    conflict_resolution_mode: "manual"  # manual, auto_server, auto_client
+    enable_compression: true
+    max_sync_duration: "30m"
+    cleanup_interval: "24h"
+    log_retention_days: 90
+  
+  labels:
+    enabled: true
+    base_path: "/api/labels"
+    max_concurrent_jobs: 10
+    max_labels_per_batch: 1000
+    default_label_format: "pdf"
+    supported_formats:
+      - "pdf"
+      - "png"
+      - "jpg"
+    max_label_size: 5120             # KB
+    cache_templates_ttl: "2h"
+    storage_path: "/var/lib/ferre-pos/labels"
+    cleanup_interval: "24h"
+    file_retention_days: 30
+    enable_preview: true
+    preview_timeout: "30s"
+  
+  reports:
+    enabled: true
+    base_path: "/api/reports"
+    max_concurrent_reports: 5
+    max_report_size: 100             # MB
+    default_format: "pdf"
+    supported_formats:
+      - "pdf"
+      - "excel"
+      - "csv"
+      - "json"
+    cache_reports_ttl: "1h"
+    storage_path: "/var/lib/ferre-pos/reports"
+    cleanup_interval: "24h"
+    file_retention_days: 90
+    enable_scheduled_reports: true
+    max_scheduled_reports: 50
+    report_timeout: "10m"
+    enable_dashboards: true
+    dashboard_refresh_rate: "5m"
+
+# Configuración de Seguridad
+security:
+  jwt_secret: "your-super-secret-jwt-key-change-in-production-please"
+  jwt_expiration: "24h"
+  refresh_token_expiration: "168h"   # 7 días
+  password_min_length: 8
+  password_require_special: true
+  max_login_attempts: 5
+  login_lockout_duration: "15m"
+  enable_two_factor: false
+  api_keys:                          # API Keys para acceso externo
+    - "api-key-for-external-system-1"
+    - "api-key-for-mobile-app"
+  allowed_ips:                       # IPs permitidas (vacío = todas)
+    - "0.0.0.0"
+  
+  # Configuración CORS por API
+  cors:
+    pos:
+      allow_origins:
+        - "http://localhost:3000"
+        - "https://pos.ferreteria.com"
+        - "https://*.ferreteria.com"
+      allow_methods:
+        - "GET"
+        - "POST"
+        - "PUT"
+        - "PATCH"
+        - "DELETE"
+        - "OPTIONS"
+      allow_headers:
+        - "Origin"
+        - "Content-Type"
+        - "Accept"
+        - "Authorization"
+        - "X-Requested-With"
+        - "X-Terminal-ID"
+        - "X-Sucursal-ID"
+      expose_headers:
+        - "Content-Length"
+        - "X-Request-ID"
+        - "X-Response-Time"
+      allow_credentials: true
+      max_age: 86400
+    
+    sync:
+      allow_origins:
+        - "http://localhost:*"
+        - "https://sync.ferreteria.com"
+        - "https://admin.ferreteria.com"
+      allow_methods:
+        - "GET"
+        - "POST"
+        - "PUT"
+        - "DELETE"
+        - "OPTIONS"
+      allow_headers:
+        - "Origin"
+        - "Content-Type"
+        - "Authorization"
+        - "X-API-Key"
+      allow_credentials: true
+      max_age: 86400
+    
+    labels:
+      allow_origins:
+        - "http://localhost:*"
+        - "https://labels.ferreteria.com"
+        - "https://design.ferreteria.com"
+      allow_methods:
+        - "GET"
+        - "POST"
+        - "PUT"
+        - "DELETE"
+        - "OPTIONS"
+      allow_headers:
+        - "Origin"
+        - "Content-Type"
+        - "Authorization"
+      allow_credentials: true
+      max_age: 86400
+    
+    reports:
+      allow_origins:
+        - "http://localhost:*"
+        - "https://reports.ferreteria.com"
+        - "https://dashboard.ferreteria.com"
+      allow_methods:
+        - "GET"
+        - "POST"
+        - "PUT"
+        - "DELETE"
+        - "OPTIONS"
+      allow_headers:
+        - "Origin"
+        - "Content-Type"
+        - "Authorization"
+      allow_credentials: true
+      max_age: 86400
+  
+  # Rate Limiting Global
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 100
+    burst_size: 10
+    cleanup_interval: "5m"
+
+# Configuración de Logging por API
+logging:
+  global:
+    level: "info"                    # debug, info, warn, error
+    format: "json"                   # json, text
+    output: "both"                   # stdout, file, both
+    file_path: "/var/log/ferre-pos/app.log"
+    max_size: 100                    # MB
+    max_backups: 5
+    max_age: 30                      # días
+    compress: true
+    log_requests: true
+    log_responses: false
+    log_headers: false
+    log_body: false
+    skip_paths:
+      - "/health"
+      - "/metrics"
+      - "/ping"
+    sensitive_fields:
+      - "password"
+      - "token"
+      - "authorization"
+      - "api_key"
+      - "secret"
+  
+  pos:
+    level: "info"
+    format: "json"
+    output: "file"
+    file_path: "/var/log/ferre-pos/pos.log"
+    log_requests: true
+    log_responses: false
+  
+  sync:
+    level: "warn"
+    format: "json"
+    output: "file"
+    file_path: "/var/log/ferre-pos/sync.log"
+    log_requests: true
+    log_responses: true
+  
+  labels:
+    level: "info"
+    format: "json"
+    output: "file"
+    file_path: "/var/log/ferre-pos/labels.log"
+    log_requests: true
+    log_responses: false
+  
+  reports:
+    level: "info"
+    format: "json"
+    output: "file"
+    file_path: "/var/log/ferre-pos/reports.log"
+    log_requests: true
+    log_responses: false
+
+# Configuración de Cache
+cache:
+  type: "memory"                     # memory, redis
+  host: "localhost"
+  port: 6379
+  password: ""
+  database: 0
+  max_connections: 10
+  default_ttl: "1h"
+  cleanup_interval: "10m"
+
+# Configuración de Email
+email:
+  enabled: false
+  smtp_host: "smtp.gmail.com"
+  smtp_port: 587
+  username: "your-email@gmail.com"
+  password: "your-app-password"
+  from_email: "noreply@ferreteria.com"
+  from_name: "Ferre-POS Sistema"
+  use_tls: true
+  use_ssl: false
+
+# Configuración de SMS
+sms:
+  enabled: false
+  provider: "twilio"                 # twilio, aws
+  api_key: "your-twilio-sid"
+  api_secret: "your-twilio-token"
+  from_number: "+1234567890"
+
+# Configuración de Almacenamiento
+storage:
+  type: "local"                      # local, s3, gcs
+  base_path: "/var/lib/ferre-pos/storage"
+  max_file_size: 10                  # MB
+  allowed_extensions:
+    - ".pdf"
+    - ".png"
+    - ".jpg"
+    - ".jpeg"
+    - ".xlsx"
+    - ".csv"
+    - ".zip"
+  
+  # Configuración S3 (si type = "s3")
+  s3_bucket: "ferre-pos-storage"
+  s3_region: "us-east-1"
+  s3_access_key: "your-access-key"
+  s3_secret_key: "your-secret-key"
+
+# Configuración de Monitoreo
+monitoring:
+  enabled: true
+  metrics_path: "/metrics"
+  health_path: "/health"
+  enable_pprof: false
+  collect_interval: "30s"
+  retention_days: 30
+

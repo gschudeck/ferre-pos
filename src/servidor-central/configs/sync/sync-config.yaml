@@ -1,0 +1,266 @@
+# Configuración Específica del API de Sincronización
+# Este archivo puede ser modificado independientemente del archivo principal
+# Los cambios se aplicarán automáticamente sin reiniciar el servidor
+
+# Configuración General del API Sync
+api:
+  enabled: true
+  base_path: "/api/sync"
+  version: "v1"
+  description: "API para sincronización de datos entre servidor central y sucursales"
+
+# Configuración de Sincronización
+sync:
+  max_concurrent_syncs: 5           # Sincronizaciones concurrentes máximas
+  sync_interval: "15m"              # Intervalo de sincronización automática
+  batch_size: 100                   # Tamaño de lote para sincronización
+  max_retries: 3                    # Reintentos máximos por operación
+  retry_backoff_multiplier: 2.0     # Multiplicador de backoff exponencial
+  initial_retry_delay: "5s"         # Delay inicial para reintentos
+  max_retry_delay: "5m"             # Delay máximo para reintentos
+
+# Configuración de Resolución de Conflictos
+conflict_resolution:
+  mode: "manual"                    # manual, auto_server, auto_client
+  auto_resolve_threshold: 0.8       # Umbral de confianza para resolución automática
+  enable_conflict_notifications: true # Notificar conflictos
+  conflict_retention_days: 30       # Días para retener conflictos resueltos
+  priority_rules:                   # Reglas de prioridad por entidad
+    productos: "server"             # server, client, timestamp, manual
+    precios: "server"
+    stock: "client"
+    ventas: "client"
+    clientes: "merge"               # merge, server, client
+
+# Configuración de Compresión y Transferencia
+transfer:
+  enable_compression: true          # Habilitar compresión de datos
+  compression_algorithm: "gzip"     # gzip, lz4, snappy
+  compression_level: 6              # Nivel de compresión (1-9)
+  max_transfer_size: "50MB"         # Tamaño máximo de transferencia
+  chunk_size: "1MB"                 # Tamaño de chunk para transferencias grandes
+  enable_delta_sync: true           # Habilitar sincronización delta
+  enable_checksums: true            # Habilitar checksums para integridad
+
+# Configuración de Timeout y Límites
+timeouts:
+  max_sync_duration: "30m"          # Duración máxima de sincronización
+  connection_timeout: "30s"         # Timeout de conexión
+  read_timeout: "5m"                # Timeout de lectura
+  write_timeout: "5m"               # Timeout de escritura
+  heartbeat_interval: "30s"         # Intervalo de heartbeat
+  idle_timeout: "10m"               # Timeout de inactividad
+
+# Configuración de Entidades Sincronizables
+entities:
+  productos:
+    enabled: true
+    priority: 1                     # Prioridad de sincronización (1-10)
+    sync_frequency: "5m"            # Frecuencia específica
+    batch_size: 50                  # Tamaño de lote específico
+    enable_real_time: true          # Sincronización en tiempo real
+    conflict_strategy: "server_wins" # server_wins, client_wins, merge, manual
+  
+  stock:
+    enabled: true
+    priority: 2
+    sync_frequency: "2m"
+    batch_size: 100
+    enable_real_time: true
+    conflict_strategy: "client_wins"
+    enable_stock_alerts: true       # Alertas de stock durante sync
+  
+  precios:
+    enabled: true
+    priority: 1
+    sync_frequency: "10m"
+    batch_size: 200
+    enable_real_time: false
+    conflict_strategy: "server_wins"
+  
+  ventas:
+    enabled: true
+    priority: 3
+    sync_frequency: "1m"
+    batch_size: 25
+    enable_real_time: true
+    conflict_strategy: "client_wins"
+    enable_validation: true         # Validar ventas durante sync
+  
+  clientes:
+    enabled: true
+    priority: 4
+    sync_frequency: "30m"
+    batch_size: 100
+    enable_real_time: false
+    conflict_strategy: "merge"
+  
+  usuarios:
+    enabled: true
+    priority: 5
+    sync_frequency: "1h"
+    batch_size: 50
+    enable_real_time: false
+    conflict_strategy: "server_wins"
+  
+  configuracion:
+    enabled: true
+    priority: 1
+    sync_frequency: "1h"
+    batch_size: 10
+    enable_real_time: true
+    conflict_strategy: "server_wins"
+
+# Configuración de Logging y Auditoría
+logging:
+  log_all_operations: true          # Registrar todas las operaciones
+  log_data_changes: true            # Registrar cambios de datos
+  log_conflicts: true               # Registrar conflictos
+  log_performance_metrics: true     # Registrar métricas de rendimiento
+  detailed_error_logging: true      # Logging detallado de errores
+  log_retention_days: 90            # Días de retención de logs
+  
+  # Configuración de logs por nivel
+  levels:
+    sync_start: "info"
+    sync_complete: "info"
+    sync_error: "error"
+    conflict_detected: "warn"
+    conflict_resolved: "info"
+    performance_warning: "warn"
+
+# Configuración de Limpieza y Mantenimiento
+cleanup:
+  cleanup_interval: "24h"           # Intervalo de limpieza automática
+  log_retention_days: 90            # Días para retener logs
+  temp_file_retention_hours: 24     # Horas para retener archivos temporales
+  completed_sync_retention_days: 7  # Días para retener syncs completados
+  failed_sync_retention_days: 30    # Días para retener syncs fallidos
+  enable_auto_cleanup: true         # Habilitar limpieza automática
+  cleanup_batch_size: 1000          # Tamaño de lote para limpieza
+
+# Configuración de Notificaciones
+notifications:
+  enable_sync_notifications: true   # Habilitar notificaciones de sync
+  enable_conflict_notifications: true # Habilitar notificaciones de conflictos
+  enable_error_notifications: true  # Habilitar notificaciones de errores
+  enable_performance_alerts: true   # Habilitar alertas de rendimiento
+  
+  # Destinatarios de notificaciones
+  recipients:
+    sync_admin: "sync-admin@ferreteria.com"
+    it_support: "soporte@ferreteria.com"
+    managers: "gerentes@ferreteria.com"
+  
+  # Configuración de alertas
+  alerts:
+    sync_failure_threshold: 3       # Fallos consecutivos para alerta
+    performance_threshold: "5m"     # Umbral de rendimiento para alerta
+    conflict_threshold: 10          # Conflictos para alerta
+    disk_usage_threshold: 80        # % de uso de disco para alerta
+
+# Configuración de Seguridad
+security:
+  enable_encryption: true           # Habilitar encriptación de datos
+  encryption_algorithm: "AES-256"   # Algoritmo de encriptación
+  enable_authentication: true       # Requerir autenticación
+  enable_authorization: true        # Verificar autorización
+  require_ssl: true                 # Requerir SSL/TLS
+  validate_certificates: true       # Validar certificados SSL
+  enable_api_key_auth: true         # Habilitar autenticación por API key
+  
+  # Configuración de certificados
+  certificates:
+    server_cert_path: "/etc/ssl/certs/ferre-pos-server.crt"
+    server_key_path: "/etc/ssl/private/ferre-pos-server.key"
+    ca_cert_path: "/etc/ssl/certs/ferre-pos-ca.crt"
+    verify_client_certs: false      # Verificar certificados de cliente
+
+# Configuración de Monitoreo y Métricas
+monitoring:
+  enable_metrics: true              # Habilitar métricas
+  metrics_interval: "30s"           # Intervalo de recolección de métricas
+  enable_health_checks: true        # Habilitar health checks
+  health_check_interval: "1m"       # Intervalo de health checks
+  enable_performance_monitoring: true # Monitoreo de rendimiento
+  
+  # Métricas específicas
+  metrics:
+    sync_duration: true             # Duración de sincronizaciones
+    sync_throughput: true           # Throughput de sincronización
+    conflict_rate: true             # Tasa de conflictos
+    error_rate: true                # Tasa de errores
+    queue_size: true                # Tamaño de cola de sincronización
+    active_connections: true        # Conexiones activas
+
+# Configuración de Cola de Sincronización
+queue:
+  max_queue_size: 10000             # Tamaño máximo de cola
+  queue_timeout: "1h"               # Timeout de elementos en cola
+  enable_priority_queue: true       # Habilitar cola con prioridades
+  max_concurrent_workers: 5         # Workers concurrentes máximos
+  worker_timeout: "30m"             # Timeout de workers
+  enable_dead_letter_queue: true    # Habilitar cola de elementos fallidos
+  dead_letter_retention: "7d"       # Retención de elementos fallidos
+
+# Configuración de Cache
+cache:
+  enable_sync_cache: true           # Habilitar cache de sincronización
+  cache_ttl: "1h"                   # TTL del cache
+  max_cache_size: "100MB"           # Tamaño máximo de cache
+  cache_cleanup_interval: "30m"     # Intervalo de limpieza de cache
+  enable_distributed_cache: false   # Habilitar cache distribuido
+
+# Configuración de Backup y Recuperación
+backup:
+  enable_sync_backup: true          # Habilitar backup de datos de sync
+  backup_interval: "6h"             # Intervalo de backup
+  backup_retention_days: 30         # Días de retención de backups
+  backup_path: "/var/lib/ferre-pos/backups/sync"
+  compress_backups: true            # Comprimir backups
+  enable_incremental_backup: true   # Habilitar backup incremental
+  
+  # Configuración de recuperación
+  recovery:
+    enable_auto_recovery: true      # Habilitar recuperación automática
+    recovery_timeout: "10m"         # Timeout de recuperación
+    max_recovery_attempts: 3        # Intentos máximos de recuperación
+
+# Configuración de Desarrollo y Testing
+development:
+  enable_debug_mode: false          # Habilitar modo debug
+  enable_dry_run: false             # Habilitar modo dry-run
+  simulate_network_issues: false    # Simular problemas de red
+  simulate_conflicts: false         # Simular conflictos
+  enable_test_endpoints: false      # Habilitar endpoints de prueba
+  mock_external_systems: false      # Simular sistemas externos
+  
+  # Configuración de testing
+  testing:
+    enable_load_testing: false     # Habilitar pruebas de carga
+    max_test_connections: 100      # Conexiones máximas para testing
+    test_data_size: 1000           # Tamaño de datos de prueba
+
+# Configuración de Integración con Sistemas Externos
+integration:
+  erp_system:
+    enabled: true
+    endpoint: "https://erp.ferreteria.com/api"
+    timeout: "30s"
+    retry_attempts: 3
+    api_key: "erp-api-key"
+  
+  accounting_system:
+    enabled: false
+    endpoint: "https://accounting.ferreteria.com/api"
+    timeout: "60s"
+    retry_attempts: 2
+    api_key: "accounting-api-key"
+  
+  inventory_system:
+    enabled: true
+    endpoint: "https://inventory.ferreteria.com/api"
+    timeout: "45s"
+    retry_attempts: 3
+    api_key: "inventory-api-key"
+

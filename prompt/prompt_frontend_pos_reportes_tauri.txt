@@ -1,0 +1,24 @@
+Desarrolla el código fuente completo para el frontend del módulo “Reportes” de un sistema POS, utilizando Node.js + Tauri como base. El frontend debe consumir una API REST previamente creada (no incluir el backend en este desarrollo).
+
+Requisitos funcionales:
+- Interfaz para visualización y generación de reportes operacionales y administrativos.
+- Filtros por rango de fechas, usuario, tipo de transacción, sucursal, etc.
+- Visualización en pantalla de reportes: ventas por día, ventas por producto, medios de pago, cierres de caja, stock actual, etc.
+- Exportación de reportes en formatos PDF y CSV.
+- Gráficos simples (ej: barras, líneas, tortas) para análisis visual.
+- Posibilidad de imprimir directamente desde la aplicación.
+- Acceso controlado según roles (ej: administrador, supervisor, vendedor).
+
+Requisitos técnicos:
+- Base en Node.js para lógica y manejo de datos.
+- Interfaz desarrollada usando Tauri + React o Svelte (elige lo más ligero y rápido).
+- Consumo de API REST usando fetch o librería liviana como axios.
+- Uso de librerías para generación de PDF (como jsPDF) y gráficos (como Chart.js o ApexCharts).
+- Estilo limpio, ordenado y con enfoque en claridad de datos.
+- Estructura modular y fácil de mantener.
+
+Extras opcionales:
+- Programación de reportes automáticos con envío por correo.
+- Modo offline para reportes cacheados previamente.
+
+Entrega el código organizado, comentado y listo para compilar y ejecutar.

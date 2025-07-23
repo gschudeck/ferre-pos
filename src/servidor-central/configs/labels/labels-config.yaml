@@ -1,0 +1,287 @@
+# Configuración Específica del API de Etiquetas
+# Este archivo puede ser modificado independientemente del archivo principal
+# Los cambios se aplicarán automáticamente sin reiniciar el servidor
+
+# Configuración General del API Labels
+api:
+  enabled: true
+  base_path: "/api/labels"
+  version: "v1"
+  description: "API para generación y gestión de etiquetas de productos"
+
+# Configuración de Generación de Etiquetas
+generation:
+  max_concurrent_jobs: 10           # Trabajos concurrentes máximos
+  max_labels_per_batch: 1000        # Etiquetas máximas por lote
+  default_label_format: "pdf"       # Formato por defecto
+  supported_formats:                # Formatos soportados
+    - "pdf"
+    - "png"
+    - "jpg"
+    - "svg"
+  max_label_size: 5120              # Tamaño máximo por etiqueta (KB)
+  generation_timeout: "5m"          # Timeout para generación
+  queue_timeout: "30m"              # Timeout en cola
+
+# Configuración de Plantillas
+templates:
+  cache_templates_ttl: "2h"         # TTL del cache de plantillas
+  max_template_size: "2MB"          # Tamaño máximo de plantilla
+  allowed_template_formats:         # Formatos de plantilla permitidos
+    - "html"
+    - "json"
+    - "xml"
+  enable_template_validation: true  # Validar plantillas al crear/actualizar
+  enable_template_versioning: true  # Habilitar versionado de plantillas
+  max_template_versions: 10         # Versiones máximas por plantilla
+  
+  # Configuración de campos personalizados
+  custom_fields:
+    max_custom_fields: 20           # Campos personalizados máximos
+    allowed_field_types:            # Tipos de campo permitidos
+      - "text"
+      - "number"
+      - "date"
+      - "boolean"
+      - "image"
+      - "barcode"
+    enable_field_validation: true   # Validar campos personalizados
+
+# Configuración de Almacenamiento
+storage:
+  storage_path: "/var/lib/ferre-pos/labels"
+  temp_path: "/tmp/ferre-pos/labels"
+  max_storage_size: "10GB"          # Tamaño máximo de almacenamiento
+  enable_compression: true          # Comprimir archivos almacenados
+  compression_level: 6              # Nivel de compresión (1-9)
+  enable_encryption: false          # Encriptar archivos almacenados
+  
+  # Configuración de estructura de directorios
+  directory_structure:
+    by_date: true                   # Organizar por fecha
+    by_user: false                  # Organizar por usuario
+    by_template: false              # Organizar por plantilla
+    date_format: "2006/01/02"       # Formato de fecha para directorios
+
+# Configuración de Limpieza
+cleanup:
+  cleanup_interval: "24h"           # Intervalo de limpieza automática
+  file_retention_days: 30           # Días para retener archivos
+  temp_file_retention_hours: 2      # Horas para retener archivos temporales
+  failed_job_retention_days: 7      # Días para retener trabajos fallidos
+  enable_auto_cleanup: true         # Habilitar limpieza automática
+  cleanup_batch_size: 100           # Tamaño de lote para limpieza
+
+# Configuración de Preview
+preview:
+  enable_preview: true              # Habilitar vista previa
+  preview_timeout: "30s"            # Timeout para generar preview
+  preview_format: "png"             # Formato de preview
+  preview_quality: 80               # Calidad de preview (1-100)
+  preview_max_size: "1MB"           # Tamaño máximo de preview
+  cache_previews: true              # Cachear previews
+  preview_cache_ttl: "1h"           # TTL del cache de previews
+
+# Configuración de Códigos de Barras
+barcodes:
+  default_barcode_type: "CODE128"   # Tipo de código de barras por defecto
+  supported_barcode_types:          # Tipos soportados
+    - "CODE128"
+    - "CODE39"
+    - "EAN13"
+    - "EAN8"
+    - "UPC"
+    - "QR"
+    - "DATAMATRIX"
+  barcode_quality: "high"           # Calidad: low, medium, high
+  enable_barcode_validation: true   # Validar códigos de barras
+  barcode_error_correction: "medium" # Corrección de errores: low, medium, high, highest
+
+# Configuración de Impresión
+printing:
+  default_printer_dpi: 300          # DPI por defecto para impresión
+  supported_paper_sizes:            # Tamaños de papel soportados
+    - "A4"
+    - "Letter"
+    - "Legal"
+    - "A3"
+    - "Custom"
+  default_paper_size: "A4"
+  enable_print_preview: true        # Habilitar vista previa de impresión
+  print_margins:                    # Márgenes de impresión (mm)
+    top: 10
+    bottom: 10
+    left: 10
+    right: 10
+  
+  # Configuración de impresoras
+  printers:
+    enable_network_printers: true   # Habilitar impresoras de red
+    enable_local_printers: true     # Habilitar impresoras locales
+    printer_timeout: "30s"          # Timeout de impresión
+    max_print_jobs: 50              # Trabajos de impresión máximos en cola
+
+# Configuración de Validación
+validation:
+  validate_product_data: true       # Validar datos de producto
+  validate_template_syntax: true    # Validar sintaxis de plantilla
+  validate_image_formats: true      # Validar formatos de imagen
+  strict_validation: false          # Validación estricta
+  enable_data_sanitization: true    # Sanitizar datos de entrada
+  
+  # Reglas de validación
+  rules:
+    min_label_width: 10             # Ancho mínimo de etiqueta (mm)
+    max_label_width: 200            # Ancho máximo de etiqueta (mm)
+    min_label_height: 10            # Alto mínimo de etiqueta (mm)
+    max_label_height: 300           # Alto máximo de etiqueta (mm)
+    max_text_length: 1000           # Longitud máxima de texto
+    allowed_fonts:                  # Fuentes permitidas
+      - "Arial"
+      - "Helvetica"
+      - "Times New Roman"
+      - "Courier New"
+
+# Configuración de Seguridad
+security:
+  enable_template_sandboxing: true  # Habilitar sandboxing de plantillas
+  allowed_html_tags:                # Tags HTML permitidos en plantillas
+    - "div"
+    - "span"
+    - "p"
+    - "h1"
+    - "h2"
+    - "h3"
+    - "img"
+    - "table"
+    - "tr"
+    - "td"
+    - "th"
+  blocked_html_tags:                # Tags HTML bloqueados
+    - "script"
+    - "iframe"
+    - "object"
+    - "embed"
+    - "form"
+    - "input"
+  enable_content_filtering: true    # Filtrar contenido malicioso
+  max_template_complexity: 100      # Complejidad máxima de plantilla
+
+# Configuración de Performance
+performance:
+  enable_parallel_processing: true  # Habilitar procesamiento paralelo
+  max_worker_threads: 4             # Threads de worker máximos
+  worker_queue_size: 1000           # Tamaño de cola de workers
+  enable_memory_optimization: true  # Optimización de memoria
+  max_memory_usage: "512MB"         # Uso máximo de memoria
+  enable_cpu_throttling: false      # Habilitar throttling de CPU
+  cpu_throttle_threshold: 80        # Umbral de CPU para throttling (%)
+
+# Configuración de Cache
+cache:
+  enable_label_cache: true          # Habilitar cache de etiquetas
+  label_cache_ttl: "1h"             # TTL del cache de etiquetas
+  enable_template_cache: true       # Habilitar cache de plantillas
+  template_cache_ttl: "2h"          # TTL del cache de plantillas
+  enable_product_cache: true        # Habilitar cache de productos
+  product_cache_ttl: "30m"          # TTL del cache de productos
+  max_cache_size: "256MB"           # Tamaño máximo de cache
+  cache_cleanup_interval: "30m"     # Intervalo de limpieza de cache
+
+# Configuración de Logging
+logging:
+  log_generation_jobs: true         # Registrar trabajos de generación
+  log_template_usage: true          # Registrar uso de plantillas
+  log_performance_metrics: true     # Registrar métricas de rendimiento
+  log_errors_detailed: true         # Logging detallado de errores
+  log_user_actions: true            # Registrar acciones de usuario
+  
+  # Configuración de logs por tipo
+  job_logs:
+    log_start: true
+    log_progress: false
+    log_completion: true
+    log_errors: true
+  
+  template_logs:
+    log_creation: true
+    log_modification: true
+    log_deletion: true
+    log_usage: false
+
+# Configuración de Notificaciones
+notifications:
+  enable_job_notifications: true    # Notificar trabajos completados
+  enable_error_notifications: true  # Notificar errores
+  enable_quota_notifications: true  # Notificar límites de cuota
+  
+  # Destinatarios
+  recipients:
+    admin: "labels-admin@ferreteria.com"
+    users: "usuarios@ferreteria.com"
+  
+  # Configuración de alertas
+  alerts:
+    job_failure_threshold: 5        # Fallos consecutivos para alerta
+    storage_usage_threshold: 80     # % de uso de almacenamiento para alerta
+    queue_size_threshold: 500       # Tamaño de cola para alerta
+
+# Configuración de Integración
+integration:
+  enable_product_sync: true         # Sincronizar con sistema de productos
+  product_sync_interval: "15m"      # Intervalo de sincronización
+  enable_inventory_sync: true       # Sincronizar con inventario
+  inventory_sync_interval: "30m"    # Intervalo de sincronización
+  
+  # APIs externas
+  external_apis:
+    product_api:
+      enabled: true
+      endpoint: "http://localhost:8080/api/pos/productos"
+      timeout: "30s"
+      retry_attempts: 3
+    
+    inventory_api:
+      enabled: true
+      endpoint: "http://localhost:8080/api/pos/stock"
+      timeout: "30s"
+      retry_attempts: 3
+
+# Configuración de Cuotas y Límites
+quotas:
+  enable_user_quotas: true          # Habilitar cuotas por usuario
+  default_user_quota: 1000          # Etiquetas por usuario por día
+  enable_template_quotas: false     # Habilitar cuotas por plantilla
+  default_template_quota: 10000     # Usos por plantilla por día
+  enable_storage_quotas: true       # Habilitar cuotas de almacenamiento
+  default_storage_quota: "1GB"      # Almacenamiento por usuario
+  
+  # Configuración de límites
+  limits:
+    max_concurrent_jobs_per_user: 3 # Trabajos concurrentes por usuario
+    max_labels_per_user_per_day: 5000 # Etiquetas por usuario por día
+    max_templates_per_user: 50      # Plantillas por usuario
+
+# Configuración de Backup
+backup:
+  enable_template_backup: true      # Backup de plantillas
+  backup_interval: "12h"            # Intervalo de backup
+  backup_retention_days: 90         # Días de retención
+  backup_path: "/var/lib/ferre-pos/backups/labels"
+  compress_backups: true            # Comprimir backups
+  include_generated_labels: false   # Incluir etiquetas generadas en backup
+
+# Configuración de Desarrollo
+development:
+  enable_debug_mode: false          # Habilitar modo debug
+  enable_template_debugging: false  # Debug de plantillas
+  save_intermediate_files: false    # Guardar archivos intermedios
+  enable_performance_profiling: false # Profiling de rendimiento
+  mock_external_services: false     # Simular servicios externos
+  
+  # Configuración de testing
+  testing:
+    enable_test_templates: false    # Habilitar plantillas de prueba
+    test_data_path: "/var/lib/ferre-pos/test-data/labels"
+    enable_load_testing: false      # Habilitar pruebas de carga
+

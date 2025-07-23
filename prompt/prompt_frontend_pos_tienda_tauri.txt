@@ -1,0 +1,27 @@
+Desarrolla el código fuente completo para el frontend del módulo “Tienda” de un sistema POS, utilizando Node.js + Tauri como base. El frontend debe consumir una API REST previamente creada (no incluir el backend en este desarrollo).
+
+Requisitos funcionales:
+- Interfaz para atención en sala o tienda.
+- Consulta y visualización de stock por producto.
+- Búsqueda avanzada por categoría, nombre, fabricante, etc.
+- Visualización de fichas de producto (nombre, imagen, precio, stock, descripción).
+- Creación y edición de cotizaciones o presupuestos.
+- Envío de cotizaciones por correo electrónico o impresión directa.
+- Consulta del historial de productos más vendidos.
+- Gestión de devoluciones o cambios simples.
+- Sincronización en línea con backend vía API REST.
+
+Requisitos técnicos:
+- Base en Node.js para lógica y manejo de datos.
+- Interfaz desarrollada usando Tauri + React o Svelte (elige lo más ligero y rápido).
+- Consumo de API REST usando fetch o librería liviana como axios.
+- Manejo del estado local (ej: usando Zustand, Redux, o solución nativa).
+- Estilo claro, intuitivo, optimizado para pantallas táctiles o uso con mouse.
+- Estructura de carpetas limpia y extensible.
+
+Extras opcionales:
+- Integración con lector de código de barras.
+- Soporte para agregar notas o comentarios internos en cotizaciones.
+- Modo offline con sincronización posterior.
+
+Entrega el código organizado, comentado y listo para compilar y ejecutar.

@@ -1,0 +1,26 @@
+Desarrolla el código fuente completo para el frontend del módulo “Despacho” de un sistema POS, utilizando Node.js + Tauri como base. El frontend debe consumir una API REST previamente creada (no incluir el backend en este desarrollo).
+
+Requisitos funcionales:
+- Interfaz para el equipo de despacho de productos desde bodega o punto de entrega.
+- Visualización de pedidos pendientes por cliente o código de pedido.
+- Confirmación de entrega de productos (manual o mediante escaneo de código de barras).
+- Visualización de detalles del pedido (productos, cantidades, observaciones).
+- Registro de entregas completas o parciales.
+- Generación de comprobante de entrega.
+- Sincronización de estado del pedido con backend vía API REST.
+- Registro de devoluciones o incidencias detectadas en el momento del despacho.
+
+Requisitos técnicos:
+- Base en Node.js para lógica y manejo de datos.
+- Interfaz desarrollada usando Tauri + React o Svelte (elige lo más ligero y rápido).
+- Consumo de API REST usando fetch o librería liviana como axios.
+- Manejo del estado local (ej: usando Zustand, Redux, o solución nativa).
+- Estilo enfocado en la claridad, rapidez de uso y funcionamiento en tablets o terminales móviles.
+- Estructura de carpetas organizada y modular.
+
+Extras opcionales:
+- Firma digital del cliente en pantalla táctil.
+- Soporte para impresión del comprobante de entrega.
+- Modo offline con sincronización posterior.
+
+Entrega el código organizado, comentado y listo para compilar y ejecutar.

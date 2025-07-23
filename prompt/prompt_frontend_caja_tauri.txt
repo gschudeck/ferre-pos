@@ -1,0 +1,27 @@
+Desarrolla el código fuente completo para el frontend del módulo “Caja” de un sistema POS, utilizando Node.js + Tauri como base. El frontend debe consumir una API REST previamente creada (no incluir el backend en este desarrollo).
+
+Requisitos funcionales:
+- Interfaz principal para operaciones de caja rápida en ferretería.
+- Lectura de código de barras (modo texto).
+- Búsqueda manual de productos (input de búsqueda).
+- Visualización de productos seleccionados con cantidad y precio.
+- Función de totalización del ticket.
+- Ingreso de medios de pago (efectivo, débito, crédito, transferencia, etc.).
+- Impresión de boleta o comprobante.
+- Función de sincronización con el backend vía API REST.
+- Modo offline con sincronización posterior si se cae la red.
+
+Requisitos técnicos:
+- Base en Node.js para lógica y manejo de datos.
+- Interfaz desarrollada usando Tauri + React o Svelte (elige lo más ligero y rápido).
+- Consumo de API REST usando fetch o librería liviana como axios.
+- Manejo del estado local (ej: usando Zustand, Redux, o solución nativa).
+- Estilo moderno, minimalista, y optimizado para pantallas táctiles o terminales con teclado.
+- Debe incluir estructura de carpetas organizada y fácilmente extensible.
+
+Extras opcionales:
+- Soporte para impresora térmica (USB o red).
+- Integración con cajón de dinero (por puerto USB/COM).
+- Gestión básica de errores y reconexión de red.
+
+Entrega el código organizado, comentado y listo para compilar y ejecutar.

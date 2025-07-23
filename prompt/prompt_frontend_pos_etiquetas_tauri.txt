@@ -1,0 +1,25 @@
+Desarrolla el código fuente completo para el frontend del módulo “Etiquetas” de un sistema POS, utilizando Node.js + Tauri como base. El frontend debe consumir una API REST previamente creada (no incluir el backend en este desarrollo).
+
+Requisitos funcionales:
+- Interfaz para confección e impresión de etiquetas de precio.
+- Búsqueda de productos por código, nombre, categoría o fabricante.
+- Selección individual o por lote de productos.
+- Visualización previa del diseño de la etiqueta antes de imprimir.
+- Diseño de etiqueta debe incluir: nombre del producto, código interno, modelo, descripción, fabricante, precio y código de barras en formato Code 39.
+- Selección del formato de impresión (ej: tamaño de etiqueta, número de copias).
+- Envío de etiquetas a impresora local o red.
+
+Requisitos técnicos:
+- Base en Node.js para lógica y manejo de datos.
+- Interfaz desarrollada usando Tauri + React o Svelte (elige lo más ligero y rápido).
+- Consumo de API REST usando fetch o librería liviana como axios.
+- Soporte para renderizado de código de barras (ej: usando JsBarcode o similar).
+- Estilo simple, funcional y optimizado para productividad en entornos de bodega o administración.
+- Estructura de carpetas clara y modular.
+
+Extras opcionales:
+- Permitir guardar plantillas de etiquetas personalizadas.
+- Soporte para impresión por lotes automáticos.
+- Modo offline con sincronización posterior.
+
+Entrega el código organizado, comentado y listo para compilar y ejecutar.
