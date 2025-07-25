@@ -1,0 +1,21 @@
+# Configuración para producción
+app:
+  environment: "production"
+
+logging:
+  level: "warn"
+  output: "file"
+  
+connection_pool:
+  max_connections: 50
+  max_idle_time: "10m"
+
+rate_limiting:
+  requests_per_minute: 300
+  burst: 50
+
+security:
+  require_tls: true
+  allowed_domains:
+    - "empresa.com"
+    - "clienteimportante.com"
