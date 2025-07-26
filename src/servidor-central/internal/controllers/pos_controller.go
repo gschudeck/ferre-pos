@@ -5,10 +5,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"ferre-pos-servidor-central/internal/models"
 	"ferre-pos-servidor-central/internal/services"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // POSController maneja las operaciones del API POS
@@ -160,9 +161,9 @@ func (pc *POSController) GetProducto(c *gin.Context) {
 
 	// Puede ser ID o código de barra
 	identifier := c.Param("id")
-	
+
 	var producto *models.ProductoPOSResponseDTO
-	
+
 	// Intentar parsear como UUID primero
 	if id, err := uuid.Parse(identifier); err == nil {
 		producto, err = pc.productoService.GetProductoPOSByID(id, sucursalID)
@@ -677,4 +678,3 @@ func (pc *POSController) SincronizarDatos(c *gin.Context) {
 	pc.LogActivity(c, "sincronizar_datos", resultado)
 	pc.ResponseSuccess(c, resultado)
 }
-

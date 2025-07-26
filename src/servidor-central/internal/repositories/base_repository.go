@@ -6,9 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"gorm.io/gorm"
-	"github.com/google/uuid"
 	"ferre-pos-servidor-central/internal/models"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // BaseRepository contiene funcionalidades comunes para todos los repositorios
@@ -63,16 +64,16 @@ func (br *BaseRepository) ExistsByField(field string, value interface{}, model i
 // GetAll obtiene todos los registros con paginación
 func (br *BaseRepository) GetAll(entities interface{}, filter models.PaginationFilter) error {
 	query := br.db.Model(entities)
-	
+
 	if filter.Limit > 0 {
 		query = query.Limit(filter.Limit)
 	}
-	
+
 	if filter.Page > 1 && filter.Limit > 0 {
 		offset := (filter.Page - 1) * filter.Limit
 		query = query.Offset(offset)
 	}
-	
+
 	return query.Find(entities).Error
 }
 
@@ -106,18 +107,18 @@ func (br *BaseRepository) ApplyFilters(query *gorm.DB, filters interface{}) *gor
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
-	
+
 	t := v.Type()
-	
+
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Field(i)
 		fieldType := t.Field(i)
-		
+
 		// Saltar campos nil o vacíos
 		if !field.IsValid() || field.IsZero() {
 			continue
 		}
-		
+
 		// Obtener tag de base de datos
 		dbTag := fieldType.Tag.Get("db")
 		if dbTag == "" {
@@ -126,7 +127,7 @@ func (br *BaseRepository) ApplyFilters(query *gorm.DB, filters interface{}) *gor
 		if dbTag == "" {
 			continue
 		}
-		
+
 		// Aplicar filtro según el tipo
 		switch field.Kind() {
 		case reflect.Ptr:
@@ -137,7 +138,7 @@ func (br *BaseRepository) ApplyFilters(query *gorm.DB, filters interface{}) *gor
 			query = br.applyFieldFilter(query, dbTag, field.Interface())
 		}
 	}
-	
+
 	return query
 }
 
@@ -175,7 +176,7 @@ func (br *BaseRepository) ApplySorting(query *gorm.DB, sort models.SortFilter) *
 		// Ordenamiento por defecto
 		query = query.Order("created_at DESC")
 	}
-	
+
 	return query
 }
 
@@ -184,11 +185,11 @@ func (br *BaseRepository) ApplyDateRange(query *gorm.DB, dateRange models.DateRa
 	if dateRange.FechaInicio != nil {
 		query = query.Where(fmt.Sprintf("%s >= ?", dateField), *dateRange.FechaInicio)
 	}
-	
+
 	if dateRange.FechaFin != nil {
 		query = query.Where(fmt.Sprintf("%s <= ?", dateField), *dateRange.FechaFin)
 	}
-	
+
 	return query
 }
 
@@ -199,48 +200,48 @@ func (br *BaseRepository) GetPaginatedResults(
 	filter models.PaginationFilter,
 	queryBuilder func(*gorm.DB) *gorm.DB,
 ) (models.PaginationResponse, error) {
-	
+
 	// Construir consulta base
 	baseQuery := br.db.Model(model)
 	if queryBuilder != nil {
 		baseQuery = queryBuilder(baseQuery)
 	}
-	
+
 	// Contar total de registros
 	var total int64
 	if err := baseQuery.Count(&total).Error; err != nil {
 		return models.PaginationResponse{}, err
 	}
-	
+
 	// Aplicar paginación
 	query := baseQuery
 	if filter.Limit > 0 {
 		query = query.Limit(filter.Limit)
-		
+
 		if filter.Page > 1 {
 			offset := (filter.Page - 1) * filter.Limit
 			query = query.Offset(offset)
 		}
 	}
-	
+
 	// Obtener resultados
 	if err := query.Find(results).Error; err != nil {
 		return models.PaginationResponse{}, err
 	}
-	
+
 	// Calcular información de paginación
 	totalPages := int(total) / filter.Limit
 	if int(total)%filter.Limit > 0 {
 		totalPages++
 	}
-	
+
 	return models.PaginationResponse{
-		Page:       filter.Page,
-		Limit:      filter.Limit,
-		Total:      int(total),
-		TotalPages: totalPages,
-		HasNext:    filter.Page < totalPages,
-		HasPrev:    filter.Page > 1,
+		IntPage:       filter.Page,
+		IntPageSize:   filter.Limit,
+		IntTotal:      int64(total),
+		IntTotalPages: totalPages,
+		BoolHasNext:   filter.Page < totalPages,
+		BoolHasPrev:   filter.Page > 1,
 	}, nil
 }
 
@@ -286,16 +287,16 @@ func (br *BaseRepository) GetLastInsertID(entity interface{}) (uuid.UUID, error)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
-	
+
 	idField := v.FieldByName("ID")
 	if !idField.IsValid() {
 		return uuid.Nil, fmt.Errorf("campo ID no encontrado")
 	}
-	
+
 	if idField.Type() != reflect.TypeOf(uuid.UUID{}) {
 		return uuid.Nil, fmt.Errorf("campo ID no es de tipo UUID")
 	}
-	
+
 	return idField.Interface().(uuid.UUID), nil
 }
 
@@ -304,11 +305,11 @@ func (br *BaseRepository) BulkInsert(tableName string, columns []string, values 
 	if len(values) == 0 {
 		return nil
 	}
-	
+
 	// Construir consulta SQL
 	placeholders := make([]string, len(values))
 	args := make([]interface{}, 0, len(values)*len(columns))
-	
+
 	for i, row := range values {
 		rowPlaceholders := make([]string, len(columns))
 		for j := range columns {
@@ -317,14 +318,14 @@ func (br *BaseRepository) BulkInsert(tableName string, columns []string, values 
 		}
 		placeholders[i] = "(" + strings.Join(rowPlaceholders, ",") + ")"
 	}
-	
+
 	sql := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES %s",
 		tableName,
 		strings.Join(columns, ","),
 		strings.Join(placeholders, ","),
 	)
-	
+
 	return br.db.Exec(sql, args...).Error
 }
 
@@ -333,25 +334,25 @@ func (br *BaseRepository) Search(model interface{}, results interface{}, searchT
 	if searchTerm == "" {
 		return br.db.Model(model).Limit(limit).Find(results).Error
 	}
-	
+
 	query := br.db.Model(model)
-	
+
 	// Construir condiciones de búsqueda
 	conditions := make([]string, len(searchFields))
 	args := make([]interface{}, len(searchFields))
-	
+
 	for i, field := range searchFields {
 		conditions[i] = fmt.Sprintf("%s ILIKE ?", field)
 		args[i] = "%" + searchTerm + "%"
 	}
-	
+
 	whereClause := strings.Join(conditions, " OR ")
 	query = query.Where(whereClause, args...)
-	
+
 	if limit > 0 {
 		query = query.Limit(limit)
 	}
-	
+
 	return query.Find(results).Error
 }
 
@@ -434,4 +435,3 @@ func (br *BaseRepository) CleanupDeleted(model interface{}, daysOld int) error {
 	cutoffDate := time.Now().AddDate(0, 0, -daysOld)
 	return br.db.Unscoped().Where("deleted_at < ?", cutoffDate).Delete(model).Error
 }
-

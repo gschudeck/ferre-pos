@@ -2,9 +2,10 @@ package services
 
 import (
 	"time"
-	
-	"github.com/google/uuid"
+
 	"ferre-pos-servidor-central/internal/models"
+
+	"github.com/google/uuid"
 )
 
 // AuthService define la interfaz para servicios de autenticación
@@ -83,18 +84,18 @@ type EtiquetaService interface {
 	DuplicarPlantilla(id uuid.UUID, dto models.DuplicarPlantillaDTO, userID uuid.UUID) (*models.PlantillaEtiquetaResponseDTO, error)
 	ValidarPlantilla(dto models.PlantillaEtiquetaCreateDTO) ([]models.ValidationError, error)
 	GenerarPreviewPlantilla(id uuid.UUID, dto models.PreviewPlantillaDTO, userID uuid.UUID) ([]byte, string, error)
-	
+
 	GenerarEtiqueta(dto models.GenerarEtiquetaDTO, userID uuid.UUID, sucursalID *uuid.UUID) (*models.EtiquetaGeneradaResponseDTO, error)
 	GenerarLoteEtiquetas(dto models.GenerarLoteEtiquetasDTO, userID uuid.UUID, sucursalID *uuid.UUID) (*models.LoteEtiquetasResponseDTO, error)
 	GetEtiquetasGeneradas(filter models.EtiquetaGeneradaFilter) ([]models.EtiquetaGeneradaListDTO, models.PaginationResponse, error)
 	GetEtiqueta(id uuid.UUID, userID uuid.UUID) (*models.EtiquetaGeneradaResponseDTO, error)
 	DescargarEtiqueta(id uuid.UUID, userID uuid.UUID) ([]byte, string, error)
-	
+
 	GetLotesEtiquetas(filter models.LoteEtiquetasFilter) ([]models.LoteEtiquetasListDTO, models.PaginationResponse, error)
 	GetLoteEtiquetas(id uuid.UUID, userID uuid.UUID) (*models.LoteEtiquetasResponseDTO, error)
 	DescargarLoteEtiquetas(id uuid.UUID, formato string, userID uuid.UUID) ([]byte, string, string, error)
 	CancelarLote(id uuid.UUID, userID uuid.UUID) error
-	
+
 	GetEstadisticasEtiquetas(userID uuid.UUID, sucursalID *uuid.UUID, periodo string) (*models.EstadisticasEtiquetasDTO, error)
 }
 
@@ -103,23 +104,23 @@ type SincronizacionService interface {
 	GetEstadoSincronizacion(sucursalID uuid.UUID) (*models.SincronizacionSucursalResponseDTO, error)
 	GetEstadosSincronizacion(filter models.SincronizacionSucursalFilter) ([]models.SincronizacionSucursalResponseDTO, models.PaginationResponse, error)
 	ActualizarConfiguracion(sucursalID uuid.UUID, dto models.SincronizacionSucursalUpdateDTO, userID uuid.UUID) (*models.SincronizacionSucursalResponseDTO, error)
-	
+
 	IniciarSincronizacion(sucursalID uuid.UUID, dto models.IniciarSincronizacionDTO, userID uuid.UUID) (*models.ResultadoSincronizacionDTO, error)
 	DetenerSincronizacion(sucursalID uuid.UUID, userID uuid.UUID) error
 	ReiniciarSincronizacion(sucursalID uuid.UUID, userID uuid.UUID) (*models.ResultadoSincronizacionDTO, error)
-	
+
 	GetLogsSincronizacion(filter models.LogSincronizacionFilter) ([]models.LogSincronizacionListDTO, models.PaginationResponse, error)
 	GetLogSincronizacion(id uuid.UUID) (*models.LogSincronizacionResponseDTO, error)
 	ReintentarOperacion(logID uuid.UUID, userID uuid.UUID) (*models.ResultadoOperacionDTO, error)
-	
+
 	GetConflictos(filter models.ConflictoSincronizacionFilter) ([]models.ConflictoSincronizacionResponseDTO, models.PaginationResponse, error)
 	GetConflicto(id uuid.UUID) (*models.ConflictoSincronizacionResponseDTO, error)
 	ResolverConflicto(id uuid.UUID, dto models.ConflictoSincronizacionResolverDTO, userID uuid.UUID) (*models.ConflictoSincronizacionResponseDTO, error)
 	IgnorarConflicto(id uuid.UUID, dto models.IgnorarConflictoDTO, userID uuid.UUID) error
-	
+
 	GetConfiguracionGlobal() (*models.ConfiguracionSincronizacionGlobalResponseDTO, error)
 	ActualizarConfiguracionGlobal(dto models.ConfiguracionSincronizacionGlobalUpdateDTO, userID uuid.UUID) (*models.ConfiguracionSincronizacionGlobalResponseDTO, error)
-	
+
 	GetEstadisticasSincronizacion(periodo string, sucursalID *uuid.UUID) (*models.EstadisticasSincronizacionDTO, error)
 	GetMetricasRendimiento(periodo string, limite int) (*models.MetricasRendimientoDTO, error)
 	ValidarConectividad(sucursalID uuid.UUID) (*models.ConectividadResultDTO, error)
@@ -136,26 +137,26 @@ type ReporteService interface {
 	ActualizarPlantillaReporte(id uuid.UUID, dto models.PlantillaReporteUpdateDTO, userID uuid.UUID) (*models.PlantillaReporteResponseDTO, error)
 	EliminarPlantillaReporte(id uuid.UUID, userID uuid.UUID) error
 	ValidarPlantillaReporte(dto models.PlantillaReporteCreateDTO) ([]models.ValidationError, error)
-	
+
 	GenerarReporte(dto models.ReporteGeneradoCreateDTO, userID uuid.UUID, sucursalID *uuid.UUID) (*models.ReporteGeneradoResponseDTO, error)
 	GetReportesGenerados(filter models.ReporteGeneradoFilter) ([]models.ReporteGeneradoListDTO, models.PaginationResponse, error)
 	GetReporteGenerado(id uuid.UUID, userID uuid.UUID) (*models.ReporteGeneradoResponseDTO, error)
 	DescargarReporte(id uuid.UUID, userID uuid.UUID) ([]byte, string, string, error)
 	CancelarReporte(id uuid.UUID, userID uuid.UUID) error
 	CompartirReporte(id uuid.UUID, dto models.CompartirReporteDTO, userID uuid.UUID) error
-	
+
 	GetReportesProgramados(filter models.ReporteProgramadoFilter) ([]models.ReporteProgramadoListDTO, models.PaginationResponse, error)
 	CrearReporteProgramado(dto models.ReporteProgramadoCreateDTO, userID uuid.UUID, sucursalID *uuid.UUID) (*models.ReporteProgramadoResponseDTO, error)
 	ActualizarReporteProgramado(id uuid.UUID, dto models.ReporteProgramadoUpdateDTO, userID uuid.UUID) (*models.ReporteProgramadoResponseDTO, error)
 	EliminarReporteProgramado(id uuid.UUID, userID uuid.UUID) error
-	
+
 	GetDashboards(filter models.DashboardFilter) ([]models.DashboardListDTO, models.PaginationResponse, error)
 	GetDashboard(id uuid.UUID, userID uuid.UUID) (*models.DashboardResponseDTO, error)
 	CrearDashboard(dto models.DashboardCreateDTO, userID uuid.UUID, sucursalID *uuid.UUID) (*models.DashboardResponseDTO, error)
 	ActualizarDashboard(id uuid.UUID, dto models.DashboardUpdateDTO, userID uuid.UUID) (*models.DashboardResponseDTO, error)
 	EliminarDashboard(id uuid.UUID, userID uuid.UUID) error
 	ActualizarVisualizacionDashboard(id uuid.UUID) error
-	
+
 	GetEstadisticasReportes(userID uuid.UUID, sucursalID *uuid.UUID, periodo string) (*models.EstadisticasReportesDTO, error)
 	GenerarPreviewReporte(plantillaID uuid.UUID, dto models.PreviewReporteDTO, userID uuid.UUID, sucursalID *uuid.UUID) ([]byte, string, error)
 	ValidarParametrosReporte(plantillaID uuid.UUID, parametros models.ParametrosReporte) ([]models.ValidationError, error)
@@ -233,4 +234,3 @@ type ConfigService interface {
 	BackupConfig() (string, error)
 	RestoreConfig(backupPath string) error
 }
-

@@ -12,28 +12,28 @@ import (
 // FidelizacionCliente representa un cliente en el sistema de fidelización
 type FidelizacionCliente struct {
 	BaseModel
-	Rut                           string                        `json:"rut" db:"rut" binding:"required" validate:"required,rut"`
-	Nombre                        string                        `json:"nombre" db:"nombre" binding:"required" validate:"required,max=255"`
-	Apellido                      *string                       `json:"apellido,omitempty" db:"apellido"`
-	Email                         *string                       `json:"email,omitempty" db:"email" validate:"omitempty,email"`
-	Telefono                      *string                       `json:"telefono,omitempty" db:"telefono"`
-	FechaNacimiento               *time.Time                    `json:"fecha_nacimiento,omitempty" db:"fecha_nacimiento"`
-	Direccion                     *string                       `json:"direccion,omitempty" db:"direccion"`
-	Comuna                        *string                       `json:"comuna,omitempty" db:"comuna"`
-	Region                        *string                       `json:"region,omitempty" db:"region"`
-	PuntosActuales                int                           `json:"puntos_actuales" db:"puntos_actuales" default:"0"`
-	PuntosAcumuladosTotal         int                           `json:"puntos_acumulados_total" db:"puntos_acumulados_total" default:"0"`
-	NivelFidelizacion             NivelFidelizacion             `json:"nivel_fidelizacion" db:"nivel_fidelizacion" default:"bronce"`
-	FechaUltimaCompra             *time.Time                    `json:"fecha_ultima_compra,omitempty" db:"fecha_ultima_compra"`
-	FechaUltimaActividad          *time.Time                    `json:"fecha_ultima_actividad,omitempty" db:"fecha_ultima_actividad"`
-	Activo                        bool                          `json:"activo" db:"activo" default:"true"`
-	AceptaMarketing               bool                          `json:"acepta_marketing" db:"acepta_marketing" default:"false"`
-	DatosAdicionales              *DatosAdicionalesCliente      `json:"datos_adicionales,omitempty" db:"datos_adicionales"`
-	HashBusqueda                  *string                       `json:"-" db:"hash_busqueda"`
-	QRFidelizacion                *string                       `json:"qr_fidelizacion,omitempty" db:"qr_fidelizacion"`
-	CacheEstadisticas             *CacheEstadisticasCliente     `json:"cache_estadisticas,omitempty" db:"cache_estadisticas"`
-	FechaProximoVencimiento       *time.Time                    `json:"fecha_proximo_vencimiento_puntos,omitempty" db:"fecha_proximo_vencimiento_puntos"`
-	PuntosPorVencer               int                           `json:"puntos_por_vencer" db:"puntos_por_vencer" default:"0"`
+	Rut                     string                    `json:"rut" db:"rut" binding:"required" validate:"required,rut"`
+	Nombre                  string                    `json:"nombre" db:"nombre" binding:"required" validate:"required,max=255"`
+	Apellido                *string                   `json:"apellido,omitempty" db:"apellido"`
+	Email                   *string                   `json:"email,omitempty" db:"email" validate:"omitempty,email"`
+	Telefono                *string                   `json:"telefono,omitempty" db:"telefono"`
+	FechaNacimiento         *time.Time                `json:"fecha_nacimiento,omitempty" db:"fecha_nacimiento"`
+	Direccion               *string                   `json:"direccion,omitempty" db:"direccion"`
+	Comuna                  *string                   `json:"comuna,omitempty" db:"comuna"`
+	Region                  *string                   `json:"region,omitempty" db:"region"`
+	PuntosActuales          int                       `json:"puntos_actuales" db:"puntos_actuales" default:"0"`
+	PuntosAcumuladosTotal   int                       `json:"puntos_acumulados_total" db:"puntos_acumulados_total" default:"0"`
+	NivelFidelizacion       NivelFidelizacion         `json:"nivel_fidelizacion" db:"nivel_fidelizacion" default:"bronce"`
+	FechaUltimaCompra       *time.Time                `json:"fecha_ultima_compra,omitempty" db:"fecha_ultima_compra"`
+	FechaUltimaActividad    *time.Time                `json:"fecha_ultima_actividad,omitempty" db:"fecha_ultima_actividad"`
+	Activo                  bool                      `json:"activo" db:"activo" default:"true"`
+	AceptaMarketing         bool                      `json:"acepta_marketing" db:"acepta_marketing" default:"false"`
+	DatosAdicionales        *DatosAdicionalesCliente  `json:"datos_adicionales,omitempty" db:"datos_adicionales"`
+	HashBusqueda            *string                   `json:"-" db:"hash_busqueda"`
+	QRFidelizacion          *string                   `json:"qr_fidelizacion,omitempty" db:"qr_fidelizacion"`
+	CacheEstadisticas       *CacheEstadisticasCliente `json:"cache_estadisticas,omitempty" db:"cache_estadisticas"`
+	FechaProximoVencimiento *time.Time                `json:"fecha_proximo_vencimiento_puntos,omitempty" db:"fecha_proximo_vencimiento_puntos"`
+	PuntosPorVencer         int                       `json:"puntos_por_vencer" db:"puntos_por_vencer" default:"0"`
 
 	// Relaciones
 	MovimientosFidelizacion []MovimientoFidelizacion `json:"movimientos_fidelizacion,omitempty" gorm:"foreignKey:ClienteID"`
@@ -42,46 +42,46 @@ type FidelizacionCliente struct {
 // MovimientoFidelizacion representa un movimiento de puntos de fidelización
 type MovimientoFidelizacion struct {
 	BaseModel
-	ClienteID         uuid.UUID                     `json:"cliente_id" db:"cliente_id" binding:"required"`
-	SucursalID        uuid.UUID                     `json:"sucursal_id" db:"sucursal_id" binding:"required"`
-	VentaID           *uuid.UUID                    `json:"venta_id,omitempty" db:"venta_id"`
-	Tipo              TipoMovimientoFidelizacion    `json:"tipo" db:"tipo" binding:"required"`
-	Puntos            int                           `json:"puntos" db:"puntos" binding:"required"`
-	PuntosAnteriores  *int                          `json:"puntos_anteriores,omitempty" db:"puntos_anteriores"`
-	PuntosNuevos      *int                          `json:"puntos_nuevos,omitempty" db:"puntos_nuevos"`
-	Multiplicador     float64                       `json:"multiplicador" db:"multiplicador" default:"1.0"`
-	Detalle           *string                       `json:"detalle,omitempty" db:"detalle"`
-	Fecha             time.Time                     `json:"fecha" db:"fecha" default:"NOW()"`
-	FechaVencimiento  *time.Time                    `json:"fecha_vencimiento,omitempty" db:"fecha_vencimiento"`
-	UsuarioID         *uuid.UUID                    `json:"usuario_id,omitempty" db:"usuario_id"`
-	DatosAdicionales  *DatosAdicionalesMovimiento   `json:"datos_adicionales,omitempty" db:"datos_adicionales"`
-	ReglaAplicadaID   *uuid.UUID                    `json:"regla_aplicada_id,omitempty" db:"regla_aplicada_id"`
-	LoteProcesamiento *uuid.UUID                    `json:"lote_procesamiento,omitempty" db:"lote_procesamiento"`
+	ClienteID         uuid.UUID                   `json:"cliente_id" db:"cliente_id" binding:"required"`
+	SucursalID        uuid.UUID                   `json:"sucursal_id" db:"sucursal_id" binding:"required"`
+	VentaID           *uuid.UUID                  `json:"venta_id,omitempty" db:"venta_id"`
+	Tipo              TipoMovimientoFidelizacion  `json:"tipo" db:"tipo" binding:"required"`
+	Puntos            int                         `json:"puntos" db:"puntos" binding:"required"`
+	PuntosAnteriores  *int                        `json:"puntos_anteriores,omitempty" db:"puntos_anteriores"`
+	PuntosNuevos      *int                        `json:"puntos_nuevos,omitempty" db:"puntos_nuevos"`
+	Multiplicador     float64                     `json:"multiplicador" db:"multiplicador" default:"1.0"`
+	Detalle           *string                     `json:"detalle,omitempty" db:"detalle"`
+	Fecha             time.Time                   `json:"fecha" db:"fecha" default:"NOW()"`
+	FechaVencimiento  *time.Time                  `json:"fecha_vencimiento,omitempty" db:"fecha_vencimiento"`
+	UsuarioID         *uuid.UUID                  `json:"usuario_id,omitempty" db:"usuario_id"`
+	DatosAdicionales  *DatosAdicionalesMovimiento `json:"datos_adicionales,omitempty" db:"datos_adicionales"`
+	ReglaAplicadaID   *uuid.UUID                  `json:"regla_aplicada_id,omitempty" db:"regla_aplicada_id"`
+	LoteProcesamiento *uuid.UUID                  `json:"lote_procesamiento,omitempty" db:"lote_procesamiento"`
 
 	// Relaciones
-	Cliente   *FidelizacionCliente `json:"cliente,omitempty" gorm:"foreignKey:ClienteID"`
-	Sucursal  *Sucursal            `json:"sucursal,omitempty" gorm:"foreignKey:SucursalID"`
-	Venta     *Venta               `json:"venta,omitempty" gorm:"foreignKey:VentaID"`
-	Usuario   *Usuario             `json:"usuario,omitempty" gorm:"foreignKey:UsuarioID"`
-	Regla     *ReglaFidelizacion   `json:"regla,omitempty" gorm:"foreignKey:ReglaAplicadaID"`
+	Cliente  *FidelizacionCliente `json:"cliente,omitempty" gorm:"foreignKey:ClienteID"`
+	Sucursal *Sucursal            `json:"sucursal,omitempty" gorm:"foreignKey:SucursalID"`
+	Venta    *Venta               `json:"venta,omitempty" gorm:"foreignKey:VentaID"`
+	Usuario  *Usuario             `json:"usuario,omitempty" gorm:"foreignKey:UsuarioID"`
+	Regla    *ReglaFidelizacion   `json:"regla,omitempty" gorm:"foreignKey:ReglaAplicadaID"`
 }
 
 // ReglaFidelizacion representa una regla del sistema de fidelización
 type ReglaFidelizacion struct {
 	BaseModel
-	Nombre                  string                    `json:"nombre" db:"nombre" binding:"required" validate:"required,max=255"`
-	Descripcion             *string                   `json:"descripcion,omitempty" db:"descripcion"`
-	TipoRegla               TipoReglaFidelizacion     `json:"tipo_regla" db:"tipo_regla" binding:"required"`
-	Condiciones             CondicionesRegla          `json:"condiciones" db:"condiciones" binding:"required"`
-	Acciones                AccionesRegla             `json:"acciones" db:"acciones" binding:"required"`
-	Activa                  bool                      `json:"activa" db:"activa" default:"true"`
-	FechaInicio             *time.Time                `json:"fecha_inicio,omitempty" db:"fecha_inicio"`
-	FechaFin                *time.Time                `json:"fecha_fin,omitempty" db:"fecha_fin"`
-	Prioridad               int                       `json:"prioridad" db:"prioridad" default:"0"`
-	CondicionesCompiladas   *CondicionesCompiladas    `json:"condiciones_compiladas,omitempty" db:"condiciones_compiladas"`
-	CacheEvaluacion         *CacheEvaluacionRegla     `json:"cache_evaluacion,omitempty" db:"cache_evaluacion"`
-	TotalAplicaciones       int                       `json:"total_aplicaciones" db:"total_aplicaciones" default:"0"`
-	TotalPuntosOtorgados    int                       `json:"total_puntos_otorgados" db:"total_puntos_otorgados" default:"0"`
+	Nombre                string                 `json:"nombre" db:"nombre" binding:"required" validate:"required,max=255"`
+	Descripcion           *string                `json:"descripcion,omitempty" db:"descripcion"`
+	TipoRegla             TipoReglaFidelizacion  `json:"tipo_regla" db:"tipo_regla" binding:"required"`
+	Condiciones           CondicionesRegla       `json:"condiciones" db:"condiciones" binding:"required"`
+	Acciones              AccionesRegla          `json:"acciones" db:"acciones" binding:"required"`
+	Activa                bool                   `json:"activa" db:"activa" default:"true"`
+	FechaInicio           *time.Time             `json:"fecha_inicio,omitempty" db:"fecha_inicio"`
+	FechaFin              *time.Time             `json:"fecha_fin,omitempty" db:"fecha_fin"`
+	Prioridad             int                    `json:"prioridad" db:"prioridad" default:"0"`
+	CondicionesCompiladas *CondicionesCompiladas `json:"condiciones_compiladas,omitempty" db:"condiciones_compiladas"`
+	CacheEvaluacion       *CacheEvaluacionRegla  `json:"cache_evaluacion,omitempty" db:"cache_evaluacion"`
+	TotalAplicaciones     int                    `json:"total_aplicaciones" db:"total_aplicaciones" default:"0"`
+	TotalPuntosOtorgados  int                    `json:"total_puntos_otorgados" db:"total_puntos_otorgados" default:"0"`
 
 	// Relaciones
 	MovimientosGenerados []MovimientoFidelizacion `json:"movimientos_generados,omitempty" gorm:"foreignKey:ReglaAplicadaID"`
@@ -110,27 +110,27 @@ const (
 // Estructuras JSON
 
 type DatosAdicionalesCliente struct {
-	Profesion               *string                `json:"profesion,omitempty"`
-	Empresa                 *string                `json:"empresa,omitempty"`
-	PreferenciasContacto    []string               `json:"preferencias_contacto,omitempty"`
-	InteresesProductos      []string               `json:"intereses_productos,omitempty"`
-	FrecuenciaCompra        *string                `json:"frecuencia_compra,omitempty"`
-	MontoPromedioCompra     *float64               `json:"monto_promedio_compra,omitempty"`
-	CanalPreferido          *string                `json:"canal_preferido,omitempty"`
-	Observaciones           *string                `json:"observaciones,omitempty"`
-	DatosPersonalizados     map[string]interface{} `json:"datos_personalizados,omitempty"`
+	Profesion            *string                `json:"profesion,omitempty"`
+	Empresa              *string                `json:"empresa,omitempty"`
+	PreferenciasContacto []string               `json:"preferencias_contacto,omitempty"`
+	InteresesProductos   []string               `json:"intereses_productos,omitempty"`
+	FrecuenciaCompra     *string                `json:"frecuencia_compra,omitempty"`
+	MontoPromedioCompra  *float64               `json:"monto_promedio_compra,omitempty"`
+	CanalPreferido       *string                `json:"canal_preferido,omitempty"`
+	Observaciones        *string                `json:"observaciones,omitempty"`
+	DatosPersonalizados  map[string]interface{} `json:"datos_personalizados,omitempty"`
 }
 
 type CacheEstadisticasCliente struct {
-	TotalCompras            int       `json:"total_compras"`
-	MontoTotalCompras       float64   `json:"monto_total_compras"`
-	PromedioCompra          float64   `json:"promedio_compra"`
-	DiasConCompras          int       `json:"dias_con_compras"`
-	FechaUltimaVenta        *time.Time `json:"fecha_ultima_venta,omitempty"`
-	DiasSinComprar          int       `json:"dias_sin_comprar"`
-	EstadoActividad         string    `json:"estado_actividad"` // ACTIVO, INACTIVO, PERDIDO
-	FechaCalculado          time.Time `json:"fecha_calculado"`
-	ValidoHasta             time.Time `json:"valido_hasta"`
+	TotalCompras      int        `json:"total_compras"`
+	MontoTotalCompras float64    `json:"monto_total_compras"`
+	PromedioCompra    float64    `json:"promedio_compra"`
+	DiasConCompras    int        `json:"dias_con_compras"`
+	FechaUltimaVenta  *time.Time `json:"fecha_ultima_venta,omitempty"`
+	DiasSinComprar    int        `json:"dias_sin_comprar"`
+	EstadoActividad   string     `json:"estado_actividad"` // ACTIVO, INACTIVO, PERDIDO
+	FechaCalculado    time.Time  `json:"fecha_calculado"`
+	ValidoHasta       time.Time  `json:"valido_hasta"`
 }
 
 type DatosAdicionalesMovimiento struct {
@@ -143,49 +143,49 @@ type DatosAdicionalesMovimiento struct {
 }
 
 type CondicionesRegla struct {
-	MontoMinimo             *float64               `json:"monto_minimo,omitempty"`
-	MontoMaximo             *float64               `json:"monto_maximo,omitempty"`
-	ProductosIncluidos      []string               `json:"productos_incluidos,omitempty"`
-	ProductosExcluidos      []string               `json:"productos_excluidos,omitempty"`
-	CategoriasIncluidas     []string               `json:"categorias_incluidas,omitempty"`
-	CategoriasExcluidas     []string               `json:"categorias_excluidas,omitempty"`
-	SucursalesIncluidas     []string               `json:"sucursales_incluidas,omitempty"`
-	SucursalesExcluidas     []string               `json:"sucursales_excluidas,omitempty"`
-	NivelCliente            *NivelFidelizacion     `json:"nivel_cliente,omitempty"`
-	DiasVigencia            *int                   `json:"dias_vigencia,omitempty"`
-	HoraInicio              *string                `json:"hora_inicio,omitempty"`
-	HoraFin                 *string                `json:"hora_fin,omitempty"`
-	DiasSemana              []int                  `json:"dias_semana,omitempty"` // 0=Domingo, 1=Lunes, etc.
+	MontoMinimo               *float64               `json:"monto_minimo,omitempty"`
+	MontoMaximo               *float64               `json:"monto_maximo,omitempty"`
+	ProductosIncluidos        []string               `json:"productos_incluidos,omitempty"`
+	ProductosExcluidos        []string               `json:"productos_excluidos,omitempty"`
+	CategoriasIncluidas       []string               `json:"categorias_incluidas,omitempty"`
+	CategoriasExcluidas       []string               `json:"categorias_excluidas,omitempty"`
+	SucursalesIncluidas       []string               `json:"sucursales_incluidas,omitempty"`
+	SucursalesExcluidas       []string               `json:"sucursales_excluidas,omitempty"`
+	NivelCliente              *NivelFidelizacion     `json:"nivel_cliente,omitempty"`
+	DiasVigencia              *int                   `json:"dias_vigencia,omitempty"`
+	HoraInicio                *string                `json:"hora_inicio,omitempty"`
+	HoraFin                   *string                `json:"hora_fin,omitempty"`
+	DiasSemana                []int                  `json:"dias_semana,omitempty"` // 0=Domingo, 1=Lunes, etc.
 	CondicionesPersonalizadas map[string]interface{} `json:"condiciones_personalizadas,omitempty"`
 }
 
 type AccionesRegla struct {
-	PuntosPorPeso           *float64               `json:"puntos_por_peso,omitempty"`
-	PuntosFijos             *int                   `json:"puntos_fijos,omitempty"`
-	Multiplicador           *float64               `json:"multiplicador,omitempty"`
-	BonusAdicional          *int                   `json:"bonus_adicional,omitempty"`
-	PorcentajeDescuento     *float64               `json:"porcentaje_descuento,omitempty"`
-	MontoDescuento          *float64               `json:"monto_descuento,omitempty"`
-	ProductoGratis          *string                `json:"producto_gratis,omitempty"`
-	CambioNivel             *NivelFidelizacion     `json:"cambio_nivel,omitempty"`
-	DiasVencimientoPuntos   *int                   `json:"dias_vencimiento_puntos,omitempty"`
-	AccionesPersonalizadas  map[string]interface{} `json:"acciones_personalizadas,omitempty"`
+	PuntosPorPeso          *float64               `json:"puntos_por_peso,omitempty"`
+	PuntosFijos            *int                   `json:"puntos_fijos,omitempty"`
+	Multiplicador          *float64               `json:"multiplicador,omitempty"`
+	BonusAdicional         *int                   `json:"bonus_adicional,omitempty"`
+	PorcentajeDescuento    *float64               `json:"porcentaje_descuento,omitempty"`
+	MontoDescuento         *float64               `json:"monto_descuento,omitempty"`
+	ProductoGratis         *string                `json:"producto_gratis,omitempty"`
+	CambioNivel            *NivelFidelizacion     `json:"cambio_nivel,omitempty"`
+	DiasVencimientoPuntos  *int                   `json:"dias_vencimiento_puntos,omitempty"`
+	AccionesPersonalizadas map[string]interface{} `json:"acciones_personalizadas,omitempty"`
 }
 
 type CondicionesCompiladas struct {
-	CacheKey            string                 `json:"cache_key"`
-	EvaluacionRapida    bool                   `json:"evaluacion_rapida"`
-	CondicionesSQL      *string                `json:"condiciones_sql,omitempty"`
-	ParametrosSQL       map[string]interface{} `json:"parametros_sql,omitempty"`
-	FechaCompilacion    time.Time              `json:"fecha_compilacion"`
+	CacheKey         string                 `json:"cache_key"`
+	EvaluacionRapida bool                   `json:"evaluacion_rapida"`
+	CondicionesSQL   *string                `json:"condiciones_sql,omitempty"`
+	ParametrosSQL    map[string]interface{} `json:"parametros_sql,omitempty"`
+	FechaCompilacion time.Time              `json:"fecha_compilacion"`
 }
 
 type CacheEvaluacionRegla struct {
-	EvaluacionesRecientes   map[string]bool        `json:"evaluaciones_recientes"`
-	FechaUltimaEvaluacion   time.Time              `json:"fecha_ultima_evaluacion"`
-	TotalEvaluaciones       int                    `json:"total_evaluaciones"`
-	TotalAplicacionesCache  int                    `json:"total_aplicaciones_cache"`
-	ValidoHasta             time.Time              `json:"valido_hasta"`
+	EvaluacionesRecientes  map[string]bool `json:"evaluaciones_recientes"`
+	FechaUltimaEvaluacion  time.Time       `json:"fecha_ultima_evaluacion"`
+	TotalEvaluaciones      int             `json:"total_evaluaciones"`
+	TotalAplicacionesCache int             `json:"total_aplicaciones_cache"`
+	ValidoHasta            time.Time       `json:"valido_hasta"`
 }
 
 // Implementar driver.Valuer para tipos JSON personalizados
@@ -297,71 +297,71 @@ func (c *CacheEvaluacionRegla) Scan(value interface{}) error {
 // DTOs para FidelizacionCliente
 
 type FidelizacionClienteCreateDTO struct {
-	Rut                 string                   `json:"rut" binding:"required" validate:"required,rut"`
-	Nombre              string                   `json:"nombre" binding:"required" validate:"required,max=255"`
-	Apellido            *string                  `json:"apellido,omitempty"`
-	Email               *string                  `json:"email,omitempty" validate:"omitempty,email"`
-	Telefono            *string                  `json:"telefono,omitempty"`
-	FechaNacimiento     *time.Time               `json:"fecha_nacimiento,omitempty"`
-	Direccion           *string                  `json:"direccion,omitempty"`
-	Comuna              *string                  `json:"comuna,omitempty"`
-	Region              *string                  `json:"region,omitempty"`
-	AceptaMarketing     bool                     `json:"acepta_marketing"`
-	DatosAdicionales    *DatosAdicionalesCliente `json:"datos_adicionales,omitempty"`
+	Rut              string                   `json:"rut" binding:"required" validate:"required,rut"`
+	Nombre           string                   `json:"nombre" binding:"required" validate:"required,max=255"`
+	Apellido         *string                  `json:"apellido,omitempty"`
+	Email            *string                  `json:"email,omitempty" validate:"omitempty,email"`
+	Telefono         *string                  `json:"telefono,omitempty"`
+	FechaNacimiento  *time.Time               `json:"fecha_nacimiento,omitempty"`
+	Direccion        *string                  `json:"direccion,omitempty"`
+	Comuna           *string                  `json:"comuna,omitempty"`
+	Region           *string                  `json:"region,omitempty"`
+	AceptaMarketing  bool                     `json:"acepta_marketing"`
+	DatosAdicionales *DatosAdicionalesCliente `json:"datos_adicionales,omitempty"`
 }
 
 type FidelizacionClienteUpdateDTO struct {
-	Nombre              *string                  `json:"nombre,omitempty" validate:"omitempty,max=255"`
-	Apellido            *string                  `json:"apellido,omitempty"`
-	Email               *string                  `json:"email,omitempty" validate:"omitempty,email"`
-	Telefono            *string                  `json:"telefono,omitempty"`
-	FechaNacimiento     *time.Time               `json:"fecha_nacimiento,omitempty"`
-	Direccion           *string                  `json:"direccion,omitempty"`
-	Comuna              *string                  `json:"comuna,omitempty"`
-	Region              *string                  `json:"region,omitempty"`
-	Activo              *bool                    `json:"activo,omitempty"`
-	AceptaMarketing     *bool                    `json:"acepta_marketing,omitempty"`
-	DatosAdicionales    *DatosAdicionalesCliente `json:"datos_adicionales,omitempty"`
+	Nombre           *string                  `json:"nombre,omitempty" validate:"omitempty,max=255"`
+	Apellido         *string                  `json:"apellido,omitempty"`
+	Email            *string                  `json:"email,omitempty" validate:"omitempty,email"`
+	Telefono         *string                  `json:"telefono,omitempty"`
+	FechaNacimiento  *time.Time               `json:"fecha_nacimiento,omitempty"`
+	Direccion        *string                  `json:"direccion,omitempty"`
+	Comuna           *string                  `json:"comuna,omitempty"`
+	Region           *string                  `json:"region,omitempty"`
+	Activo           *bool                    `json:"activo,omitempty"`
+	AceptaMarketing  *bool                    `json:"acepta_marketing,omitempty"`
+	DatosAdicionales *DatosAdicionalesCliente `json:"datos_adicionales,omitempty"`
 }
 
 type FidelizacionClienteResponseDTO struct {
-	ID                        uuid.UUID                 `json:"id"`
-	Rut                       string                    `json:"rut"`
-	Nombre                    string                    `json:"nombre"`
-	Apellido                  *string                   `json:"apellido,omitempty"`
-	Email                     *string                   `json:"email,omitempty"`
-	Telefono                  *string                   `json:"telefono,omitempty"`
-	FechaNacimiento           *time.Time                `json:"fecha_nacimiento,omitempty"`
-	Direccion                 *string                   `json:"direccion,omitempty"`
-	Comuna                    *string                   `json:"comuna,omitempty"`
-	Region                    *string                   `json:"region,omitempty"`
-	PuntosActuales            int                       `json:"puntos_actuales"`
-	PuntosAcumuladosTotal     int                       `json:"puntos_acumulados_total"`
-	NivelFidelizacion         NivelFidelizacion         `json:"nivel_fidelizacion"`
-	FechaUltimaCompra         *time.Time                `json:"fecha_ultima_compra,omitempty"`
-	FechaUltimaActividad      *time.Time                `json:"fecha_ultima_actividad,omitempty"`
-	Activo                    bool                      `json:"activo"`
-	AceptaMarketing           bool                      `json:"acepta_marketing"`
-	QRFidelizacion            *string                   `json:"qr_fidelizacion,omitempty"`
-	CacheEstadisticas         *CacheEstadisticasCliente `json:"cache_estadisticas,omitempty"`
-	FechaProximoVencimiento   *time.Time                `json:"fecha_proximo_vencimiento_puntos,omitempty"`
-	PuntosPorVencer           int                       `json:"puntos_por_vencer"`
-	FechaCreacion             time.Time                 `json:"fecha_creacion"`
-	FechaModificacion         time.Time                 `json:"fecha_modificacion"`
+	ID                      uuid.UUID                 `json:"id"`
+	Rut                     string                    `json:"rut"`
+	Nombre                  string                    `json:"nombre"`
+	Apellido                *string                   `json:"apellido,omitempty"`
+	Email                   *string                   `json:"email,omitempty"`
+	Telefono                *string                   `json:"telefono,omitempty"`
+	FechaNacimiento         *time.Time                `json:"fecha_nacimiento,omitempty"`
+	Direccion               *string                   `json:"direccion,omitempty"`
+	Comuna                  *string                   `json:"comuna,omitempty"`
+	Region                  *string                   `json:"region,omitempty"`
+	PuntosActuales          int                       `json:"puntos_actuales"`
+	PuntosAcumuladosTotal   int                       `json:"puntos_acumulados_total"`
+	NivelFidelizacion       NivelFidelizacion         `json:"nivel_fidelizacion"`
+	FechaUltimaCompra       *time.Time                `json:"fecha_ultima_compra,omitempty"`
+	FechaUltimaActividad    *time.Time                `json:"fecha_ultima_actividad,omitempty"`
+	Activo                  bool                      `json:"activo"`
+	AceptaMarketing         bool                      `json:"acepta_marketing"`
+	QRFidelizacion          *string                   `json:"qr_fidelizacion,omitempty"`
+	CacheEstadisticas       *CacheEstadisticasCliente `json:"cache_estadisticas,omitempty"`
+	FechaProximoVencimiento *time.Time                `json:"fecha_proximo_vencimiento_puntos,omitempty"`
+	PuntosPorVencer         int                       `json:"puntos_por_vencer"`
+	FechaCreacion           time.Time                 `json:"fecha_creacion"`
+	FechaModificacion       time.Time                 `json:"fecha_modificacion"`
 }
 
 type FidelizacionClienteListDTO struct {
-	ID                    uuid.UUID         `json:"id"`
-	Rut                   string            `json:"rut"`
-	Nombre                string            `json:"nombre"`
-	Apellido              *string           `json:"apellido,omitempty"`
-	Email                 *string           `json:"email,omitempty"`
-	PuntosActuales        int               `json:"puntos_actuales"`
-	NivelFidelizacion     NivelFidelizacion `json:"nivel_fidelizacion"`
-	FechaUltimaCompra     *time.Time        `json:"fecha_ultima_compra,omitempty"`
-	Activo                bool              `json:"activo"`
-	FechaCreacion         time.Time         `json:"fecha_creacion"`
-	FechaModificacion     time.Time         `json:"fecha_modificacion"`
+	ID                uuid.UUID         `json:"id"`
+	Rut               string            `json:"rut"`
+	Nombre            string            `json:"nombre"`
+	Apellido          *string           `json:"apellido,omitempty"`
+	Email             *string           `json:"email,omitempty"`
+	PuntosActuales    int               `json:"puntos_actuales"`
+	NivelFidelizacion NivelFidelizacion `json:"nivel_fidelizacion"`
+	FechaUltimaCompra *time.Time        `json:"fecha_ultima_compra,omitempty"`
+	Activo            bool              `json:"activo"`
+	FechaCreacion     time.Time         `json:"fecha_creacion"`
+	FechaModificacion time.Time         `json:"fecha_modificacion"`
 }
 
 // DTOs para MovimientoFidelizacion
@@ -379,47 +379,47 @@ type MovimientoFidelizacionCreateDTO struct {
 }
 
 type MovimientoFidelizacionResponseDTO struct {
-	ID               uuid.UUID                   `json:"id"`
-	ClienteID        uuid.UUID                   `json:"cliente_id"`
-	SucursalID       uuid.UUID                   `json:"sucursal_id"`
-	VentaID          *uuid.UUID                  `json:"venta_id,omitempty"`
-	Tipo             TipoMovimientoFidelizacion  `json:"tipo"`
-	Puntos           int                         `json:"puntos"`
-	PuntosAnteriores *int                        `json:"puntos_anteriores,omitempty"`
-	PuntosNuevos     *int                        `json:"puntos_nuevos,omitempty"`
-	Multiplicador    float64                     `json:"multiplicador"`
-	Detalle          *string                     `json:"detalle,omitempty"`
-	Fecha            time.Time                   `json:"fecha"`
-	FechaVencimiento *time.Time                  `json:"fecha_vencimiento,omitempty"`
-	UsuarioID        *uuid.UUID                  `json:"usuario_id,omitempty"`
-	FechaCreacion    time.Time                   `json:"fecha_creacion"`
-	ClienteNombre    *string                     `json:"cliente_nombre,omitempty"`
-	SucursalNombre   *string                     `json:"sucursal_nombre,omitempty"`
-	UsuarioNombre    *string                     `json:"usuario_nombre,omitempty"`
+	ID               uuid.UUID                  `json:"id"`
+	ClienteID        uuid.UUID                  `json:"cliente_id"`
+	SucursalID       uuid.UUID                  `json:"sucursal_id"`
+	VentaID          *uuid.UUID                 `json:"venta_id,omitempty"`
+	Tipo             TipoMovimientoFidelizacion `json:"tipo"`
+	Puntos           int                        `json:"puntos"`
+	PuntosAnteriores *int                       `json:"puntos_anteriores,omitempty"`
+	PuntosNuevos     *int                       `json:"puntos_nuevos,omitempty"`
+	Multiplicador    float64                    `json:"multiplicador"`
+	Detalle          *string                    `json:"detalle,omitempty"`
+	Fecha            time.Time                  `json:"fecha"`
+	FechaVencimiento *time.Time                 `json:"fecha_vencimiento,omitempty"`
+	UsuarioID        *uuid.UUID                 `json:"usuario_id,omitempty"`
+	FechaCreacion    time.Time                  `json:"fecha_creacion"`
+	ClienteNombre    *string                    `json:"cliente_nombre,omitempty"`
+	SucursalNombre   *string                    `json:"sucursal_nombre,omitempty"`
+	UsuarioNombre    *string                    `json:"usuario_nombre,omitempty"`
 }
 
 // DTOs para ReglaFidelizacion
 
 type ReglaFidelizacionCreateDTO struct {
-	Nombre                string                `json:"nombre" binding:"required" validate:"required,max=255"`
-	Descripcion           *string               `json:"descripcion,omitempty"`
-	TipoRegla             TipoReglaFidelizacion `json:"tipo_regla" binding:"required"`
-	Condiciones           CondicionesRegla      `json:"condiciones" binding:"required"`
-	Acciones              AccionesRegla         `json:"acciones" binding:"required"`
-	FechaInicio           *time.Time            `json:"fecha_inicio,omitempty"`
-	FechaFin              *time.Time            `json:"fecha_fin,omitempty"`
-	Prioridad             int                   `json:"prioridad" default:"0"`
+	Nombre      string                `json:"nombre" binding:"required" validate:"required,max=255"`
+	Descripcion *string               `json:"descripcion,omitempty"`
+	TipoRegla   TipoReglaFidelizacion `json:"tipo_regla" binding:"required"`
+	Condiciones CondicionesRegla      `json:"condiciones" binding:"required"`
+	Acciones    AccionesRegla         `json:"acciones" binding:"required"`
+	FechaInicio *time.Time            `json:"fecha_inicio,omitempty"`
+	FechaFin    *time.Time            `json:"fecha_fin,omitempty"`
+	Prioridad   int                   `json:"prioridad" default:"0"`
 }
 
 type ReglaFidelizacionUpdateDTO struct {
-	Nombre      *string               `json:"nombre,omitempty" validate:"omitempty,max=255"`
-	Descripcion *string               `json:"descripcion,omitempty"`
-	Condiciones *CondicionesRegla     `json:"condiciones,omitempty"`
-	Acciones    *AccionesRegla        `json:"acciones,omitempty"`
-	Activa      *bool                 `json:"activa,omitempty"`
-	FechaInicio *time.Time            `json:"fecha_inicio,omitempty"`
-	FechaFin    *time.Time            `json:"fecha_fin,omitempty"`
-	Prioridad   *int                  `json:"prioridad,omitempty"`
+	Nombre      *string           `json:"nombre,omitempty" validate:"omitempty,max=255"`
+	Descripcion *string           `json:"descripcion,omitempty"`
+	Condiciones *CondicionesRegla `json:"condiciones,omitempty"`
+	Acciones    *AccionesRegla    `json:"acciones,omitempty"`
+	Activa      *bool             `json:"activa,omitempty"`
+	FechaInicio *time.Time        `json:"fecha_inicio,omitempty"`
+	FechaFin    *time.Time        `json:"fecha_fin,omitempty"`
+	Prioridad   *int              `json:"prioridad,omitempty"`
 }
 
 type ReglaFidelizacionResponseDTO struct {
@@ -488,12 +488,12 @@ func (c *FidelizacionCliente) CalcularNivel() NivelFidelizacion {
 func (c *FidelizacionCliente) ActualizarNivel() bool {
 	nivelAnterior := c.NivelFidelizacion
 	nivelNuevo := c.CalcularNivel()
-	
+
 	if nivelAnterior != nivelNuevo {
 		c.NivelFidelizacion = nivelNuevo
 		return true
 	}
-	
+
 	return false
 }
 
@@ -505,14 +505,14 @@ func (c *FidelizacionCliente) AgregarPuntos(puntos int) error {
 	if puntos <= 0 {
 		return fmt.Errorf("los puntos a agregar deben ser positivos")
 	}
-	
+
 	c.PuntosActuales += puntos
 	c.PuntosAcumuladosTotal += puntos
 	c.ActualizarNivel()
-	
+
 	now := time.Now()
 	c.FechaUltimaActividad = &now
-	
+
 	return nil
 }
 
@@ -520,12 +520,12 @@ func (c *FidelizacionCliente) DescontarPuntos(puntos int) error {
 	if !c.PuedeUsarPuntos(puntos) {
 		return fmt.Errorf("no se pueden descontar %d puntos, solo tiene %d disponibles", puntos, c.PuntosActuales)
 	}
-	
+
 	c.PuntosActuales -= puntos
-	
+
 	now := time.Now()
 	c.FechaUltimaActividad = &now
-	
+
 	return nil
 }
 
@@ -595,7 +595,7 @@ func (m *MovimientoFidelizacion) ToResponseDTO() MovimientoFidelizacionResponseD
 		UsuarioID:        m.UsuarioID,
 		FechaCreacion:    m.FechaCreacion,
 	}
-	
+
 	if m.Cliente != nil {
 		nombreCompleto := m.Cliente.Nombre
 		if m.Cliente.Apellido != nil {
@@ -603,11 +603,11 @@ func (m *MovimientoFidelizacion) ToResponseDTO() MovimientoFidelizacionResponseD
 		}
 		dto.ClienteNombre = &nombreCompleto
 	}
-	
+
 	if m.Sucursal != nil {
 		dto.SucursalNombre = &m.Sucursal.Nombre
 	}
-	
+
 	if m.Usuario != nil {
 		nombreUsuario := m.Usuario.Nombre
 		if m.Usuario.Apellido != nil {
@@ -615,7 +615,7 @@ func (m *MovimientoFidelizacion) ToResponseDTO() MovimientoFidelizacionResponseD
 		}
 		dto.UsuarioNombre = &nombreUsuario
 	}
-	
+
 	return dto
 }
 
@@ -656,11 +656,11 @@ func (dto *FidelizacionClienteCreateDTO) ToModel() *FidelizacionCliente {
 		AceptaMarketing:       dto.AceptaMarketing,
 		DatosAdicionales:      dto.DatosAdicionales,
 	}
-	
+
 	// Generar QR de fidelización
 	qr := cliente.GenerarQR()
 	cliente.QRFidelizacion = &qr
-	
+
 	return cliente
 }
 
@@ -670,15 +670,15 @@ func (c *FidelizacionCliente) Validate() error {
 	if c.PuntosActuales < 0 {
 		return fmt.Errorf("puntos actuales no pueden ser negativos")
 	}
-	
+
 	if c.PuntosAcumuladosTotal < 0 {
 		return fmt.Errorf("puntos acumulados totales no pueden ser negativos")
 	}
-	
+
 	if c.PuntosPorVencer < 0 {
 		return fmt.Errorf("puntos por vencer no pueden ser negativos")
 	}
-	
+
 	return nil
 }
 
@@ -686,11 +686,11 @@ func (m *MovimientoFidelizacion) Validate() error {
 	if m.Puntos == 0 {
 		return fmt.Errorf("puntos del movimiento no pueden ser cero")
 	}
-	
+
 	if m.Multiplicador <= 0 {
 		return fmt.Errorf("multiplicador debe ser mayor a cero")
 	}
-	
+
 	return nil
 }
 
@@ -698,7 +698,7 @@ func (r *ReglaFidelizacion) Validate() error {
 	if r.FechaInicio != nil && r.FechaFin != nil && r.FechaInicio.After(*r.FechaFin) {
 		return fmt.Errorf("fecha de inicio no puede ser posterior a fecha de fin")
 	}
-	
+
 	return nil
 }
 
@@ -712,4 +712,3 @@ func CalcularPuntosPorCompra(montoCompra float64, puntosPorPeso float64, multipl
 func CalcularDescuentoPorPuntos(puntos int, valorPunto float64) float64 {
 	return float64(puntos) * valorPunto
 }
-

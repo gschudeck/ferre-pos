@@ -6,11 +6,12 @@ import (
 	"strings"
 	"time"
 
+	"ferre-pos-servidor-central/internal/models"
+	"ferre-pos-servidor-central/internal/services"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"ferre-pos-servidor-central/internal/models"
-	"ferre-pos-servidor-central/internal/services"
 )
 
 // AuthMiddleware contiene la configuración del middleware de autenticación
@@ -41,12 +42,12 @@ func NewAuthMiddleware(authService services.AuthService, jwtSecret string) *Auth
 
 // JWTClaims define las claims del JWT
 type JWTClaims struct {
-	UserID     uuid.UUID `json:"user_id"`
-	Email      string    `json:"email"`
-	Rol        string    `json:"rol"`
+	UserID     uuid.UUID  `json:"user_id"`
+	Email      string     `json:"email"`
+	Rol        string     `json:"rol"`
 	SucursalID *uuid.UUID `json:"sucursal_id,omitempty"`
-	TerminalID string    `json:"terminal_id,omitempty"`
-	Permisos   []string  `json:"permisos"`
+	TerminalID string     `json:"terminal_id,omitempty"`
+	Permisos   []string   `json:"permisos"`
 	jwt.RegisteredClaims
 }
 
@@ -123,11 +124,11 @@ func (am *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 		c.Set("user_email", claims.Email)
 		c.Set("user_rol", claims.Rol)
 		c.Set("user_permisos", claims.Permisos)
-		
+
 		if claims.SucursalID != nil {
 			c.Set("sucursal_id", *claims.SucursalID)
 		}
-		
+
 		if claims.TerminalID != "" {
 			c.Set("terminal_id", claims.TerminalID)
 		}
@@ -151,7 +152,7 @@ func (am *AuthMiddleware) RequireRole(roles ...models.RolUsuario) gin.HandlerFun
 		}
 
 		userObj := user.(*models.Usuario)
-		
+
 		// Verificar si el usuario tiene alguno de los roles requeridos
 		hasRole := false
 		for _, role := range roles {
@@ -190,7 +191,7 @@ func (am *AuthMiddleware) RequirePermission(permission string) gin.HandlerFunc {
 		}
 
 		permisosSlice := permisos.([]string)
-		
+
 		// Verificar si el usuario tiene el permiso requerido
 		hasPermission := false
 		for _, p := range permisosSlice {
@@ -284,11 +285,11 @@ func (am *AuthMiddleware) OptionalAuth() gin.HandlerFunc {
 		c.Set("user_email", claims.Email)
 		c.Set("user_rol", claims.Rol)
 		c.Set("user_permisos", claims.Permisos)
-		
+
 		if claims.SucursalID != nil {
 			c.Set("sucursal_id", *claims.SucursalID)
 		}
-		
+
 		if claims.TerminalID != "" {
 			c.Set("terminal_id", claims.TerminalID)
 		}
@@ -521,4 +522,3 @@ func IsGerente(c *gin.Context) bool {
 func IsCajero(c *gin.Context) bool {
 	return HasRole(c, models.RolCajero)
 }
-

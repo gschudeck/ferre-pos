@@ -12,26 +12,27 @@ import (
 	"strings"
 	"time"
 
+	"ferre-pos-servidor-central/internal/services"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"ferre-pos-servidor-central/internal/services"
 )
 
 // LoggingConfig contiene la configuración del logging
 type LoggingConfig struct {
-	Level          string `yaml:"level" json:"level"`
-	Format         string `yaml:"format" json:"format"` // "json" o "text"
-	Output         string `yaml:"output" json:"output"` // "stdout", "file", "both"
-	FilePath       string `yaml:"file_path" json:"file_path"`
-	MaxSize        int    `yaml:"max_size" json:"max_size"`         // MB
-	MaxBackups     int    `yaml:"max_backups" json:"max_backups"`   // archivos
-	MaxAge         int    `yaml:"max_age" json:"max_age"`           // días
-	Compress       bool   `yaml:"compress" json:"compress"`
-	LogRequests    bool   `yaml:"log_requests" json:"log_requests"`
-	LogResponses   bool   `yaml:"log_responses" json:"log_responses"`
-	LogHeaders     bool   `yaml:"log_headers" json:"log_headers"`
-	LogBody        bool   `yaml:"log_body" json:"log_body"`
-	SkipPaths      []string `yaml:"skip_paths" json:"skip_paths"`
+	Level           string   `yaml:"level" json:"level"`
+	Format          string   `yaml:"format" json:"format"` // "json" o "text"
+	Output          string   `yaml:"output" json:"output"` // "stdout", "file", "both"
+	FilePath        string   `yaml:"file_path" json:"file_path"`
+	MaxSize         int      `yaml:"max_size" json:"max_size"`       // MB
+	MaxBackups      int      `yaml:"max_backups" json:"max_backups"` // archivos
+	MaxAge          int      `yaml:"max_age" json:"max_age"`         // días
+	Compress        bool     `yaml:"compress" json:"compress"`
+	LogRequests     bool     `yaml:"log_requests" json:"log_requests"`
+	LogResponses    bool     `yaml:"log_responses" json:"log_responses"`
+	LogHeaders      bool     `yaml:"log_headers" json:"log_headers"`
+	LogBody         bool     `yaml:"log_body" json:"log_body"`
+	SkipPaths       []string `yaml:"skip_paths" json:"skip_paths"`
 	SensitiveFields []string `yaml:"sensitive_fields" json:"sensitive_fields"`
 }
 
@@ -86,7 +87,7 @@ func LoggingMiddleware(config LoggingConfig, logService services.LogService) gin
 		}
 
 		start := time.Now()
-		
+
 		// Capturar request body si está habilitado
 		var requestBody []byte
 		if config.LogBody && c.Request.Body != nil {
@@ -100,7 +101,7 @@ func LoggingMiddleware(config LoggingConfig, logService services.LogService) gin
 			responseBody = &bytes.Buffer{}
 			writer := &responseWriter{
 				ResponseWriter: c.Writer,
-				body:          responseBody,
+				body:           responseBody,
 			}
 			c.Writer = writer
 		}
@@ -139,15 +140,15 @@ func LoggingMiddleware(config LoggingConfig, logService services.LogService) gin
 // createLogEntry crea una entrada de log
 func createLogEntry(c *gin.Context, duration time.Duration, requestBody []byte, responseBody *bytes.Buffer, config LoggingConfig, userID *uuid.UUID) map[string]interface{} {
 	entry := map[string]interface{}{
-		"timestamp":    time.Now().UTC().Format(time.RFC3339),
-		"method":       c.Request.Method,
-		"path":         c.Request.URL.Path,
-		"query":        c.Request.URL.RawQuery,
-		"status":       c.Writer.Status(),
-		"duration_ms":  duration.Milliseconds(),
-		"size":         c.Writer.Size(),
-		"ip":           c.ClientIP(),
-		"user_agent":   c.Request.UserAgent(),
+		"timestamp":   time.Now().UTC().Format(time.RFC3339),
+		"method":      c.Request.Method,
+		"path":        c.Request.URL.Path,
+		"query":       c.Request.URL.RawQuery,
+		"status":      c.Writer.Status(),
+		"duration_ms": duration.Milliseconds(),
+		"size":        c.Writer.Size(),
+		"ip":          c.ClientIP(),
+		"user_agent":  c.Request.UserAgent(),
 	}
 
 	// Agregar request ID si existe
@@ -187,7 +188,7 @@ func createLogEntry(c *gin.Context, duration time.Duration, requestBody []byte, 
 // logToOutput envía el log a la salida configurada
 func logToOutput(entry map[string]interface{}, config LoggingConfig) {
 	var output string
-	
+
 	if config.Format == "json" {
 		// Formato JSON
 		output = formatJSON(entry)
@@ -271,13 +272,13 @@ func sanitizeBody(body string, sensitiveFields []string) string {
 func MetricsMiddleware(metricsService services.MetricsService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
-		
+
 		// Procesar request
 		c.Next()
-		
+
 		// Calcular métricas
 		duration := time.Since(start)
-		
+
 		// Tags para las métricas
 		tags := map[string]string{
 			"method": c.Request.Method,
@@ -295,10 +296,10 @@ func MetricsMiddleware(metricsService services.MetricsService) gin.HandlerFunc {
 			go func() {
 				// Contador de requests
 				metricsService.IncrementCounter("http_requests_total", tags)
-				
+
 				// Duración de requests
 				metricsService.RecordDuration("http_request_duration", duration, tags)
-				
+
 				// Tamaño de response
 				if c.Writer.Size() > 0 {
 					metricsService.RecordMetric("http_response_size_bytes", float64(c.Writer.Size()), tags)
@@ -342,7 +343,7 @@ func ErrorLoggingMiddleware(logService services.LogService) gin.HandlerFunc {
 							"ip":         c.ClientIP(),
 							"user_agent": c.Request.UserAgent(),
 						}
-						
+
 						if requestID, exists := c.Get("request_id"); exists {
 							context["request_id"] = requestID
 						}
@@ -359,11 +360,11 @@ func ErrorLoggingMiddleware(logService services.LogService) gin.HandlerFunc {
 func RateLimitMiddleware(requestsPerMinute int) gin.HandlerFunc {
 	// Mapa simple para tracking (en producción usar Redis)
 	requestCounts := make(map[string][]time.Time)
-	
+
 	return func(c *gin.Context) {
 		clientIP := c.ClientIP()
 		now := time.Now()
-		
+
 		// Limpiar requests antiguos
 		if requests, exists := requestCounts[clientIP]; exists {
 			var validRequests []time.Time
@@ -374,7 +375,7 @@ func RateLimitMiddleware(requestsPerMinute int) gin.HandlerFunc {
 			}
 			requestCounts[clientIP] = validRequests
 		}
-		
+
 		// Verificar límite
 		if len(requestCounts[clientIP]) >= requestsPerMinute {
 			c.JSON(http.StatusTooManyRequests, gin.H{
@@ -385,10 +386,10 @@ func RateLimitMiddleware(requestsPerMinute int) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		// Agregar request actual
 		requestCounts[clientIP] = append(requestCounts[clientIP], now)
-		
+
 		c.Next()
 	}
 }
@@ -468,18 +469,18 @@ func TimeoutMiddleware(timeout time.Duration) gin.HandlerFunc {
 		// Crear contexto con timeout
 		ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
 		defer cancel()
-		
+
 		// Reemplazar contexto del request
 		c.Request = c.Request.WithContext(ctx)
-		
+
 		// Canal para señalar completion
 		done := make(chan bool, 1)
-		
+
 		go func() {
 			c.Next()
 			done <- true
 		}()
-		
+
 		select {
 		case <-done:
 			// Request completado a tiempo
@@ -496,4 +497,3 @@ func TimeoutMiddleware(timeout time.Duration) gin.HandlerFunc {
 		}
 	}
 }
-

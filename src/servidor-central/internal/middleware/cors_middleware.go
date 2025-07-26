@@ -58,7 +58,7 @@ func DefaultCORSConfig() CORSConfig {
 func CORS(config CORSConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
-		
+
 		// Verificar si el origen está permitido
 		if isOriginAllowed(origin, config.AllowOrigins) {
 			c.Header("Access-Control-Allow-Origin", origin)
@@ -103,7 +103,7 @@ func isOriginAllowed(origin string, allowedOrigins []string) bool {
 		if allowed == "*" || allowed == origin {
 			return true
 		}
-		
+
 		// Verificar wildcards
 		if strings.Contains(allowed, "*") {
 			if matchWildcard(allowed, origin) {
@@ -120,19 +120,19 @@ func matchWildcard(pattern, origin string) bool {
 	if pattern == "*" {
 		return true
 	}
-	
+
 	if strings.HasPrefix(pattern, "*.") {
 		domain := pattern[2:]
 		return strings.HasSuffix(origin, domain)
 	}
-	
+
 	return pattern == origin
 }
 
 // CORSForAPI retorna configuración CORS específica para cada API
 func CORSForAPI(apiName string) CORSConfig {
 	baseConfig := DefaultCORSConfig()
-	
+
 	switch apiName {
 	case "pos":
 		// API POS requiere configuración más estricta
@@ -142,7 +142,7 @@ func CORSForAPI(apiName string) CORSConfig {
 			"https://*.ferreteria.com",
 		}
 		baseConfig.AllowCredentials = true
-		
+
 	case "sync":
 		// API Sync permite orígenes internos
 		baseConfig.AllowOrigins = []string{
@@ -150,7 +150,7 @@ func CORSForAPI(apiName string) CORSConfig {
 			"https://sync.ferreteria.com",
 			"https://admin.ferreteria.com",
 		}
-		
+
 	case "labels":
 		// API Labels permite acceso desde herramientas de diseño
 		baseConfig.AllowOrigins = []string{
@@ -158,7 +158,7 @@ func CORSForAPI(apiName string) CORSConfig {
 			"https://labels.ferreteria.com",
 			"https://design.ferreteria.com",
 		}
-		
+
 	case "reports":
 		// API Reports permite acceso desde dashboards
 		baseConfig.AllowOrigins = []string{
@@ -168,7 +168,7 @@ func CORSForAPI(apiName string) CORSConfig {
 			"https://analytics.ferreteria.com",
 		}
 	}
-	
+
 	return baseConfig
 }
 
@@ -179,19 +179,19 @@ func SecurityHeaders() gin.HandlerFunc {
 		c.Header("X-Content-Type-Options", "nosniff")
 		c.Header("X-Frame-Options", "DENY")
 		c.Header("X-XSS-Protection", "1; mode=block")
-		
+
 		// Política de seguridad de contenido básica
 		c.Header("Content-Security-Policy", "default-src 'self'")
-		
+
 		// Prevenir información de servidor
 		c.Header("Server", "Ferre-POS-Server")
-		
+
 		// Política de referrer
 		c.Header("Referrer-Policy", "strict-origin-when-cross-origin")
-		
+
 		// Prevenir MIME type sniffing
 		c.Header("X-Content-Type-Options", "nosniff")
-		
+
 		c.Next()
 	}
 }
@@ -348,7 +348,7 @@ func UserAgent(requiredAgents ...string) gin.HandlerFunc {
 func IPWhitelist(allowedIPs []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientIP := c.ClientIP()
-		
+
 		// Verificar si la IP está en la whitelist
 		isAllowed := false
 		for _, allowedIP := range allowedIPs {
@@ -388,4 +388,3 @@ func Maintenance(enabled bool, message string) gin.HandlerFunc {
 		c.Next()
 	}
 }
-

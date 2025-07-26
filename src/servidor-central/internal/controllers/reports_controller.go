@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"net/http"
-	"strconv"
+
+	"ferre-pos-servidor-central/internal/models"
+	"ferre-pos-servidor-central/internal/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"ferre-pos-servidor-central/internal/models"
-	"ferre-pos-servidor-central/internal/services"
 )
 
 // ReportsController maneja las operaciones del API de Reportes
@@ -217,7 +217,7 @@ func (rc *ReportsController) ValidarPlantillaReporte(c *gin.Context) {
 	}
 
 	rc.ResponseSuccess(c, gin.H{
-		"valida": true,
+		"valida":  true,
 		"message": "Plantilla válida",
 	})
 }
@@ -917,4 +917,3 @@ func (rc *ReportsController) GetDatosWidget(c *gin.Context) {
 	rc.SetCacheHeaders(c, 60) // Cache por 1 minuto
 	rc.ResponseSuccess(c, datos)
 }
-

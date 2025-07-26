@@ -12,21 +12,21 @@ import (
 // PlantillaEtiqueta representa una plantilla para generar etiquetas
 type PlantillaEtiqueta struct {
 	BaseModel
-	Nombre                string                    `json:"nombre" db:"nombre" binding:"required" validate:"required,max=255"`
-	Descripcion           *string                   `json:"descripcion,omitempty" db:"descripcion"`
-	TipoEtiqueta          TipoEtiqueta              `json:"tipo_etiqueta" db:"tipo_etiqueta" binding:"required"`
-	Dimensiones           DimensionesEtiqueta       `json:"dimensiones" db:"dimensiones" binding:"required"`
-	ConfiguracionDiseno   ConfiguracionDiseno       `json:"configuracion_diseno" db:"configuracion_diseno" binding:"required"`
-	CamposPersonalizados  []CampoPersonalizado      `json:"campos_personalizados,omitempty" db:"campos_personalizados"`
-	Activa                bool                      `json:"activa" db:"activa" default:"true"`
-	EsDefault             bool                      `json:"es_default" db:"es_default" default:"false"`
-	SucursalesPermitidas  []uuid.UUID               `json:"sucursales_permitidas,omitempty" db:"sucursales_permitidas"`
-	CategoriasPermitidas  []uuid.UUID               `json:"categorias_permitidas,omitempty" db:"categorias_permitidas"`
-	TotalGeneradas        int                       `json:"total_generadas" db:"total_generadas" default:"0"`
-	FechaUltimoUso        *time.Time                `json:"fecha_ultimo_uso,omitempty" db:"fecha_ultimo_uso"`
-	ConfiguracionImpresion *ConfiguracionImpresion  `json:"configuracion_impresion,omitempty" db:"configuracion_impresion"`
-	VersionPlantilla      int                       `json:"version_plantilla" db:"version_plantilla" default:"1"`
-	CacheRenderizado      *CacheRenderizado         `json:"cache_renderizado,omitempty" db:"cache_renderizado"`
+	Nombre                 string                  `json:"nombre" db:"nombre" binding:"required" validate:"required,max=255"`
+	Descripcion            *string                 `json:"descripcion,omitempty" db:"descripcion"`
+	TipoEtiqueta           TipoEtiqueta            `json:"tipo_etiqueta" db:"tipo_etiqueta" binding:"required"`
+	Dimensiones            DimensionesEtiqueta     `json:"dimensiones" db:"dimensiones" binding:"required"`
+	ConfiguracionDiseno    ConfiguracionDiseno     `json:"configuracion_diseno" db:"configuracion_diseno" binding:"required"`
+	CamposPersonalizados   []CampoPersonalizado    `json:"campos_personalizados,omitempty" db:"campos_personalizados"`
+	Activa                 bool                    `json:"activa" db:"activa" default:"true"`
+	EsDefault              bool                    `json:"es_default" db:"es_default" default:"false"`
+	SucursalesPermitidas   []uuid.UUID             `json:"sucursales_permitidas,omitempty" db:"sucursales_permitidas"`
+	CategoriasPermitidas   []uuid.UUID             `json:"categorias_permitidas,omitempty" db:"categorias_permitidas"`
+	TotalGeneradas         int                     `json:"total_generadas" db:"total_generadas" default:"0"`
+	FechaUltimoUso         *time.Time              `json:"fecha_ultimo_uso,omitempty" db:"fecha_ultimo_uso"`
+	ConfiguracionImpresion *ConfiguracionImpresion `json:"configuracion_impresion,omitempty" db:"configuracion_impresion"`
+	VersionPlantilla       int                     `json:"version_plantilla" db:"version_plantilla" default:"1"`
+	CacheRenderizado       *CacheRenderizado       `json:"cache_renderizado,omitempty" db:"cache_renderizado"`
 
 	// Relaciones
 	EtiquetasGeneradas []EtiquetaGenerada `json:"etiquetas_generadas,omitempty" gorm:"foreignKey:PlantillaID"`
@@ -35,22 +35,22 @@ type PlantillaEtiqueta struct {
 // EtiquetaGenerada representa una etiqueta generada
 type EtiquetaGenerada struct {
 	BaseModel
-	PlantillaID           uuid.UUID                 `json:"plantilla_id" db:"plantilla_id" binding:"required"`
-	ProductoID            uuid.UUID                 `json:"producto_id" db:"producto_id" binding:"required"`
-	SucursalID            uuid.UUID                 `json:"sucursal_id" db:"sucursal_id" binding:"required"`
-	UsuarioID             uuid.UUID                 `json:"usuario_id" db:"usuario_id" binding:"required"`
-	Cantidad              int                       `json:"cantidad" db:"cantidad" binding:"required,min=1"`
-	Estado                EstadoEtiqueta            `json:"estado" db:"estado" default:"generada"`
-	FechaGeneracion       time.Time                 `json:"fecha_generacion" db:"fecha_generacion" default:"NOW()"`
-	FechaImpresion        *time.Time                `json:"fecha_impresion,omitempty" db:"fecha_impresion"`
-	TerminalImpresion     *uuid.UUID                `json:"terminal_impresion,omitempty" db:"terminal_impresion"`
-	DatosEtiqueta         DatosEtiqueta             `json:"datos_etiqueta" db:"datos_etiqueta" binding:"required"`
-	ArchivoGenerado       *string                   `json:"archivo_generado,omitempty" db:"archivo_generado"`
-	HashIntegridad        *string                   `json:"hash_integridad,omitempty" db:"hash_integridad"`
-	ConfiguracionUsada    *ConfiguracionEtiquetaUsada `json:"configuracion_usada,omitempty" db:"configuracion_usada"`
-	MetadatosGeneracion   *MetadatosGeneracion      `json:"metadatos_generacion,omitempty" db:"metadatos_generacion"`
-	LoteGeneracion        *uuid.UUID                `json:"lote_generacion,omitempty" db:"lote_generacion"`
-	TiempoGeneracion      *int                      `json:"tiempo_generacion_ms,omitempty" db:"tiempo_generacion_ms"`
+	PlantillaID         uuid.UUID                   `json:"plantilla_id" db:"plantilla_id" binding:"required"`
+	ProductoID          uuid.UUID                   `json:"producto_id" db:"producto_id" binding:"required"`
+	SucursalID          uuid.UUID                   `json:"sucursal_id" db:"sucursal_id" binding:"required"`
+	UsuarioID           uuid.UUID                   `json:"usuario_id" db:"usuario_id" binding:"required"`
+	Cantidad            int                         `json:"cantidad" db:"cantidad" binding:"required,min=1"`
+	Estado              EstadoEtiqueta              `json:"estado" db:"estado" default:"generada"`
+	FechaGeneracion     time.Time                   `json:"fecha_generacion" db:"fecha_generacion" default:"NOW()"`
+	FechaImpresion      *time.Time                  `json:"fecha_impresion,omitempty" db:"fecha_impresion"`
+	TerminalImpresion   *uuid.UUID                  `json:"terminal_impresion,omitempty" db:"terminal_impresion"`
+	DatosEtiqueta       DatosEtiqueta               `json:"datos_etiqueta" db:"datos_etiqueta" binding:"required"`
+	ArchivoGenerado     *string                     `json:"archivo_generado,omitempty" db:"archivo_generado"`
+	HashIntegridad      *string                     `json:"hash_integridad,omitempty" db:"hash_integridad"`
+	ConfiguracionUsada  *ConfiguracionEtiquetaUsada `json:"configuracion_usada,omitempty" db:"configuracion_usada"`
+	MetadatosGeneracion *MetadatosGeneracion        `json:"metadatos_generacion,omitempty" db:"metadatos_generacion"`
+	LoteGeneracion      *uuid.UUID                  `json:"lote_generacion,omitempty" db:"lote_generacion"`
+	TiempoGeneracion    *int                        `json:"tiempo_generacion_ms,omitempty" db:"tiempo_generacion_ms"`
 
 	// Relaciones
 	Plantilla *PlantillaEtiqueta `json:"plantilla,omitempty" gorm:"foreignKey:PlantillaID"`
@@ -63,18 +63,18 @@ type EtiquetaGenerada struct {
 // LoteEtiquetas representa un lote de etiquetas generadas
 type LoteEtiquetas struct {
 	BaseModel
-	Nombre                string                    `json:"nombre" db:"nombre" binding:"required"`
-	Descripcion           *string                   `json:"descripcion,omitempty" db:"descripcion"`
-	SucursalID            uuid.UUID                 `json:"sucursal_id" db:"sucursal_id" binding:"required"`
-	UsuarioID             uuid.UUID                 `json:"usuario_id" db:"usuario_id" binding:"required"`
-	TotalEtiquetas        int                       `json:"total_etiquetas" db:"total_etiquetas" default:"0"`
-	EtiquetasImpresas     int                       `json:"etiquetas_impresas" db:"etiquetas_impresas" default:"0"`
-	Estado                EstadoLote                `json:"estado" db:"estado" default:"pendiente"`
-	FechaGeneracion       time.Time                 `json:"fecha_generacion" db:"fecha_generacion" default:"NOW()"`
-	FechaCompletado       *time.Time                `json:"fecha_completado,omitempty" db:"fecha_completado"`
-	ConfiguracionLote     *ConfiguracionLote        `json:"configuracion_lote,omitempty" db:"configuracion_lote"`
-	ArchivoConsolidado    *string                   `json:"archivo_consolidado,omitempty" db:"archivo_consolidado"`
-	MetadatosLote         *MetadatosLote            `json:"metadatos_lote,omitempty" db:"metadatos_lote"`
+	Nombre             string             `json:"nombre" db:"nombre" binding:"required"`
+	Descripcion        *string            `json:"descripcion,omitempty" db:"descripcion"`
+	SucursalID         uuid.UUID          `json:"sucursal_id" db:"sucursal_id" binding:"required"`
+	UsuarioID          uuid.UUID          `json:"usuario_id" db:"usuario_id" binding:"required"`
+	TotalEtiquetas     int                `json:"total_etiquetas" db:"total_etiquetas" default:"0"`
+	EtiquetasImpresas  int                `json:"etiquetas_impresas" db:"etiquetas_impresas" default:"0"`
+	Estado             EstadoLote         `json:"estado" db:"estado" default:"pendiente"`
+	FechaGeneracion    time.Time          `json:"fecha_generacion" db:"fecha_generacion" default:"NOW()"`
+	FechaCompletado    *time.Time         `json:"fecha_completado,omitempty" db:"fecha_completado"`
+	ConfiguracionLote  *ConfiguracionLote `json:"configuracion_lote,omitempty" db:"configuracion_lote"`
+	ArchivoConsolidado *string            `json:"archivo_consolidado,omitempty" db:"archivo_consolidado"`
+	MetadatosLote      *MetadatosLote     `json:"metadatos_lote,omitempty" db:"metadatos_lote"`
 
 	// Relaciones
 	Sucursal           *Sucursal          `json:"sucursal,omitempty" gorm:"foreignKey:SucursalID"`
@@ -87,115 +87,115 @@ type LoteEtiquetas struct {
 type TipoEtiqueta string
 
 const (
-	EtiquetaProducto    TipoEtiqueta = "producto"
-	EtiquetaPrecio      TipoEtiqueta = "precio"
-	EtiquetaPromocion   TipoEtiqueta = "promocion"
-	EtiquetaInventario  TipoEtiqueta = "inventario"
+	EtiquetaProducto      TipoEtiqueta = "producto"
+	EtiquetaPrecio        TipoEtiqueta = "precio"
+	EtiquetaPromocion     TipoEtiqueta = "promocion"
+	EtiquetaInventario    TipoEtiqueta = "inventario"
 	EtiquetaPersonalizada TipoEtiqueta = "personalizada"
 )
 
 type EstadoEtiqueta string
 
 const (
-	EtiquetaGenerada  EstadoEtiqueta = "generada"
-	EtiquetaImpresa   EstadoEtiqueta = "impresa"
-	EtiquetaCancelada EstadoEtiqueta = "cancelada"
-	EtiquetaError     EstadoEtiqueta = "error"
+	EtiquetaGeneradaEstado EstadoEtiqueta = "generada"
+	EtiquetaImpresa        EstadoEtiqueta = "impresa"
+	EtiquetaCancelada      EstadoEtiqueta = "cancelada"
+	EtiquetaErrorEstado    EstadoEtiqueta = "error"
 )
 
 type EstadoLote string
 
 const (
-	LotePendiente   EstadoLote = "pendiente"
-	LoteGenerando   EstadoLote = "generando"
-	LoteCompletado  EstadoLote = "completado"
-	LoteCancelado   EstadoLote = "cancelado"
-	LoteError       EstadoLote = "error"
+	LotePendiente  EstadoLote = "pendiente"
+	LoteGenerando  EstadoLote = "generando"
+	LoteCompletado EstadoLote = "completado"
+	LoteCancelado  EstadoLote = "cancelado"
+	LoteError      EstadoLote = "error"
 )
 
 // Estructuras JSON
 
 type DimensionesEtiqueta struct {
-	Ancho         float64 `json:"ancho"`          // en mm
-	Alto          float64 `json:"alto"`           // en mm
-	MargenSuperior float64 `json:"margen_superior"` // en mm
-	MargenInferior float64 `json:"margen_inferior"` // en mm
+	Ancho           float64 `json:"ancho"`            // en mm
+	Alto            float64 `json:"alto"`             // en mm
+	MargenSuperior  float64 `json:"margen_superior"`  // en mm
+	MargenInferior  float64 `json:"margen_inferior"`  // en mm
 	MargenIzquierdo float64 `json:"margen_izquierdo"` // en mm
-	MargenDerecho  float64 `json:"margen_derecho"`  // en mm
-	Orientacion    string  `json:"orientacion"`     // "vertical", "horizontal"
-	DPI            int     `json:"dpi"`             // resolución
+	MargenDerecho   float64 `json:"margen_derecho"`   // en mm
+	Orientacion     string  `json:"orientacion"`      // "vertical", "horizontal"
+	DPI             int     `json:"dpi"`              // resolución
 }
 
 type ConfiguracionDiseno struct {
-	ColorFondo           string                 `json:"color_fondo"`
-	ColorTexto           string                 `json:"color_texto"`
-	ColorBorde           string                 `json:"color_borde"`
-	FuentePrincipal      string                 `json:"fuente_principal"`
-	FuenteSecundaria     string                 `json:"fuente_secundaria"`
-	TamañoFuenteTitulo   int                    `json:"tamaño_fuente_titulo"`
-	TamañoFuenteTexto    int                    `json:"tamaño_fuente_texto"`
-	TamañoFuentePrecio   int                    `json:"tamaño_fuente_precio"`
-	MostrarLogo          bool                   `json:"mostrar_logo"`
-	PosicionLogo         string                 `json:"posicion_logo"` // "superior", "inferior", "izquierda", "derecha"
-	MostrarCodigoBarra   bool                   `json:"mostrar_codigo_barra"`
-	TipoCodigoBarra      string                 `json:"tipo_codigo_barra"` // "CODE39", "CODE128", "EAN13", etc.
-	PosicionCodigoBarra  string                 `json:"posicion_codigo_barra"`
-	TamañoCodigoBarra    string                 `json:"tamaño_codigo_barra"` // "pequeño", "mediano", "grande"
+	ColorFondo              string                 `json:"color_fondo"`
+	ColorTexto              string                 `json:"color_texto"`
+	ColorBorde              string                 `json:"color_borde"`
+	FuentePrincipal         string                 `json:"fuente_principal"`
+	FuenteSecundaria        string                 `json:"fuente_secundaria"`
+	TamañoFuenteTitulo      int                    `json:"tamaño_fuente_titulo"`
+	TamañoFuenteTexto       int                    `json:"tamaño_fuente_texto"`
+	TamañoFuentePrecio      int                    `json:"tamaño_fuente_precio"`
+	MostrarLogo             bool                   `json:"mostrar_logo"`
+	PosicionLogo            string                 `json:"posicion_logo"` // "superior", "inferior", "izquierda", "derecha"
+	MostrarCodigoBarra      bool                   `json:"mostrar_codigo_barra"`
+	TipoCodigoBarra         string                 `json:"tipo_codigo_barra"` // "CODE39", "CODE128", "EAN13", etc.
+	PosicionCodigoBarra     string                 `json:"posicion_codigo_barra"`
+	TamañoCodigoBarra       string                 `json:"tamaño_codigo_barra"` // "pequeño", "mediano", "grande"
 	ElementosPersonalizados map[string]interface{} `json:"elementos_personalizados,omitempty"`
 }
 
 type CampoPersonalizado struct {
-	Nombre       string                 `json:"nombre"`
-	Etiqueta     string                 `json:"etiqueta"`
-	Tipo         string                 `json:"tipo"` // "texto", "numero", "fecha", "booleano"
-	Obligatorio  bool                   `json:"obligatorio"`
-	ValorDefault *string                `json:"valor_default,omitempty"`
-	Validacion   *ValidacionCampo       `json:"validacion,omitempty"`
-	Posicion     PosicionCampo          `json:"posicion"`
-	Estilo       EstiloCampo            `json:"estilo"`
+	Nombre       string           `json:"nombre"`
+	Etiqueta     string           `json:"etiqueta"`
+	Tipo         string           `json:"tipo"` // "texto", "numero", "fecha", "booleano"
+	Obligatorio  bool             `json:"obligatorio"`
+	ValorDefault *string          `json:"valor_default,omitempty"`
+	Validacion   *ValidacionCampo `json:"validacion,omitempty"`
+	Posicion     PosicionCampo    `json:"posicion"`
+	Estilo       EstiloCampo      `json:"estilo"`
 }
 
 type ValidacionCampo struct {
-	LongitudMinima *int    `json:"longitud_minima,omitempty"`
-	LongitudMaxima *int    `json:"longitud_maxima,omitempty"`
-	PatronRegex    *string `json:"patron_regex,omitempty"`
+	LongitudMinima    *int     `json:"longitud_minima,omitempty"`
+	LongitudMaxima    *int     `json:"longitud_maxima,omitempty"`
+	PatronRegex       *string  `json:"patron_regex,omitempty"`
 	ValoresPermitidos []string `json:"valores_permitidos,omitempty"`
 }
 
 type PosicionCampo struct {
-	X      float64 `json:"x"`      // posición X en mm
-	Y      float64 `json:"y"`      // posición Y en mm
-	Ancho  float64 `json:"ancho"`  // ancho en mm
-	Alto   float64 `json:"alto"`   // alto en mm
+	X      float64 `json:"x"`       // posición X en mm
+	Y      float64 `json:"y"`       // posición Y en mm
+	Ancho  float64 `json:"ancho"`   // ancho en mm
+	Alto   float64 `json:"alto"`    // alto en mm
 	ZIndex int     `json:"z_index"` // orden de superposición
 }
 
 type EstiloCampo struct {
-	Color           string  `json:"color"`
-	TamañoFuente    int     `json:"tamaño_fuente"`
-	Fuente          string  `json:"fuente"`
-	Negrita         bool    `json:"negrita"`
-	Cursiva         bool    `json:"cursiva"`
-	Subrayado       bool    `json:"subrayado"`
-	Alineacion      string  `json:"alineacion"` // "izquierda", "centro", "derecha"
-	ColorFondo      *string `json:"color_fondo,omitempty"`
-	Borde           *string `json:"borde,omitempty"`
+	Color        string  `json:"color"`
+	TamañoFuente int     `json:"tamaño_fuente"`
+	Fuente       string  `json:"fuente"`
+	Negrita      bool    `json:"negrita"`
+	Cursiva      bool    `json:"cursiva"`
+	Subrayado    bool    `json:"subrayado"`
+	Alineacion   string  `json:"alineacion"` // "izquierda", "centro", "derecha"
+	ColorFondo   *string `json:"color_fondo,omitempty"`
+	Borde        *string `json:"borde,omitempty"`
 }
 
 type ConfiguracionImpresion struct {
-	ImpresoraDefault     string                 `json:"impresora_default"`
-	CalidadImpresion     string                 `json:"calidad_impresion"` // "borrador", "normal", "alta"
-	TipoMaterial         string                 `json:"tipo_material"`     // "papel", "adhesivo", "plastico"
-	VelocidadImpresion   string                 `json:"velocidad_impresion"` // "lenta", "normal", "rapida"
+	ImpresoraDefault      string                 `json:"impresora_default"`
+	CalidadImpresion      string                 `json:"calidad_impresion"`   // "borrador", "normal", "alta"
+	TipoMaterial          string                 `json:"tipo_material"`       // "papel", "adhesivo", "plastico"
+	VelocidadImpresion    string                 `json:"velocidad_impresion"` // "lenta", "normal", "rapida"
 	ConfiguracionAvanzada map[string]interface{} `json:"configuracion_avanzada,omitempty"`
 }
 
 type CacheRenderizado struct {
-	TemplateCompilado    string    `json:"template_compilado"`
-	HashConfiguracion    string    `json:"hash_configuracion"`
-	FechaCompilacion     time.Time `json:"fecha_compilacion"`
-	ValidoHasta          time.Time `json:"valido_hasta"`
-	TamañoCache          int       `json:"tamaño_cache"` // en bytes
+	TemplateCompilado string    `json:"template_compilado"`
+	HashConfiguracion string    `json:"hash_configuracion"`
+	FechaCompilacion  time.Time `json:"fecha_compilacion"`
+	ValidoHasta       time.Time `json:"valido_hasta"`
+	TamañoCache       int       `json:"tamaño_cache"` // en bytes
 }
 
 type DatosEtiqueta struct {
@@ -213,41 +213,41 @@ type DatosEtiqueta struct {
 }
 
 type ConfiguracionEtiquetaUsada struct {
-	PlantillaVersion     int                    `json:"plantilla_version"`
-	ConfiguracionDiseno  ConfiguracionDiseno    `json:"configuracion_diseno"`
-	DimensionesUsadas    DimensionesEtiqueta    `json:"dimensiones_usadas"`
-	CamposUsados         []CampoPersonalizado   `json:"campos_usados,omitempty"`
+	PlantillaVersion       int                     `json:"plantilla_version"`
+	ConfiguracionDiseno    ConfiguracionDiseno     `json:"configuracion_diseno"`
+	DimensionesUsadas      DimensionesEtiqueta     `json:"dimensiones_usadas"`
+	CamposUsados           []CampoPersonalizado    `json:"campos_usados,omitempty"`
 	ConfiguracionImpresion *ConfiguracionImpresion `json:"configuracion_impresion,omitempty"`
 }
 
 type MetadatosGeneracion struct {
-	VersionSistema       string                 `json:"version_sistema"`
-	MotorRenderizado     string                 `json:"motor_renderizado"`
-	TiempoRenderizado    int                    `json:"tiempo_renderizado_ms"`
-	TamañoArchivo        int                    `json:"tamaño_archivo_bytes"`
-	FormatoSalida        string                 `json:"formato_salida"` // "PDF", "PNG", "SVG"
-	ResolucionGenerada   string                 `json:"resolucion_generada"`
-	ErroresGeneracion    []string               `json:"errores_generacion,omitempty"`
-	AdvertenciasGeneracion []string             `json:"advertencias_generacion,omitempty"`
-	DatosDebug           map[string]interface{} `json:"datos_debug,omitempty"`
+	VersionSistema         string                 `json:"version_sistema"`
+	MotorRenderizado       string                 `json:"motor_renderizado"`
+	TiempoRenderizado      int                    `json:"tiempo_renderizado_ms"`
+	TamañoArchivo          int                    `json:"tamaño_archivo_bytes"`
+	FormatoSalida          string                 `json:"formato_salida"` // "PDF", "PNG", "SVG"
+	ResolucionGenerada     string                 `json:"resolucion_generada"`
+	ErroresGeneracion      []string               `json:"errores_generacion,omitempty"`
+	AdvertenciasGeneracion []string               `json:"advertencias_generacion,omitempty"`
+	DatosDebug             map[string]interface{} `json:"datos_debug,omitempty"`
 }
 
 type ConfiguracionLote struct {
-	FormatoSalida        string                 `json:"formato_salida"` // "PDF", "ZIP"
-	AgruparPorProducto   bool                   `json:"agrupar_por_producto"`
-	AgruparPorPlantilla  bool                   `json:"agrupar_por_plantilla"`
-	IncluirIndice        bool                   `json:"incluir_indice"`
-	ConfiguracionPDF     *ConfiguracionPDF      `json:"configuracion_pdf,omitempty"`
-	ConfiguracionZIP     *ConfiguracionZIP      `json:"configuracion_zip,omitempty"`
-	MetadatosIncluir     []string               `json:"metadatos_incluir,omitempty"`
+	FormatoSalida       string            `json:"formato_salida"` // "PDF", "ZIP"
+	AgruparPorProducto  bool              `json:"agrupar_por_producto"`
+	AgruparPorPlantilla bool              `json:"agrupar_por_plantilla"`
+	IncluirIndice       bool              `json:"incluir_indice"`
+	ConfiguracionPDF    *ConfiguracionPDF `json:"configuracion_pdf,omitempty"`
+	ConfiguracionZIP    *ConfiguracionZIP `json:"configuracion_zip,omitempty"`
+	MetadatosIncluir    []string          `json:"metadatos_incluir,omitempty"`
 }
 
 type ConfiguracionPDF struct {
-	EtiquetasPorPagina   int    `json:"etiquetas_por_pagina"`
-	OrientacionPagina    string `json:"orientacion_pagina"` // "vertical", "horizontal"
-	TamañoPagina         string `json:"tamaño_pagina"`      // "A4", "Letter", "Legal"
-	MargenPagina         float64 `json:"margen_pagina"`     // en mm
-	EspaciadoEtiquetas   float64 `json:"espaciado_etiquetas"` // en mm
+	EtiquetasPorPagina int     `json:"etiquetas_por_pagina"`
+	OrientacionPagina  string  `json:"orientacion_pagina"`  // "vertical", "horizontal"
+	TamañoPagina       string  `json:"tamaño_pagina"`       // "A4", "Letter", "Legal"
+	MargenPagina       float64 `json:"margen_pagina"`       // en mm
+	EspaciadoEtiquetas float64 `json:"espaciado_etiquetas"` // en mm
 }
 
 type ConfiguracionZIP struct {
@@ -258,13 +258,13 @@ type ConfiguracionZIP struct {
 }
 
 type MetadatosLote struct {
-	TotalProductosUnicos int                    `json:"total_productos_unicos"`
-	TotalPlantillasUsadas int                   `json:"total_plantillas_usadas"`
-	TiempoGeneracionTotal int                   `json:"tiempo_generacion_total_ms"`
-	TamañoArchivoTotal    int                   `json:"tamaño_archivo_total_bytes"`
-	EstadisticasGeneracion map[string]int       `json:"estadisticas_generacion"`
-	ErroresLote           []string               `json:"errores_lote,omitempty"`
-	AdvertenciasLote      []string               `json:"advertencias_lote,omitempty"`
+	TotalProductosUnicos   int            `json:"total_productos_unicos"`
+	TotalPlantillasUsadas  int            `json:"total_plantillas_usadas"`
+	TiempoGeneracionTotal  int            `json:"tiempo_generacion_total_ms"`
+	TamañoArchivoTotal     int            `json:"tamaño_archivo_total_bytes"`
+	EstadisticasGeneracion map[string]int `json:"estadisticas_generacion"`
+	ErroresLote            []string       `json:"errores_lote,omitempty"`
+	AdvertenciasLote       []string       `json:"advertencias_lote,omitempty"`
 }
 
 // Implementar driver.Valuer para tipos JSON personalizados
@@ -298,11 +298,14 @@ func (c *ConfiguracionDiseno) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, c)
 }
 
-func (c []CampoPersonalizado) Value() (driver.Value, error) {
+// CamposPersonalizados es un tipo para manejar arrays de CampoPersonalizado
+type CamposPersonalizados []CampoPersonalizado
+
+func (c CamposPersonalizados) Value() (driver.Value, error) {
 	return json.Marshal(c)
 }
 
-func (c *[]CampoPersonalizado) Scan(value interface{}) error {
+func (c *CamposPersonalizados) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
@@ -420,63 +423,63 @@ func (m *MetadatosLote) Scan(value interface{}) error {
 
 // DTOs para PlantillaEtiqueta
 
-type PlantillaEtiquetaCreateDTO struct {
-	Nombre                string                  `json:"nombre" binding:"required" validate:"required,max=255"`
-	Descripcion           *string                 `json:"descripcion,omitempty"`
-	TipoEtiqueta          TipoEtiqueta            `json:"tipo_etiqueta" binding:"required"`
-	Dimensiones           DimensionesEtiqueta     `json:"dimensiones" binding:"required"`
-	ConfiguracionDiseno   ConfiguracionDiseno     `json:"configuracion_diseno" binding:"required"`
-	CamposPersonalizados  []CampoPersonalizado    `json:"campos_personalizados,omitempty"`
-	EsDefault             bool                    `json:"es_default"`
-	SucursalesPermitidas  []uuid.UUID             `json:"sucursales_permitidas,omitempty"`
-	CategoriasPermitidas  []uuid.UUID             `json:"categorias_permitidas,omitempty"`
+type PlantillaEtiquetaCreateDTODetailed struct {
+	Nombre                 string                  `json:"nombre" binding:"required" validate:"required,max=255"`
+	Descripcion            *string                 `json:"descripcion,omitempty"`
+	TipoEtiqueta           TipoEtiqueta            `json:"tipo_etiqueta" binding:"required"`
+	Dimensiones            DimensionesEtiqueta     `json:"dimensiones" binding:"required"`
+	ConfiguracionDiseno    ConfiguracionDiseno     `json:"configuracion_diseno" binding:"required"`
+	CamposPersonalizados   []CampoPersonalizado    `json:"campos_personalizados,omitempty"`
+	EsDefault              bool                    `json:"es_default"`
+	SucursalesPermitidas   []uuid.UUID             `json:"sucursales_permitidas,omitempty"`
+	CategoriasPermitidas   []uuid.UUID             `json:"categorias_permitidas,omitempty"`
 	ConfiguracionImpresion *ConfiguracionImpresion `json:"configuracion_impresion,omitempty"`
 }
 
 type PlantillaEtiquetaUpdateDTO struct {
-	Nombre                *string                 `json:"nombre,omitempty" validate:"omitempty,max=255"`
-	Descripcion           *string                 `json:"descripcion,omitempty"`
-	Dimensiones           *DimensionesEtiqueta    `json:"dimensiones,omitempty"`
-	ConfiguracionDiseno   *ConfiguracionDiseno    `json:"configuracion_diseno,omitempty"`
-	CamposPersonalizados  *[]CampoPersonalizado   `json:"campos_personalizados,omitempty"`
-	Activa                *bool                   `json:"activa,omitempty"`
-	EsDefault             *bool                   `json:"es_default,omitempty"`
-	SucursalesPermitidas  *[]uuid.UUID            `json:"sucursales_permitidas,omitempty"`
-	CategoriasPermitidas  *[]uuid.UUID            `json:"categorias_permitidas,omitempty"`
+	Nombre                 *string                 `json:"nombre,omitempty" validate:"omitempty,max=255"`
+	Descripcion            *string                 `json:"descripcion,omitempty"`
+	Dimensiones            *DimensionesEtiqueta    `json:"dimensiones,omitempty"`
+	ConfiguracionDiseno    *ConfiguracionDiseno    `json:"configuracion_diseno,omitempty"`
+	CamposPersonalizados   *[]CampoPersonalizado   `json:"campos_personalizados,omitempty"`
+	Activa                 *bool                   `json:"activa,omitempty"`
+	EsDefault              *bool                   `json:"es_default,omitempty"`
+	SucursalesPermitidas   *[]uuid.UUID            `json:"sucursales_permitidas,omitempty"`
+	CategoriasPermitidas   *[]uuid.UUID            `json:"categorias_permitidas,omitempty"`
 	ConfiguracionImpresion *ConfiguracionImpresion `json:"configuracion_impresion,omitempty"`
 }
 
 type PlantillaEtiquetaResponseDTO struct {
-	ID                    uuid.UUID               `json:"id"`
-	Nombre                string                  `json:"nombre"`
-	Descripcion           *string                 `json:"descripcion,omitempty"`
-	TipoEtiqueta          TipoEtiqueta            `json:"tipo_etiqueta"`
-	Dimensiones           DimensionesEtiqueta     `json:"dimensiones"`
-	ConfiguracionDiseno   ConfiguracionDiseno     `json:"configuracion_diseno"`
-	CamposPersonalizados  []CampoPersonalizado    `json:"campos_personalizados,omitempty"`
-	Activa                bool                    `json:"activa"`
-	EsDefault             bool                    `json:"es_default"`
-	SucursalesPermitidas  []uuid.UUID             `json:"sucursales_permitidas,omitempty"`
-	CategoriasPermitidas  []uuid.UUID             `json:"categorias_permitidas,omitempty"`
-	TotalGeneradas        int                     `json:"total_generadas"`
-	FechaUltimoUso        *time.Time              `json:"fecha_ultimo_uso,omitempty"`
+	ID                     uuid.UUID               `json:"id"`
+	Nombre                 string                  `json:"nombre"`
+	Descripcion            *string                 `json:"descripcion,omitempty"`
+	TipoEtiqueta           TipoEtiqueta            `json:"tipo_etiqueta"`
+	Dimensiones            DimensionesEtiqueta     `json:"dimensiones"`
+	ConfiguracionDiseno    ConfiguracionDiseno     `json:"configuracion_diseno"`
+	CamposPersonalizados   []CampoPersonalizado    `json:"campos_personalizados,omitempty"`
+	Activa                 bool                    `json:"activa"`
+	EsDefault              bool                    `json:"es_default"`
+	SucursalesPermitidas   []uuid.UUID             `json:"sucursales_permitidas,omitempty"`
+	CategoriasPermitidas   []uuid.UUID             `json:"categorias_permitidas,omitempty"`
+	TotalGeneradas         int                     `json:"total_generadas"`
+	FechaUltimoUso         *time.Time              `json:"fecha_ultimo_uso,omitempty"`
 	ConfiguracionImpresion *ConfiguracionImpresion `json:"configuracion_impresion,omitempty"`
-	VersionPlantilla      int                     `json:"version_plantilla"`
-	FechaCreacion         time.Time               `json:"fecha_creacion"`
-	FechaModificacion     time.Time               `json:"fecha_modificacion"`
+	VersionPlantilla       int                     `json:"version_plantilla"`
+	FechaCreacion          time.Time               `json:"fecha_creacion"`
+	FechaModificacion      time.Time               `json:"fecha_modificacion"`
 }
 
 type PlantillaEtiquetaListDTO struct {
-	ID               uuid.UUID    `json:"id"`
-	Nombre           string       `json:"nombre"`
-	TipoEtiqueta     TipoEtiqueta `json:"tipo_etiqueta"`
-	Activa           bool         `json:"activa"`
-	EsDefault        bool         `json:"es_default"`
-	TotalGeneradas   int          `json:"total_generadas"`
-	FechaUltimoUso   *time.Time   `json:"fecha_ultimo_uso,omitempty"`
-	VersionPlantilla int          `json:"version_plantilla"`
-	FechaCreacion    time.Time    `json:"fecha_creacion"`
-	FechaModificacion time.Time   `json:"fecha_modificacion"`
+	ID                uuid.UUID    `json:"id"`
+	Nombre            string       `json:"nombre"`
+	TipoEtiqueta      TipoEtiqueta `json:"tipo_etiqueta"`
+	Activa            bool         `json:"activa"`
+	EsDefault         bool         `json:"es_default"`
+	TotalGeneradas    int          `json:"total_generadas"`
+	FechaUltimoUso    *time.Time   `json:"fecha_ultimo_uso,omitempty"`
+	VersionPlantilla  int          `json:"version_plantilla"`
+	FechaCreacion     time.Time    `json:"fecha_creacion"`
+	FechaModificacion time.Time    `json:"fecha_modificacion"`
 }
 
 // DTOs para EtiquetaGenerada
@@ -515,31 +518,31 @@ type EtiquetaGeneradaResponseDTO struct {
 }
 
 type EtiquetaGeneradaListDTO struct {
-	ID                uuid.UUID      `json:"id"`
-	PlantillaID       uuid.UUID      `json:"plantilla_id"`
-	ProductoID        uuid.UUID      `json:"producto_id"`
-	SucursalID        uuid.UUID      `json:"sucursal_id"`
-	Cantidad          int            `json:"cantidad"`
-	Estado            EstadoEtiqueta `json:"estado"`
-	FechaGeneracion   time.Time      `json:"fecha_generacion"`
-	FechaImpresion    *time.Time     `json:"fecha_impresion,omitempty"`
-	TiempoGeneracion  *int           `json:"tiempo_generacion_ms,omitempty"`
-	PlantillaNombre   *string        `json:"plantilla_nombre,omitempty"`
-	ProductoNombre    *string        `json:"producto_nombre,omitempty"`
-	SucursalNombre    *string        `json:"sucursal_nombre,omitempty"`
+	ID               uuid.UUID      `json:"id"`
+	PlantillaID      uuid.UUID      `json:"plantilla_id"`
+	ProductoID       uuid.UUID      `json:"producto_id"`
+	SucursalID       uuid.UUID      `json:"sucursal_id"`
+	Cantidad         int            `json:"cantidad"`
+	Estado           EstadoEtiqueta `json:"estado"`
+	FechaGeneracion  time.Time      `json:"fecha_generacion"`
+	FechaImpresion   *time.Time     `json:"fecha_impresion,omitempty"`
+	TiempoGeneracion *int           `json:"tiempo_generacion_ms,omitempty"`
+	PlantillaNombre  *string        `json:"plantilla_nombre,omitempty"`
+	ProductoNombre   *string        `json:"producto_nombre,omitempty"`
+	SucursalNombre   *string        `json:"sucursal_nombre,omitempty"`
 }
 
 // DTOs para LoteEtiquetas
 
 type LoteEtiquetasCreateDTO struct {
-	Nombre            string                    `json:"nombre" binding:"required"`
-	Descripcion       *string                   `json:"descripcion,omitempty"`
-	SucursalID        uuid.UUID                 `json:"sucursal_id" binding:"required"`
-	ConfiguracionLote *ConfiguracionLote        `json:"configuracion_lote,omitempty"`
+	Nombre            string                      `json:"nombre" binding:"required"`
+	Descripcion       *string                     `json:"descripcion,omitempty"`
+	SucursalID        uuid.UUID                   `json:"sucursal_id" binding:"required"`
+	ConfiguracionLote *ConfiguracionLote          `json:"configuracion_lote,omitempty"`
 	Etiquetas         []EtiquetaGeneradaCreateDTO `json:"etiquetas" binding:"required,min=1"`
 }
 
-type LoteEtiquetasResponseDTO struct {
+type LoteEtiquetasResponseDTODetailed struct {
 	ID                 uuid.UUID          `json:"id"`
 	Nombre             string             `json:"nombre"`
 	Descripcion        *string            `json:"descripcion,omitempty"`
@@ -600,13 +603,13 @@ func (p *PlantillaEtiqueta) PuedeUsarEnSucursal(sucursalID uuid.UUID) bool {
 	if len(p.SucursalesPermitidas) == 0 {
 		return true // Sin restricciones
 	}
-	
+
 	for _, id := range p.SucursalesPermitidas {
 		if id == sucursalID {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -614,13 +617,13 @@ func (p *PlantillaEtiqueta) PuedeUsarEnCategoria(categoriaID uuid.UUID) bool {
 	if len(p.CategoriasPermitidas) == 0 {
 		return true // Sin restricciones
 	}
-	
+
 	for _, id := range p.CategoriasPermitidas {
 		if id == categoriaID {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -638,7 +641,7 @@ func (e *EtiquetaGenerada) MarcarComoImpresa(terminalID *uuid.UUID) {
 }
 
 func (e *EtiquetaGenerada) PuedeImprimir() bool {
-	return e.Estado == EtiquetaGenerada && e.ArchivoGenerado != nil
+	return e.Estado == EtiquetaGeneradaEstado && e.ArchivoGenerado != nil
 }
 
 func (l *LoteEtiquetas) ActualizarProgreso() {
@@ -656,37 +659,37 @@ func (l *LoteEtiquetas) PuedeCompletar() bool {
 
 func (p *PlantillaEtiqueta) ToResponseDTO() PlantillaEtiquetaResponseDTO {
 	return PlantillaEtiquetaResponseDTO{
-		ID:                    p.ID,
-		Nombre:                p.Nombre,
-		Descripcion:           p.Descripcion,
-		TipoEtiqueta:          p.TipoEtiqueta,
-		Dimensiones:           p.Dimensiones,
-		ConfiguracionDiseno:   p.ConfiguracionDiseno,
-		CamposPersonalizados:  p.CamposPersonalizados,
-		Activa:                p.Activa,
-		EsDefault:             p.EsDefault,
-		SucursalesPermitidas:  p.SucursalesPermitidas,
-		CategoriasPermitidas:  p.CategoriasPermitidas,
-		TotalGeneradas:        p.TotalGeneradas,
-		FechaUltimoUso:        p.FechaUltimoUso,
+		ID:                     p.ID,
+		Nombre:                 p.Nombre,
+		Descripcion:            p.Descripcion,
+		TipoEtiqueta:           p.TipoEtiqueta,
+		Dimensiones:            p.Dimensiones,
+		ConfiguracionDiseno:    p.ConfiguracionDiseno,
+		CamposPersonalizados:   p.CamposPersonalizados,
+		Activa:                 p.Activa,
+		EsDefault:              p.EsDefault,
+		SucursalesPermitidas:   p.SucursalesPermitidas,
+		CategoriasPermitidas:   p.CategoriasPermitidas,
+		TotalGeneradas:         p.TotalGeneradas,
+		FechaUltimoUso:         p.FechaUltimoUso,
 		ConfiguracionImpresion: p.ConfiguracionImpresion,
-		VersionPlantilla:      p.VersionPlantilla,
-		FechaCreacion:         p.FechaCreacion,
-		FechaModificacion:     p.FechaModificacion,
+		VersionPlantilla:       p.VersionPlantilla,
+		FechaCreacion:          p.FechaCreacion,
+		FechaModificacion:      p.FechaModificacion,
 	}
 }
 
 func (p *PlantillaEtiqueta) ToListDTO() PlantillaEtiquetaListDTO {
 	return PlantillaEtiquetaListDTO{
-		ID:               p.ID,
-		Nombre:           p.Nombre,
-		TipoEtiqueta:     p.TipoEtiqueta,
-		Activa:           p.Activa,
-		EsDefault:        p.EsDefault,
-		TotalGeneradas:   p.TotalGeneradas,
-		FechaUltimoUso:   p.FechaUltimoUso,
-		VersionPlantilla: p.VersionPlantilla,
-		FechaCreacion:    p.FechaCreacion,
+		ID:                p.ID,
+		Nombre:            p.Nombre,
+		TipoEtiqueta:      p.TipoEtiqueta,
+		Activa:            p.Activa,
+		EsDefault:         p.EsDefault,
+		TotalGeneradas:    p.TotalGeneradas,
+		FechaUltimoUso:    p.FechaUltimoUso,
+		VersionPlantilla:  p.VersionPlantilla,
+		FechaCreacion:     p.FechaCreacion,
 		FechaModificacion: p.FechaModificacion,
 	}
 }
@@ -711,19 +714,19 @@ func (e *EtiquetaGenerada) ToResponseDTO() EtiquetaGeneradaResponseDTO {
 		TiempoGeneracion:    e.TiempoGeneracion,
 		FechaCreacion:       e.FechaCreacion,
 	}
-	
+
 	if e.Plantilla != nil {
 		dto.PlantillaNombre = &e.Plantilla.Nombre
 	}
-	
+
 	if e.Producto != nil {
 		dto.ProductoNombre = &e.Producto.Descripcion
 	}
-	
+
 	if e.Sucursal != nil {
 		dto.SucursalNombre = &e.Sucursal.Nombre
 	}
-	
+
 	if e.Usuario != nil {
 		nombreUsuario := e.Usuario.Nombre
 		if e.Usuario.Apellido != nil {
@@ -731,7 +734,7 @@ func (e *EtiquetaGenerada) ToResponseDTO() EtiquetaGeneradaResponseDTO {
 		}
 		dto.UsuarioNombre = &nombreUsuario
 	}
-	
+
 	return dto
 }
 
@@ -747,24 +750,24 @@ func (e *EtiquetaGenerada) ToListDTO() EtiquetaGeneradaListDTO {
 		FechaImpresion:   e.FechaImpresion,
 		TiempoGeneracion: e.TiempoGeneracion,
 	}
-	
+
 	if e.Plantilla != nil {
 		dto.PlantillaNombre = &e.Plantilla.Nombre
 	}
-	
+
 	if e.Producto != nil {
 		dto.ProductoNombre = &e.Producto.Descripcion
 	}
-	
+
 	if e.Sucursal != nil {
 		dto.SucursalNombre = &e.Sucursal.Nombre
 	}
-	
+
 	return dto
 }
 
-func (l *LoteEtiquetas) ToResponseDTO() LoteEtiquetasResponseDTO {
-	dto := LoteEtiquetasResponseDTO{
+func (l *LoteEtiquetas) ToResponseDTO() LoteEtiquetasResponseDTODetailed {
+	dto := LoteEtiquetasResponseDTODetailed{
 		ID:                 l.ID,
 		Nombre:             l.Nombre,
 		Descripcion:        l.Descripcion,
@@ -780,11 +783,11 @@ func (l *LoteEtiquetas) ToResponseDTO() LoteEtiquetasResponseDTO {
 		MetadatosLote:      l.MetadatosLote,
 		FechaCreacion:      l.FechaCreacion,
 	}
-	
+
 	if l.Sucursal != nil {
 		dto.SucursalNombre = &l.Sucursal.Nombre
 	}
-	
+
 	if l.Usuario != nil {
 		nombreUsuario := l.Usuario.Nombre
 		if l.Usuario.Apellido != nil {
@@ -792,25 +795,25 @@ func (l *LoteEtiquetas) ToResponseDTO() LoteEtiquetasResponseDTO {
 		}
 		dto.UsuarioNombre = &nombreUsuario
 	}
-	
+
 	return dto
 }
 
-func (dto *PlantillaEtiquetaCreateDTO) ToModel() *PlantillaEtiqueta {
+func (dto *PlantillaEtiquetaCreateDTODetailed) ToModel() *PlantillaEtiqueta {
 	return &PlantillaEtiqueta{
-		Nombre:                dto.Nombre,
-		Descripcion:           dto.Descripcion,
-		TipoEtiqueta:          dto.TipoEtiqueta,
-		Dimensiones:           dto.Dimensiones,
-		ConfiguracionDiseno:   dto.ConfiguracionDiseno,
-		CamposPersonalizados:  dto.CamposPersonalizados,
-		Activa:                true,
-		EsDefault:             dto.EsDefault,
-		SucursalesPermitidas:  dto.SucursalesPermitidas,
-		CategoriasPermitidas:  dto.CategoriasPermitidas,
+		Nombre:                 dto.Nombre,
+		Descripcion:            dto.Descripcion,
+		TipoEtiqueta:           dto.TipoEtiqueta,
+		Dimensiones:            dto.Dimensiones,
+		ConfiguracionDiseno:    dto.ConfiguracionDiseno,
+		CamposPersonalizados:   dto.CamposPersonalizados,
+		Activa:                 true,
+		EsDefault:              dto.EsDefault,
+		SucursalesPermitidas:   dto.SucursalesPermitidas,
+		CategoriasPermitidas:   dto.CategoriasPermitidas,
 		ConfiguracionImpresion: dto.ConfiguracionImpresion,
-		TotalGeneradas:        0,
-		VersionPlantilla:      1,
+		TotalGeneradas:         0,
+		VersionPlantilla:       1,
 	}
 }
 
@@ -820,15 +823,15 @@ func (p *PlantillaEtiqueta) Validate() error {
 	if p.Dimensiones.Ancho <= 0 || p.Dimensiones.Alto <= 0 {
 		return fmt.Errorf("dimensiones de etiqueta deben ser positivas")
 	}
-	
+
 	if p.Dimensiones.DPI <= 0 {
 		return fmt.Errorf("DPI debe ser positivo")
 	}
-	
+
 	if p.VersionPlantilla <= 0 {
 		return fmt.Errorf("versión de plantilla debe ser positiva")
 	}
-	
+
 	return nil
 }
 
@@ -836,7 +839,7 @@ func (e *EtiquetaGenerada) Validate() error {
 	if e.Cantidad <= 0 {
 		return fmt.Errorf("cantidad debe ser mayor a 0")
 	}
-	
+
 	return nil
 }
 
@@ -844,15 +847,15 @@ func (l *LoteEtiquetas) Validate() error {
 	if l.TotalEtiquetas < 0 {
 		return fmt.Errorf("total de etiquetas no puede ser negativo")
 	}
-	
+
 	if l.EtiquetasImpresas < 0 {
 		return fmt.Errorf("etiquetas impresas no puede ser negativo")
 	}
-	
+
 	if l.EtiquetasImpresas > l.TotalEtiquetas {
 		return fmt.Errorf("etiquetas impresas no puede ser mayor al total")
 	}
-	
+
 	return nil
 }
 
@@ -867,11 +870,10 @@ func ValidarDimensionesEtiqueta(dimensiones DimensionesEtiqueta) error {
 	if dimensiones.Ancho <= 0 || dimensiones.Alto <= 0 {
 		return fmt.Errorf("ancho y alto deben ser positivos")
 	}
-	
+
 	if dimensiones.DPI < 72 || dimensiones.DPI > 600 {
 		return fmt.Errorf("DPI debe estar entre 72 y 600")
 	}
-	
+
 	return nil
 }
-

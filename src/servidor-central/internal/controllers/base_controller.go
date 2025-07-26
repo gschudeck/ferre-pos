@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"time"
 
+	"ferre-pos-servidor-central/internal/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"ferre-pos-servidor-central/internal/models"
 )
 
 // BaseController contiene funcionalidades comunes para todos los controladores
@@ -38,11 +39,11 @@ func (bc *BaseController) ResponseError(c *gin.Context, statusCode int, message 
 		Code:    statusCode,
 		Message: message,
 	}
-	
+
 	if err != nil {
 		errorResponse.Details = err.Error()
 	}
-	
+
 	c.JSON(statusCode, models.APIResponse{
 		Success: false,
 		Error:   &errorResponse,
@@ -78,7 +79,7 @@ func (bc *BaseController) ParseUUID(c *gin.Context, param string) (uuid.UUID, er
 			Message: "ID requerido",
 		}
 	}
-	
+
 	id, err := uuid.Parse(idStr)
 	if err != nil {
 		return uuid.Nil, &models.ValidationError{
@@ -86,7 +87,7 @@ func (bc *BaseController) ParseUUID(c *gin.Context, param string) (uuid.UUID, er
 			Message: "ID inválido",
 		}
 	}
-	
+
 	return id, nil
 }
 
@@ -94,19 +95,19 @@ func (bc *BaseController) ParseUUID(c *gin.Context, param string) (uuid.UUID, er
 func (bc *BaseController) ParsePagination(c *gin.Context) models.PaginationFilter {
 	page := 1
 	limit := 20
-	
+
 	if pageStr := c.Query("page"); pageStr != "" {
 		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
 			page = p
 		}
 	}
-	
+
 	if limitStr := c.Query("limit"); limitStr != "" {
 		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 100 {
 			limit = l
 		}
 	}
-	
+
 	return models.PaginationFilter{
 		Page:  page,
 		Limit: limit,
@@ -117,11 +118,11 @@ func (bc *BaseController) ParsePagination(c *gin.Context) models.PaginationFilte
 func (bc *BaseController) ParseSort(c *gin.Context) models.SortFilter {
 	sortBy := c.Query("sort_by")
 	sortOrder := c.Query("sort_order")
-	
+
 	if sortOrder != "asc" && sortOrder != "desc" {
 		sortOrder = "desc"
 	}
-	
+
 	return models.SortFilter{
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
@@ -131,15 +132,15 @@ func (bc *BaseController) ParseSort(c *gin.Context) models.SortFilter {
 // ParseDateRange parsea parámetros de rango de fechas
 func (bc *BaseController) ParseDateRange(c *gin.Context) models.DateRangeFilter {
 	var filter models.DateRangeFilter
-	
+
 	if fechaInicio := c.Query("fecha_inicio"); fechaInicio != "" {
 		filter.FechaInicio = &fechaInicio
 	}
-	
+
 	if fechaFin := c.Query("fecha_fin"); fechaFin != "" {
 		filter.FechaFin = &fechaFin
 	}
-	
+
 	return filter
 }
 
@@ -148,7 +149,7 @@ func (bc *BaseController) ValidateJSON(c *gin.Context, obj interface{}) error {
 	if err := c.ShouldBindJSON(obj); err != nil {
 		return err
 	}
-	
+
 	// Aquí se pueden agregar validaciones adicionales usando validator
 	return nil
 }
@@ -162,7 +163,7 @@ func (bc *BaseController) GetUserFromContext(c *gin.Context) (*models.Usuario, e
 			Message: "Usuario no autenticado",
 		}
 	}
-	
+
 	user, ok := userInterface.(*models.Usuario)
 	if !ok {
 		return nil, &models.ValidationError{
@@ -170,7 +171,7 @@ func (bc *BaseController) GetUserFromContext(c *gin.Context) (*models.Usuario, e
 			Message: "Contexto de usuario inválido",
 		}
 	}
-	
+
 	return user, nil
 }
 
@@ -180,7 +181,7 @@ func (bc *BaseController) GetSucursalFromContext(c *gin.Context) (*uuid.UUID, er
 	if !exists {
 		return nil, nil // Sucursal opcional
 	}
-	
+
 	sucursalID, ok := sucursalInterface.(uuid.UUID)
 	if !ok {
 		return nil, &models.ValidationError{
@@ -188,7 +189,7 @@ func (bc *BaseController) GetSucursalFromContext(c *gin.Context) (*uuid.UUID, er
 			Message: "Contexto de sucursal inválido",
 		}
 	}
-	
+
 	return &sucursalID, nil
 }
 
@@ -197,7 +198,7 @@ func (bc *BaseController) CheckPermission(user *models.Usuario, permission strin
 	if user == nil {
 		return false
 	}
-	
+
 	// Verificar permisos en la configuración del usuario
 	if user.ConfiguracionUsuario != nil {
 		for _, perm := range user.ConfiguracionUsuario.PermisosPersonalizados {
@@ -206,7 +207,7 @@ func (bc *BaseController) CheckPermission(user *models.Usuario, permission strin
 			}
 		}
 	}
-	
+
 	// Verificar permisos por rol (implementación simplificada)
 	switch user.Rol {
 	case models.RolAdministrador:
@@ -234,13 +235,13 @@ func (bc *BaseController) RequirePermission(permission string) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		if !bc.CheckPermission(user, permission) {
 			bc.ResponseError(c, http.StatusForbidden, "Permisos insuficientes", nil)
 			c.Abort()
 			return
 		}
-		
+
 		c.Next()
 	}
 }
@@ -254,7 +255,7 @@ func (bc *BaseController) RequireRole(roles ...models.RolUsuario) gin.HandlerFun
 			c.Abort()
 			return
 		}
-		
+
 		hasRole := false
 		for _, role := range roles {
 			if user.Rol == role {
@@ -262,13 +263,13 @@ func (bc *BaseController) RequireRole(roles ...models.RolUsuario) gin.HandlerFun
 				break
 			}
 		}
-		
+
 		if !hasRole {
 			bc.ResponseError(c, http.StatusForbidden, "Rol insuficiente", nil)
 			c.Abort()
 			return
 		}
-		
+
 		c.Next()
 	}
 }
@@ -279,7 +280,7 @@ func (bc *BaseController) LogActivity(c *gin.Context, action string, details int
 	if err != nil {
 		return // No logear si no hay usuario
 	}
-	
+
 	// Aquí se implementaría el logging de actividades
 	// Por ahora solo un log simple
 	c.Header("X-User-Activity", action)
@@ -357,7 +358,7 @@ func (bc *BaseController) RateLimitByUser(requestsPerMinute int) gin.HandlerFunc
 			c.Next()
 			return
 		}
-		
+
 		// Aquí se implementaría el rate limiting real
 		// Por ahora solo agregar header informativo
 		c.Header("X-RateLimit-Limit", strconv.Itoa(requestsPerMinute))
@@ -373,13 +374,13 @@ func (bc *BaseController) ValidateAPIKey() gin.HandlerFunc {
 		if apiKey == "" {
 			apiKey = c.Query("api_key")
 		}
-		
+
 		if apiKey == "" {
 			bc.ResponseError(c, http.StatusUnauthorized, "API Key requerida", nil)
 			c.Abort()
 			return
 		}
-		
+
 		// Aquí se validaría la API key contra la base de datos
 		// Por ahora implementación simplificada
 		if apiKey != "demo-api-key" {
@@ -387,7 +388,7 @@ func (bc *BaseController) ValidateAPIKey() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		c.Next()
 	}
 }
@@ -453,10 +454,9 @@ func (bc *BaseController) Metrics() gin.HandlerFunc {
 		start := time.Now()
 		c.Next()
 		duration := time.Since(start)
-		
+
 		// Agregar métricas como headers
 		c.Header("X-Response-Time", duration.String())
 		c.Header("X-Request-ID", uuid.New().String())
 	}
 }
-

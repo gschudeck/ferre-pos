@@ -26,8 +26,8 @@ type HotReloadManager struct {
 
 // ReloadEvent representa un evento de recarga
 type ReloadEvent struct {
-	FilePath string
-	APIName  string
+	FilePath  string
+	APIName   string
 	EventType string
 	Timestamp time.Time
 }
@@ -84,7 +84,7 @@ func (hrm *HotReloadManager) Start() error {
 // Stop detiene el sistema de recarga en caliente
 func (hrm *HotReloadManager) Stop() error {
 	close(hrm.stopChan)
-	
+
 	if hrm.watcher != nil {
 		if err := hrm.watcher.Close(); err != nil {
 			return fmt.Errorf("error cerrando watcher: %w", err)
@@ -145,8 +145,8 @@ func (hrm *HotReloadManager) watchFiles() {
 			}
 
 			// Filtrar eventos relevantes
-			if event.Op&fsnotify.Write == fsnotify.Write || 
-			   event.Op&fsnotify.Create == fsnotify.Create {
+			if event.Op&fsnotify.Write == fsnotify.Write ||
+				event.Op&fsnotify.Create == fsnotify.Create {
 				hrm.handleFileEvent(event)
 			}
 
@@ -491,10 +491,10 @@ func (hrm *HotReloadManager) GetReloadStats() map[string]interface{} {
 	defer hrm.mutex.RUnlock()
 
 	stats := map[string]interface{}{
-		"watched_files":    len(hrm.watchedFiles),
+		"watched_files":     len(hrm.watchedFiles),
 		"last_reload_times": make(map[string]time.Time),
-		"debounce_time":    hrm.debounceTime,
-		"queue_size":       len(hrm.reloadChan),
+		"debounce_time":     hrm.debounceTime,
+		"queue_size":        len(hrm.reloadChan),
 	}
 
 	for path, lastTime := range hrm.lastReload {
@@ -558,4 +558,3 @@ func (hrm *HotReloadManager) IsHealthy() bool {
 
 	return true
 }
-

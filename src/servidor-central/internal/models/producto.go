@@ -12,44 +12,44 @@ import (
 // Producto representa un producto en el sistema
 type Producto struct {
 	BaseModelWithUser
-	CodigoInterno              string                     `json:"codigo_interno" db:"codigo_interno" binding:"required" validate:"required,max=100"`
-	CodigoBarra                string                     `json:"codigo_barra" db:"codigo_barra" binding:"required" validate:"required,max=100"`
-	Descripcion                string                     `json:"descripcion" db:"descripcion" binding:"required" validate:"required,max=500"`
-	DescripcionCorta           *string                    `json:"descripcion_corta,omitempty" db:"descripcion_corta"`
-	CategoriaID                *uuid.UUID                 `json:"categoria_id,omitempty" db:"categoria_id"`
-	Marca                      *string                    `json:"marca,omitempty" db:"marca"`
-	Modelo                     *string                    `json:"modelo,omitempty" db:"modelo"`
-	PrecioUnitario             float64                    `json:"precio_unitario" db:"precio_unitario" binding:"required,min=0"`
-	PrecioCosto                *float64                   `json:"precio_costo,omitempty" db:"precio_costo" validate:"omitempty,min=0"`
-	UnidadMedida               string                     `json:"unidad_medida" db:"unidad_medida" default:"UN"`
-	Peso                       *float64                   `json:"peso,omitempty" db:"peso" validate:"omitempty,min=0"`
-	Dimensiones                *DimensionesProducto       `json:"dimensiones,omitempty" db:"dimensiones"`
-	EspecificacionesTecnicas   *EspecificacionesTecnicas  `json:"especificaciones_tecnicas,omitempty" db:"especificaciones_tecnicas"`
-	Activo                     bool                       `json:"activo" db:"activo" default:"true"`
-	RequiereSerie              bool                       `json:"requiere_serie" db:"requiere_serie" default:"false"`
-	PermiteFraccionamiento     bool                       `json:"permite_fraccionamiento" db:"permite_fraccionamiento" default:"false"`
-	StockMinimo                int                        `json:"stock_minimo" db:"stock_minimo" default:"0"`
-	StockMaximo                *int                       `json:"stock_maximo,omitempty" db:"stock_maximo"`
-	ImagenPrincipalURL         *string                    `json:"imagen_principal_url,omitempty" db:"imagen_principal_url"`
-	ImagenesAdicionales        *ImagenesAdicionales       `json:"imagenes_adicionales,omitempty" db:"imagenes_adicionales"`
-	DescripcionBusqueda        *string                    `json:"-" db:"descripcion_busqueda"` // TSVECTOR en PostgreSQL
-	PopularidadScore           float64                    `json:"popularidad_score" db:"popularidad_score" default:"0"`
-	CacheCodigoBarrasGenerado  *string                    `json:"cache_codigo_barras_generado,omitempty" db:"cache_codigo_barras_generado"`
-	ConfiguracionEtiqueta      *ConfiguracionEtiqueta     `json:"configuracion_etiqueta,omitempty" db:"configuracion_etiqueta"`
-	FechaUltimaEtiqueta        *time.Time                 `json:"fecha_ultima_etiqueta,omitempty" db:"fecha_ultima_etiqueta"`
-	TotalEtiquetasGeneradas    int                        `json:"total_etiquetas_generadas" db:"total_etiquetas_generadas" default:"0"`
+	CodigoInterno             string                    `json:"codigo_interno" db:"codigo_interno" binding:"required" validate:"required,max=100"`
+	CodigoBarra               string                    `json:"codigo_barra" db:"codigo_barra" binding:"required" validate:"required,max=100"`
+	Descripcion               string                    `json:"descripcion" db:"descripcion" binding:"required" validate:"required,max=500"`
+	DescripcionCorta          *string                   `json:"descripcion_corta,omitempty" db:"descripcion_corta"`
+	CategoriaID               *uuid.UUID                `json:"categoria_id,omitempty" db:"categoria_id"`
+	Marca                     *string                   `json:"marca,omitempty" db:"marca"`
+	Modelo                    *string                   `json:"modelo,omitempty" db:"modelo"`
+	PrecioUnitario            float64                   `json:"precio_unitario" db:"precio_unitario" binding:"required,min=0"`
+	PrecioCosto               *float64                  `json:"precio_costo,omitempty" db:"precio_costo" validate:"omitempty,min=0"`
+	UnidadMedida              string                    `json:"unidad_medida" db:"unidad_medida" default:"UN"`
+	Peso                      *float64                  `json:"peso,omitempty" db:"peso" validate:"omitempty,min=0"`
+	Dimensiones               *DimensionesProducto      `json:"dimensiones,omitempty" db:"dimensiones"`
+	EspecificacionesTecnicas  *EspecificacionesTecnicas `json:"especificaciones_tecnicas,omitempty" db:"especificaciones_tecnicas"`
+	Activo                    bool                      `json:"activo" db:"activo" default:"true"`
+	RequiereSerie             bool                      `json:"requiere_serie" db:"requiere_serie" default:"false"`
+	PermiteFraccionamiento    bool                      `json:"permite_fraccionamiento" db:"permite_fraccionamiento" default:"false"`
+	StockMinimo               int                       `json:"stock_minimo" db:"stock_minimo" default:"0"`
+	StockMaximo               *int                      `json:"stock_maximo,omitempty" db:"stock_maximo"`
+	ImagenPrincipalURL        *string                   `json:"imagen_principal_url,omitempty" db:"imagen_principal_url"`
+	ImagenesAdicionales       *ImagenesAdicionales      `json:"imagenes_adicionales,omitempty" db:"imagenes_adicionales"`
+	DescripcionBusqueda       *string                   `json:"-" db:"descripcion_busqueda"` // TSVECTOR en PostgreSQL
+	PopularidadScore          float64                   `json:"popularidad_score" db:"popularidad_score" default:"0"`
+	CacheCodigoBarrasGenerado *string                   `json:"cache_codigo_barras_generado,omitempty" db:"cache_codigo_barras_generado"`
+	ConfiguracionEtiqueta     *ConfiguracionEtiqueta    `json:"configuracion_etiqueta,omitempty" db:"configuracion_etiqueta"`
+	FechaUltimaEtiqueta       *time.Time                `json:"fecha_ultima_etiqueta,omitempty" db:"fecha_ultima_etiqueta"`
+	TotalEtiquetasGeneradas   int                       `json:"total_etiquetas_generadas" db:"total_etiquetas_generadas" default:"0"`
 
 	// Relaciones
-	Categoria           *CategoriaProducto        `json:"categoria,omitempty" gorm:"foreignKey:CategoriaID"`
+	Categoria               *CategoriaProducto     `json:"categoria,omitempty" gorm:"foreignKey:CategoriaID"`
 	CodigosBarraAdicionales []CodigoBarraAdicional `json:"codigos_barra_adicionales,omitempty" gorm:"foreignKey:ProductoID"`
-	Stock               []StockCentral            `json:"stock,omitempty" gorm:"foreignKey:ProductoID"`
+	Stock                   []StockCentral         `json:"stock,omitempty" gorm:"foreignKey:ProductoID"`
 }
 
 // DimensionesProducto contiene las dimensiones físicas del producto
 type DimensionesProducto struct {
-	Largo  *float64 `json:"largo,omitempty"`  // en cm
-	Ancho  *float64 `json:"ancho,omitempty"`  // en cm
-	Alto   *float64 `json:"alto,omitempty"`   // en cm
+	Largo   *float64 `json:"largo,omitempty"`   // en cm
+	Ancho   *float64 `json:"ancho,omitempty"`   // en cm
+	Alto    *float64 `json:"alto,omitempty"`    // en cm
 	Volumen *float64 `json:"volumen,omitempty"` // en cm³
 }
 
@@ -69,65 +69,65 @@ type EspecificacionesTecnicas struct {
 
 // ImagenesAdicionales contiene URLs de imágenes adicionales del producto
 type ImagenesAdicionales struct {
-	URLs        []string `json:"urls"`
-	Thumbnails  []string `json:"thumbnails,omitempty"`
+	URLs          []string `json:"urls"`
+	Thumbnails    []string `json:"thumbnails,omitempty"`
 	Descripciones []string `json:"descripciones,omitempty"`
 }
 
 // ConfiguracionEtiqueta contiene configuración específica para etiquetas del producto
 type ConfiguracionEtiqueta struct {
-	PlantillaID          *uuid.UUID `json:"plantilla_id,omitempty"`
-	MostrarMarca         bool       `json:"mostrar_marca"`
-	MostrarModelo        bool       `json:"mostrar_modelo"`
-	MostrarDimensiones   bool       `json:"mostrar_dimensiones"`
-	MostrarPeso          bool       `json:"mostrar_peso"`
-	MostrarEspecificaciones bool    `json:"mostrar_especificaciones"`
-	TipoCodigoBarra      string     `json:"tipo_codigo_barra"` // CODE39, CODE128, EAN13, etc.
-	TamañoEtiqueta       string     `json:"tamaño_etiqueta"`   // pequeña, mediana, grande
+	PlantillaID                *uuid.UUID             `json:"plantilla_id,omitempty"`
+	MostrarMarca               bool                   `json:"mostrar_marca"`
+	MostrarModelo              bool                   `json:"mostrar_modelo"`
+	MostrarDimensiones         bool                   `json:"mostrar_dimensiones"`
+	MostrarPeso                bool                   `json:"mostrar_peso"`
+	MostrarEspecificaciones    bool                   `json:"mostrar_especificaciones"`
+	TipoCodigoBarra            string                 `json:"tipo_codigo_barra"` // CODE39, CODE128, EAN13, etc.
+	TamañoEtiqueta             string                 `json:"tamaño_etiqueta"`   // pequeña, mediana, grande
 	ConfiguracionPersonalizada map[string]interface{} `json:"configuracion_personalizada,omitempty"`
 }
 
 // CategoriaProducto representa una categoría de productos
 type CategoriaProducto struct {
 	BaseModel
-	Codigo                 string                 `json:"codigo" db:"codigo" binding:"required" validate:"required,max=50"`
-	Nombre                 string                 `json:"nombre" db:"nombre" binding:"required" validate:"required,max=255"`
-	Descripcion            *string                `json:"descripcion,omitempty" db:"descripcion"`
-	CategoriaPadreID       *uuid.UUID             `json:"categoria_padre_id,omitempty" db:"categoria_padre_id"`
-	Nivel                  int                    `json:"nivel" db:"nivel" default:"1"`
-	Activa                 bool                   `json:"activa" db:"activa" default:"true"`
-	OrdenVisualizacion     *int                   `json:"orden_visualizacion,omitempty" db:"orden_visualizacion"`
-	ImagenURL              *string                `json:"imagen_url,omitempty" db:"imagen_url"`
-	PathCompleto           *string                `json:"path_completo,omitempty" db:"path_completo"`
-	TotalProductos         int                    `json:"total_productos" db:"total_productos" default:"0"`
+	Codigo                 string                           `json:"codigo" db:"codigo" binding:"required" validate:"required,max=50"`
+	Nombre                 string                           `json:"nombre" db:"nombre" binding:"required" validate:"required,max=255"`
+	Descripcion            *string                          `json:"descripcion,omitempty" db:"descripcion"`
+	CategoriaPadreID       *uuid.UUID                       `json:"categoria_padre_id,omitempty" db:"categoria_padre_id"`
+	Nivel                  int                              `json:"nivel" db:"nivel" default:"1"`
+	Activa                 bool                             `json:"activa" db:"activa" default:"true"`
+	OrdenVisualizacion     *int                             `json:"orden_visualizacion,omitempty" db:"orden_visualizacion"`
+	ImagenURL              *string                          `json:"imagen_url,omitempty" db:"imagen_url"`
+	PathCompleto           *string                          `json:"path_completo,omitempty" db:"path_completo"`
+	TotalProductos         int                              `json:"total_productos" db:"total_productos" default:"0"`
 	ConfiguracionEtiquetas *ConfiguracionEtiquetasCategoria `json:"configuracion_etiquetas,omitempty" db:"configuracion_etiquetas"`
 
 	// Relaciones
-	CategoriaPadre *CategoriaProducto   `json:"categoria_padre,omitempty" gorm:"foreignKey:CategoriaPadreID"`
-	Subcategorias  []CategoriaProducto  `json:"subcategorias,omitempty" gorm:"foreignKey:CategoriaPadreID"`
-	Productos      []Producto           `json:"productos,omitempty" gorm:"foreignKey:CategoriaID"`
+	CategoriaPadre *CategoriaProducto  `json:"categoria_padre,omitempty" gorm:"foreignKey:CategoriaPadreID"`
+	Subcategorias  []CategoriaProducto `json:"subcategorias,omitempty" gorm:"foreignKey:CategoriaPadreID"`
+	Productos      []Producto          `json:"productos,omitempty" gorm:"foreignKey:CategoriaID"`
 }
 
 // ConfiguracionEtiquetasCategoria contiene configuración de etiquetas específica por categoría
 type ConfiguracionEtiquetasCategoria struct {
-	PlantillaDefault    string                 `json:"plantilla_default"`
-	MostrarMarca        bool                   `json:"mostrar_marca"`
-	MostrarModelo       bool                   `json:"mostrar_modelo"`
-	MostrarDimensiones  bool                   `json:"mostrar_dimensiones"`
-	MostrarPeso         bool                   `json:"mostrar_peso"`
-	CamposPersonalizados []string              `json:"campos_personalizados,omitempty"`
-	ConfiguracionExtra  map[string]interface{} `json:"configuracion_extra,omitempty"`
+	PlantillaDefault     string                 `json:"plantilla_default"`
+	MostrarMarca         bool                   `json:"mostrar_marca"`
+	MostrarModelo        bool                   `json:"mostrar_modelo"`
+	MostrarDimensiones   bool                   `json:"mostrar_dimensiones"`
+	MostrarPeso          bool                   `json:"mostrar_peso"`
+	CamposPersonalizados []string               `json:"campos_personalizados,omitempty"`
+	ConfiguracionExtra   map[string]interface{} `json:"configuracion_extra,omitempty"`
 }
 
 // CodigoBarraAdicional representa códigos de barra adicionales para un producto
 type CodigoBarraAdicional struct {
 	BaseModel
-	ProductoID   uuid.UUID `json:"producto_id" db:"producto_id" binding:"required"`
-	CodigoBarra  string    `json:"codigo_barra" db:"codigo_barra" binding:"required"`
-	Descripcion  *string   `json:"descripcion,omitempty" db:"descripcion"`
-	Activo       bool      `json:"activo" db:"activo" default:"true"`
-	TipoCodigo   string    `json:"tipo_codigo" db:"tipo_codigo" default:"EAN13"`
-	Validado     bool      `json:"validado" db:"validado" default:"false"`
+	ProductoID  uuid.UUID `json:"producto_id" db:"producto_id" binding:"required"`
+	CodigoBarra string    `json:"codigo_barra" db:"codigo_barra" binding:"required"`
+	Descripcion *string   `json:"descripcion,omitempty" db:"descripcion"`
+	Activo      bool      `json:"activo" db:"activo" default:"true"`
+	TipoCodigo  string    `json:"tipo_codigo" db:"tipo_codigo" default:"EAN13"`
+	Validado    bool      `json:"validado" db:"validado" default:"false"`
 
 	// Relaciones
 	Producto *Producto `json:"producto,omitempty" gorm:"foreignKey:ProductoID"`
@@ -389,17 +389,17 @@ type CodigoBarraAdicionalDTO struct {
 type ProductoFilter struct {
 	PaginationFilter
 	SortFilter
-	CodigoInterno    *string    `json:"codigo_interno,omitempty" form:"codigo_interno"`
-	CodigoBarra      *string    `json:"codigo_barra,omitempty" form:"codigo_barra"`
-	Descripcion      *string    `json:"descripcion,omitempty" form:"descripcion"`
-	Marca            *string    `json:"marca,omitempty" form:"marca"`
-	CategoriaID      *uuid.UUID `json:"categoria_id,omitempty" form:"categoria_id"`
-	Activo           *bool      `json:"activo,omitempty" form:"activo"`
-	PrecioMin        *float64   `json:"precio_min,omitempty" form:"precio_min"`
-	PrecioMax        *float64   `json:"precio_max,omitempty" form:"precio_max"`
-	StockBajo        *bool      `json:"stock_bajo,omitempty" form:"stock_bajo"`
-	RequiereSerie    *bool      `json:"requiere_serie,omitempty" form:"requiere_serie"`
-	TerminoBusqueda  *string    `json:"termino_busqueda,omitempty" form:"q"`
+	CodigoInterno   *string    `json:"codigo_interno,omitempty" form:"codigo_interno"`
+	CodigoBarra     *string    `json:"codigo_barra,omitempty" form:"codigo_barra"`
+	Descripcion     *string    `json:"descripcion,omitempty" form:"descripcion"`
+	Marca           *string    `json:"marca,omitempty" form:"marca"`
+	CategoriaID     *uuid.UUID `json:"categoria_id,omitempty" form:"categoria_id"`
+	Activo          *bool      `json:"activo,omitempty" form:"activo"`
+	PrecioMin       *float64   `json:"precio_min,omitempty" form:"precio_min"`
+	PrecioMax       *float64   `json:"precio_max,omitempty" form:"precio_max"`
+	StockBajo       *bool      `json:"stock_bajo,omitempty" form:"stock_bajo"`
+	RequiereSerie   *bool      `json:"requiere_serie,omitempty" form:"requiere_serie"`
+	TerminoBusqueda *string    `json:"termino_busqueda,omitempty" form:"q"`
 }
 
 type CategoriaProductoFilter struct {
@@ -444,12 +444,12 @@ func (p *Producto) ToResponseDTO() ProductoResponseDTO {
 		FechaCreacion:            p.FechaCreacion,
 		FechaModificacion:        p.FechaModificacion,
 	}
-	
+
 	if p.Categoria != nil {
 		categoriaDTO := p.Categoria.ToListDTO()
 		dto.Categoria = &categoriaDTO
 	}
-	
+
 	// Convertir códigos de barra adicionales
 	for _, codigo := range p.CodigosBarraAdicionales {
 		dto.CodigosBarraAdicionales = append(dto.CodigosBarraAdicionales, CodigoBarraAdicionalDTO{
@@ -461,7 +461,7 @@ func (p *Producto) ToResponseDTO() ProductoResponseDTO {
 			Validado:    codigo.Validado,
 		})
 	}
-	
+
 	return dto
 }
 
@@ -481,11 +481,11 @@ func (p *Producto) ToListDTO() ProductoListDTO {
 		FechaCreacion:     p.FechaCreacion,
 		FechaModificacion: p.FechaModificacion,
 	}
-	
+
 	if p.Categoria != nil {
 		dto.CategoriaNombre = &p.Categoria.Nombre
 	}
-	
+
 	return dto
 }
 
@@ -506,16 +506,16 @@ func (c *CategoriaProducto) ToResponseDTO() CategoriaProductoResponseDTO {
 		FechaCreacion:          c.FechaCreacion,
 		FechaModificacion:      c.FechaModificacion,
 	}
-	
+
 	if c.CategoriaPadre != nil {
 		padreDTO := c.CategoriaPadre.ToListDTO()
 		dto.CategoriaPadre = &padreDTO
 	}
-	
+
 	for _, sub := range c.Subcategorias {
 		dto.Subcategorias = append(dto.Subcategorias, sub.ToListDTO())
 	}
-	
+
 	return dto
 }
 
@@ -559,13 +559,13 @@ func (dto *ProductoCreateDTO) ToModel(usuarioID uuid.UUID) *Producto {
 		PopularidadScore:         0,
 		TotalEtiquetasGeneradas:  0,
 	}
-	
+
 	producto.BaseModelWithUser.UsuarioCreacion = &usuarioID
-	
+
 	if producto.UnidadMedida == "" {
 		producto.UnidadMedida = "UN"
 	}
-	
+
 	return producto
 }
 
@@ -575,23 +575,23 @@ func (p *Producto) Validate() error {
 	if p.PrecioUnitario < 0 {
 		return fmt.Errorf("precio unitario debe ser mayor o igual a 0")
 	}
-	
+
 	if p.PrecioCosto != nil && *p.PrecioCosto < 0 {
 		return fmt.Errorf("precio costo debe ser mayor o igual a 0")
 	}
-	
+
 	if p.StockMinimo < 0 {
 		return fmt.Errorf("stock mínimo debe ser mayor o igual a 0")
 	}
-	
+
 	if p.StockMaximo != nil && *p.StockMaximo < p.StockMinimo {
 		return fmt.Errorf("stock máximo debe ser mayor o igual al stock mínimo")
 	}
-	
+
 	if p.PopularidadScore < 0 || p.PopularidadScore > 100 {
 		return fmt.Errorf("score de popularidad debe estar entre 0 y 100")
 	}
-	
+
 	return nil
 }
 
@@ -599,7 +599,6 @@ func (c *CategoriaProducto) Validate() error {
 	if c.Nivel <= 0 {
 		return fmt.Errorf("nivel debe ser mayor a 0")
 	}
-	
+
 	return nil
 }
-

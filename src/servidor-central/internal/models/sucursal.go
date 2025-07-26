@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,22 +12,22 @@ import (
 // Sucursal representa una sucursal de la ferretería
 type Sucursal struct {
 	BaseModel
-	Codigo                      string                 `json:"codigo" db:"codigo" binding:"required" validate:"required,max=50"`
-	Nombre                      string                 `json:"nombre" db:"nombre" binding:"required" validate:"required,max=255"`
-	Direccion                   *string                `json:"direccion,omitempty" db:"direccion"`
-	Comuna                      *string                `json:"comuna,omitempty" db:"comuna"`
-	Region                      *string                `json:"region,omitempty" db:"region"`
-	Telefono                    *string                `json:"telefono,omitempty" db:"telefono"`
-	Email                       *string                `json:"email,omitempty" db:"email" validate:"omitempty,email"`
-	HorarioApertura             *time.Time             `json:"horario_apertura,omitempty" db:"horario_apertura"`
-	HorarioCierre               *time.Time             `json:"horario_cierre,omitempty" db:"horario_cierre"`
-	Timezone                    string                 `json:"timezone" db:"timezone" default:"America/Santiago"`
-	Habilitada                  bool                   `json:"habilitada" db:"habilitada" default:"true"`
-	ConfiguracionDTE            *ConfiguracionDTE      `json:"configuracion_dte,omitempty" db:"configuracion_dte"`
-	ConfiguracionPagos          *ConfiguracionPagos    `json:"configuracion_pagos,omitempty" db:"configuracion_pagos"`
-	MaxConexionesConcurrentes   int                    `json:"max_conexiones_concurrentes" db:"max_conexiones_concurrentes" default:"50"`
-	ConfiguracionCache          *ConfiguracionCache    `json:"configuracion_cache,omitempty" db:"configuracion_cache"`
-	MetricasRendimiento         *MetricasRendimiento   `json:"metricas_rendimiento,omitempty" db:"metricas_rendimiento"`
+	Codigo                    string               `json:"codigo" db:"codigo" binding:"required" validate:"required,max=50"`
+	Nombre                    string               `json:"nombre" db:"nombre" binding:"required" validate:"required,max=255"`
+	Direccion                 *string              `json:"direccion,omitempty" db:"direccion"`
+	Comuna                    *string              `json:"comuna,omitempty" db:"comuna"`
+	Region                    *string              `json:"region,omitempty" db:"region"`
+	Telefono                  *string              `json:"telefono,omitempty" db:"telefono"`
+	Email                     *string              `json:"email,omitempty" db:"email" validate:"omitempty,email"`
+	HorarioApertura           *time.Time           `json:"horario_apertura,omitempty" db:"horario_apertura"`
+	HorarioCierre             *time.Time           `json:"horario_cierre,omitempty" db:"horario_cierre"`
+	Timezone                  string               `json:"timezone" db:"timezone" default:"America/Santiago"`
+	Habilitada                bool                 `json:"habilitada" db:"habilitada" default:"true"`
+	ConfiguracionDTE          *ConfiguracionDTE    `json:"configuracion_dte,omitempty" db:"configuracion_dte"`
+	ConfiguracionPagos        *ConfiguracionPagos  `json:"configuracion_pagos,omitempty" db:"configuracion_pagos"`
+	MaxConexionesConcurrentes int                  `json:"max_conexiones_concurrentes" db:"max_conexiones_concurrentes" default:"50"`
+	ConfiguracionCache        *ConfiguracionCache  `json:"configuracion_cache,omitempty" db:"configuracion_cache"`
+	MetricasRendimiento       *MetricasRendimiento `json:"metricas_rendimiento,omitempty" db:"metricas_rendimiento"`
 }
 
 // ConfiguracionDTE contiene la configuración de documentos tributarios electrónicos
@@ -58,9 +59,9 @@ type ConfiguracionPagos struct {
 
 // ConfiguracionCache contiene la configuración de cache para la sucursal
 type ConfiguracionCache struct {
-	TTLProductos       int  `json:"ttl_productos"`       // TTL en segundos
-	TTLStock           int  `json:"ttl_stock"`           // TTL en segundos
-	TTLFidelizacion    int  `json:"ttl_fidelizacion"`    // TTL en segundos
+	TTLProductos       int  `json:"ttl_productos"`    // TTL en segundos
+	TTLStock           int  `json:"ttl_stock"`        // TTL en segundos
+	TTLFidelizacion    int  `json:"ttl_fidelizacion"` // TTL en segundos
 	CacheHabilitado    bool `json:"cache_habilitado"`
 	TamañoMaximoCache  int  `json:"tamaño_maximo_cache"` // En MB
 	LimpiezaAutomatica bool `json:"limpieza_automatica"`
@@ -68,14 +69,14 @@ type ConfiguracionCache struct {
 
 // MetricasRendimiento contiene métricas de rendimiento de la sucursal
 type MetricasRendimiento struct {
-	VentasPromedioDiario     float64            `json:"ventas_promedio_diario"`
-	TiempoPromedioVenta      float64            `json:"tiempo_promedio_venta"`      // En milisegundos
-	ConexionesActivas        int                `json:"conexiones_activas"`
-	ConexionesMaximas        int                `json:"conexiones_maximas"`
-	UsoMemoria               float64            `json:"uso_memoria"`               // En MB
-	UsoCPU                   float64            `json:"uso_cpu"`                   // En porcentaje
-	UltimaActualizacion      time.Time          `json:"ultima_actualizacion"`
-	MetricasPersonalizadas   map[string]float64 `json:"metricas_personalizadas,omitempty"`
+	VentasPromedioDiario   float64            `json:"ventas_promedio_diario"`
+	TiempoPromedioVenta    float64            `json:"tiempo_promedio_venta"` // En milisegundos
+	ConexionesActivas      int                `json:"conexiones_activas"`
+	ConexionesMaximas      int                `json:"conexiones_maximas"`
+	UsoMemoria             float64            `json:"uso_memoria"` // En MB
+	UsoCPU                 float64            `json:"uso_cpu"`     // En porcentaje
+	UltimaActualizacion    time.Time          `json:"ultima_actualizacion"`
+	MetricasPersonalizadas map[string]float64 `json:"metricas_personalizadas,omitempty"`
 }
 
 // Implementar driver.Valuer para tipos JSON personalizados
@@ -142,37 +143,37 @@ func (m *MetricasRendimiento) Scan(value interface{}) error {
 // DTOs para Sucursal
 
 type SucursalCreateDTO struct {
-	Codigo                    string               `json:"codigo" binding:"required" validate:"required,max=50"`
-	Nombre                    string               `json:"nombre" binding:"required" validate:"required,max=255"`
-	Direccion                 *string              `json:"direccion,omitempty"`
-	Comuna                    *string              `json:"comuna,omitempty"`
-	Region                    *string              `json:"region,omitempty"`
-	Telefono                  *string              `json:"telefono,omitempty"`
-	Email                     *string              `json:"email,omitempty" validate:"omitempty,email"`
-	HorarioApertura           *time.Time           `json:"horario_apertura,omitempty"`
-	HorarioCierre             *time.Time           `json:"horario_cierre,omitempty"`
-	Timezone                  string               `json:"timezone"`
-	ConfiguracionDTE          *ConfiguracionDTE    `json:"configuracion_dte,omitempty"`
-	ConfiguracionPagos        *ConfiguracionPagos  `json:"configuracion_pagos,omitempty"`
-	MaxConexionesConcurrentes int                  `json:"max_conexiones_concurrentes"`
-	ConfiguracionCache        *ConfiguracionCache  `json:"configuracion_cache,omitempty"`
+	Codigo                    string              `json:"codigo" binding:"required" validate:"required,max=50"`
+	Nombre                    string              `json:"nombre" binding:"required" validate:"required,max=255"`
+	Direccion                 *string             `json:"direccion,omitempty"`
+	Comuna                    *string             `json:"comuna,omitempty"`
+	Region                    *string             `json:"region,omitempty"`
+	Telefono                  *string             `json:"telefono,omitempty"`
+	Email                     *string             `json:"email,omitempty" validate:"omitempty,email"`
+	HorarioApertura           *time.Time          `json:"horario_apertura,omitempty"`
+	HorarioCierre             *time.Time          `json:"horario_cierre,omitempty"`
+	Timezone                  string              `json:"timezone"`
+	ConfiguracionDTE          *ConfiguracionDTE   `json:"configuracion_dte,omitempty"`
+	ConfiguracionPagos        *ConfiguracionPagos `json:"configuracion_pagos,omitempty"`
+	MaxConexionesConcurrentes int                 `json:"max_conexiones_concurrentes"`
+	ConfiguracionCache        *ConfiguracionCache `json:"configuracion_cache,omitempty"`
 }
 
 type SucursalUpdateDTO struct {
-	Nombre                    *string              `json:"nombre,omitempty" validate:"omitempty,max=255"`
-	Direccion                 *string              `json:"direccion,omitempty"`
-	Comuna                    *string              `json:"comuna,omitempty"`
-	Region                    *string              `json:"region,omitempty"`
-	Telefono                  *string              `json:"telefono,omitempty"`
-	Email                     *string              `json:"email,omitempty" validate:"omitempty,email"`
-	HorarioApertura           *time.Time           `json:"horario_apertura,omitempty"`
-	HorarioCierre             *time.Time           `json:"horario_cierre,omitempty"`
-	Timezone                  *string              `json:"timezone,omitempty"`
-	Habilitada                *bool                `json:"habilitada,omitempty"`
-	ConfiguracionDTE          *ConfiguracionDTE    `json:"configuracion_dte,omitempty"`
-	ConfiguracionPagos        *ConfiguracionPagos  `json:"configuracion_pagos,omitempty"`
-	MaxConexionesConcurrentes *int                 `json:"max_conexiones_concurrentes,omitempty"`
-	ConfiguracionCache        *ConfiguracionCache  `json:"configuracion_cache,omitempty"`
+	Nombre                    *string             `json:"nombre,omitempty" validate:"omitempty,max=255"`
+	Direccion                 *string             `json:"direccion,omitempty"`
+	Comuna                    *string             `json:"comuna,omitempty"`
+	Region                    *string             `json:"region,omitempty"`
+	Telefono                  *string             `json:"telefono,omitempty"`
+	Email                     *string             `json:"email,omitempty" validate:"omitempty,email"`
+	HorarioApertura           *time.Time          `json:"horario_apertura,omitempty"`
+	HorarioCierre             *time.Time          `json:"horario_cierre,omitempty"`
+	Timezone                  *string             `json:"timezone,omitempty"`
+	Habilitada                *bool               `json:"habilitada,omitempty"`
+	ConfiguracionDTE          *ConfiguracionDTE   `json:"configuracion_dte,omitempty"`
+	ConfiguracionPagos        *ConfiguracionPagos `json:"configuracion_pagos,omitempty"`
+	MaxConexionesConcurrentes *int                `json:"max_conexiones_concurrentes,omitempty"`
+	ConfiguracionCache        *ConfiguracionCache `json:"configuracion_cache,omitempty"`
 }
 
 type SucursalResponseDTO struct {
@@ -271,14 +272,14 @@ func (dto *SucursalCreateDTO) ToModel() *Sucursal {
 		MaxConexionesConcurrentes: dto.MaxConexionesConcurrentes,
 		ConfiguracionCache:        dto.ConfiguracionCache,
 	}
-	
+
 	if sucursal.Timezone == "" {
 		sucursal.Timezone = "America/Santiago"
 	}
 	if sucursal.MaxConexionesConcurrentes == 0 {
 		sucursal.MaxConexionesConcurrentes = 50
 	}
-	
+
 	return sucursal
 }
 
@@ -290,11 +291,10 @@ func (s *Sucursal) Validate() error {
 			return fmt.Errorf("horario de apertura no puede ser posterior al horario de cierre")
 		}
 	}
-	
+
 	if s.MaxConexionesConcurrentes <= 0 {
 		return fmt.Errorf("máximo de conexiones concurrentes debe ser mayor a 0")
 	}
-	
+
 	return nil
 }
-

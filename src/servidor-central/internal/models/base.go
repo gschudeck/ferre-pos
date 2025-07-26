@@ -36,11 +36,11 @@ const (
 type EstadoDocumento string
 
 const (
-	EstadoPendiente  EstadoDocumento = "pendiente"
-	EstadoProcesado  EstadoDocumento = "procesado"
-	EstadoEnviado    EstadoDocumento = "enviado"
-	EstadoRechazado  EstadoDocumento = "rechazado"
-	EstadoAnulado    EstadoDocumento = "anulado"
+	EstadoPendiente EstadoDocumento = "pendiente"
+	EstadoProcesado EstadoDocumento = "procesado"
+	EstadoEnviado   EstadoDocumento = "enviado"
+	EstadoRechazado EstadoDocumento = "rechazado"
+	EstadoAnulado   EstadoDocumento = "anulado"
 )
 
 type TipoMovimientoFidelizacion string
@@ -55,19 +55,19 @@ const (
 type EstadoSincronizacion string
 
 const (
-	SincPendiente   EstadoSincronizacion = "pendiente"
-	SincEnProceso   EstadoSincronizacion = "en_proceso"
-	SincCompletado  EstadoSincronizacion = "completado"
-	SincError       EstadoSincronizacion = "error"
+	SincPendiente  EstadoSincronizacion = "pendiente"
+	SincEnProceso  EstadoSincronizacion = "en_proceso"
+	SincCompletado EstadoSincronizacion = "completado"
+	SincError      EstadoSincronizacion = "error"
 )
 
 type PrioridadProceso string
 
 const (
-	PrioridadMaxima PrioridadProceso = "maxima"  // api_pos
-	PrioridadMedia  PrioridadProceso = "media"   // api_sync
-	PrioridadBaja   PrioridadProceso = "baja"    // api_labels
-	PrioridadMinima PrioridadProceso = "minima"  // api_report
+	PrioridadMaxima PrioridadProceso = "maxima" // api_pos
+	PrioridadMedia  PrioridadProceso = "media"  // api_sync
+	PrioridadBaja   PrioridadProceso = "baja"   // api_labels
+	PrioridadMinima PrioridadProceso = "minima" // api_report
 )
 
 type EstadoTrabajoEtiqueta string
@@ -171,4 +171,3 @@ func CalculatePagination(page, limit int, total int64) PaginationInfo {
 		TotalPages: totalPages,
 	}
 }
-

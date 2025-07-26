@@ -10,11 +10,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"ferre-pos-servidor-central/internal/config"
 	"ferre-pos-servidor-central/internal/controllers"
 	"ferre-pos-servidor-central/internal/database"
 	"ferre-pos-servidor-central/internal/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -25,7 +26,7 @@ func main() {
 	// Cargar configuración
 	configPath := getConfigPath()
 	configManager := config.NewConfigManager(configPath)
-	
+
 	if err := configManager.LoadConfig(); err != nil {
 		log.Fatalf("Error cargando configuración: %v", err)
 	}
@@ -417,4 +418,3 @@ func setupGracefulShutdown(server *http.Server, timeout time.Duration) {
 		server.Close()
 	}
 }
-

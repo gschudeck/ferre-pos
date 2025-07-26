@@ -7,9 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"gopkg.in/yaml.v3"
 	"ferre-pos-servidor-central/internal/database"
 	"ferre-pos-servidor-central/internal/middleware"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Config contiene toda la configuración del sistema
@@ -58,17 +59,17 @@ type APIConfigs struct {
 
 // POSConfig configuración del API POS
 type POSConfig struct {
-	Enabled              bool          `yaml:"enabled" json:"enabled"`
-	BasePath             string        `yaml:"base_path" json:"base_path"`
-	MaxConcurrentUsers   int           `yaml:"max_concurrent_users" json:"max_concurrent_users"`
-	SessionTimeout       time.Duration `yaml:"session_timeout" json:"session_timeout"`
-	MaxProductsPerQuery  int           `yaml:"max_products_per_query" json:"max_products_per_query"`
-	CacheProductsTTL     time.Duration `yaml:"cache_products_ttl" json:"cache_products_ttl"`
-	AllowOfflineMode     bool          `yaml:"allow_offline_mode" json:"allow_offline_mode"`
-	OfflineDataRetention time.Duration `yaml:"offline_data_retention" json:"offline_data_retention"`
-	RequireTerminalAuth  bool          `yaml:"require_terminal_auth" json:"require_terminal_auth"`
-	MaxVentaItems        int           `yaml:"max_venta_items" json:"max_venta_items"`
-	EnableFidelizacion   bool          `yaml:"enable_fidelizacion" json:"enable_fidelizacion"`
+	Enabled              bool            `yaml:"enabled" json:"enabled"`
+	BasePath             string          `yaml:"base_path" json:"base_path"`
+	MaxConcurrentUsers   int             `yaml:"max_concurrent_users" json:"max_concurrent_users"`
+	SessionTimeout       time.Duration   `yaml:"session_timeout" json:"session_timeout"`
+	MaxProductsPerQuery  int             `yaml:"max_products_per_query" json:"max_products_per_query"`
+	CacheProductsTTL     time.Duration   `yaml:"cache_products_ttl" json:"cache_products_ttl"`
+	AllowOfflineMode     bool            `yaml:"allow_offline_mode" json:"allow_offline_mode"`
+	OfflineDataRetention time.Duration   `yaml:"offline_data_retention" json:"offline_data_retention"`
+	RequireTerminalAuth  bool            `yaml:"require_terminal_auth" json:"require_terminal_auth"`
+	MaxVentaItems        int             `yaml:"max_venta_items" json:"max_venta_items"`
+	EnableFidelizacion   bool            `yaml:"enable_fidelizacion" json:"enable_fidelizacion"`
 	RateLimiting         RateLimitConfig `yaml:"rate_limiting" json:"rate_limiting"`
 }
 
@@ -90,54 +91,54 @@ type SyncConfig struct {
 
 // LabelsConfig configuración del API Labels
 type LabelsConfig struct {
-	Enabled              bool          `yaml:"enabled" json:"enabled"`
-	BasePath             string        `yaml:"base_path" json:"base_path"`
-	MaxConcurrentJobs    int           `yaml:"max_concurrent_jobs" json:"max_concurrent_jobs"`
-	MaxLabelsPerBatch    int           `yaml:"max_labels_per_batch" json:"max_labels_per_batch"`
-	DefaultLabelFormat   string        `yaml:"default_label_format" json:"default_label_format"`
-	SupportedFormats     []string      `yaml:"supported_formats" json:"supported_formats"`
-	MaxLabelSize         int           `yaml:"max_label_size" json:"max_label_size"` // KB
-	CacheTemplatesTTL    time.Duration `yaml:"cache_templates_ttl" json:"cache_templates_ttl"`
-	StoragePath          string        `yaml:"storage_path" json:"storage_path"`
-	CleanupInterval      time.Duration `yaml:"cleanup_interval" json:"cleanup_interval"`
-	FileRetentionDays    int           `yaml:"file_retention_days" json:"file_retention_days"`
-	EnablePreview        bool          `yaml:"enable_preview" json:"enable_preview"`
-	PreviewTimeout       time.Duration `yaml:"preview_timeout" json:"preview_timeout"`
+	Enabled            bool          `yaml:"enabled" json:"enabled"`
+	BasePath           string        `yaml:"base_path" json:"base_path"`
+	MaxConcurrentJobs  int           `yaml:"max_concurrent_jobs" json:"max_concurrent_jobs"`
+	MaxLabelsPerBatch  int           `yaml:"max_labels_per_batch" json:"max_labels_per_batch"`
+	DefaultLabelFormat string        `yaml:"default_label_format" json:"default_label_format"`
+	SupportedFormats   []string      `yaml:"supported_formats" json:"supported_formats"`
+	MaxLabelSize       int           `yaml:"max_label_size" json:"max_label_size"` // KB
+	CacheTemplatesTTL  time.Duration `yaml:"cache_templates_ttl" json:"cache_templates_ttl"`
+	StoragePath        string        `yaml:"storage_path" json:"storage_path"`
+	CleanupInterval    time.Duration `yaml:"cleanup_interval" json:"cleanup_interval"`
+	FileRetentionDays  int           `yaml:"file_retention_days" json:"file_retention_days"`
+	EnablePreview      bool          `yaml:"enable_preview" json:"enable_preview"`
+	PreviewTimeout     time.Duration `yaml:"preview_timeout" json:"preview_timeout"`
 }
 
 // ReportsConfig configuración del API Reports
 type ReportsConfig struct {
-	Enabled               bool          `yaml:"enabled" json:"enabled"`
-	BasePath              string        `yaml:"base_path" json:"base_path"`
-	MaxConcurrentReports  int           `yaml:"max_concurrent_reports" json:"max_concurrent_reports"`
-	MaxReportSize         int           `yaml:"max_report_size" json:"max_report_size"` // MB
-	DefaultFormat         string        `yaml:"default_format" json:"default_format"`
-	SupportedFormats      []string      `yaml:"supported_formats" json:"supported_formats"`
-	CacheReportsTTL       time.Duration `yaml:"cache_reports_ttl" json:"cache_reports_ttl"`
-	StoragePath           string        `yaml:"storage_path" json:"storage_path"`
-	CleanupInterval       time.Duration `yaml:"cleanup_interval" json:"cleanup_interval"`
-	FileRetentionDays     int           `yaml:"file_retention_days" json:"file_retention_days"`
-	EnableScheduledReports bool         `yaml:"enable_scheduled_reports" json:"enable_scheduled_reports"`
-	MaxScheduledReports   int           `yaml:"max_scheduled_reports" json:"max_scheduled_reports"`
-	ReportTimeout         time.Duration `yaml:"report_timeout" json:"report_timeout"`
-	EnableDashboards      bool          `yaml:"enable_dashboards" json:"enable_dashboards"`
-	DashboardRefreshRate  time.Duration `yaml:"dashboard_refresh_rate" json:"dashboard_refresh_rate"`
+	Enabled                bool          `yaml:"enabled" json:"enabled"`
+	BasePath               string        `yaml:"base_path" json:"base_path"`
+	MaxConcurrentReports   int           `yaml:"max_concurrent_reports" json:"max_concurrent_reports"`
+	MaxReportSize          int           `yaml:"max_report_size" json:"max_report_size"` // MB
+	DefaultFormat          string        `yaml:"default_format" json:"default_format"`
+	SupportedFormats       []string      `yaml:"supported_formats" json:"supported_formats"`
+	CacheReportsTTL        time.Duration `yaml:"cache_reports_ttl" json:"cache_reports_ttl"`
+	StoragePath            string        `yaml:"storage_path" json:"storage_path"`
+	CleanupInterval        time.Duration `yaml:"cleanup_interval" json:"cleanup_interval"`
+	FileRetentionDays      int           `yaml:"file_retention_days" json:"file_retention_days"`
+	EnableScheduledReports bool          `yaml:"enable_scheduled_reports" json:"enable_scheduled_reports"`
+	MaxScheduledReports    int           `yaml:"max_scheduled_reports" json:"max_scheduled_reports"`
+	ReportTimeout          time.Duration `yaml:"report_timeout" json:"report_timeout"`
+	EnableDashboards       bool          `yaml:"enable_dashboards" json:"enable_dashboards"`
+	DashboardRefreshRate   time.Duration `yaml:"dashboard_refresh_rate" json:"dashboard_refresh_rate"`
 }
 
 // SecurityConfig configuración de seguridad
 type SecurityConfig struct {
-	JWTSecret           string        `yaml:"jwt_secret" json:"jwt_secret"`
-	JWTExpiration       time.Duration `yaml:"jwt_expiration" json:"jwt_expiration"`
-	RefreshTokenExpiration time.Duration `yaml:"refresh_token_expiration" json:"refresh_token_expiration"`
-	PasswordMinLength   int           `yaml:"password_min_length" json:"password_min_length"`
-	PasswordRequireSpecial bool       `yaml:"password_require_special" json:"password_require_special"`
-	MaxLoginAttempts    int           `yaml:"max_login_attempts" json:"max_login_attempts"`
-	LoginLockoutDuration time.Duration `yaml:"login_lockout_duration" json:"login_lockout_duration"`
-	EnableTwoFactor     bool          `yaml:"enable_two_factor" json:"enable_two_factor"`
-	APIKeys             []string      `yaml:"api_keys" json:"api_keys"`
-	AllowedIPs          []string      `yaml:"allowed_ips" json:"allowed_ips"`
-	CORS                CORSConfigs   `yaml:"cors" json:"cors"`
-	RateLimiting        RateLimitConfig `yaml:"rate_limiting" json:"rate_limiting"`
+	JWTSecret              string          `yaml:"jwt_secret" json:"jwt_secret"`
+	JWTExpiration          time.Duration   `yaml:"jwt_expiration" json:"jwt_expiration"`
+	RefreshTokenExpiration time.Duration   `yaml:"refresh_token_expiration" json:"refresh_token_expiration"`
+	PasswordMinLength      int             `yaml:"password_min_length" json:"password_min_length"`
+	PasswordRequireSpecial bool            `yaml:"password_require_special" json:"password_require_special"`
+	MaxLoginAttempts       int             `yaml:"max_login_attempts" json:"max_login_attempts"`
+	LoginLockoutDuration   time.Duration   `yaml:"login_lockout_duration" json:"login_lockout_duration"`
+	EnableTwoFactor        bool            `yaml:"enable_two_factor" json:"enable_two_factor"`
+	APIKeys                []string        `yaml:"api_keys" json:"api_keys"`
+	AllowedIPs             []string        `yaml:"allowed_ips" json:"allowed_ips"`
+	CORS                   CORSConfigs     `yaml:"cors" json:"cors"`
+	RateLimiting           RateLimitConfig `yaml:"rate_limiting" json:"rate_limiting"`
 }
 
 // CORSConfigs configuraciones CORS por API
@@ -150,10 +151,10 @@ type CORSConfigs struct {
 
 // RateLimitConfig configuración de rate limiting
 type RateLimitConfig struct {
-	Enabled        bool `yaml:"enabled" json:"enabled"`
-	RequestsPerMinute int `yaml:"requests_per_minute" json:"requests_per_minute"`
-	BurstSize      int  `yaml:"burst_size" json:"burst_size"`
-	CleanupInterval time.Duration `yaml:"cleanup_interval" json:"cleanup_interval"`
+	Enabled           bool          `yaml:"enabled" json:"enabled"`
+	RequestsPerMinute int           `yaml:"requests_per_minute" json:"requests_per_minute"`
+	BurstSize         int           `yaml:"burst_size" json:"burst_size"`
+	CleanupInterval   time.Duration `yaml:"cleanup_interval" json:"cleanup_interval"`
 }
 
 // LoggingConfigs configuraciones de logging por API
@@ -167,45 +168,45 @@ type LoggingConfigs struct {
 
 // CacheConfig configuración de cache
 type CacheConfig struct {
-	Type           string        `yaml:"type" json:"type"` // "memory", "redis"
-	Host           string        `yaml:"host" json:"host"`
-	Port           int           `yaml:"port" json:"port"`
-	Password       string        `yaml:"password" json:"password"`
-	Database       int           `yaml:"database" json:"database"`
-	MaxConnections int           `yaml:"max_connections" json:"max_connections"`
-	DefaultTTL     time.Duration `yaml:"default_ttl" json:"default_ttl"`
+	Type            string        `yaml:"type" json:"type"` // "memory", "redis"
+	Host            string        `yaml:"host" json:"host"`
+	Port            int           `yaml:"port" json:"port"`
+	Password        string        `yaml:"password" json:"password"`
+	Database        int           `yaml:"database" json:"database"`
+	MaxConnections  int           `yaml:"max_connections" json:"max_connections"`
+	DefaultTTL      time.Duration `yaml:"default_ttl" json:"default_ttl"`
 	CleanupInterval time.Duration `yaml:"cleanup_interval" json:"cleanup_interval"`
 }
 
 // EmailConfig configuración de email
 type EmailConfig struct {
-	Enabled    bool   `yaml:"enabled" json:"enabled"`
-	SMTPHost   string `yaml:"smtp_host" json:"smtp_host"`
-	SMTPPort   int    `yaml:"smtp_port" json:"smtp_port"`
-	Username   string `yaml:"username" json:"username"`
-	Password   string `yaml:"password" json:"password"`
-	FromEmail  string `yaml:"from_email" json:"from_email"`
-	FromName   string `yaml:"from_name" json:"from_name"`
-	UseTLS     bool   `yaml:"use_tls" json:"use_tls"`
-	UseSSL     bool   `yaml:"use_ssl" json:"use_ssl"`
+	Enabled   bool   `yaml:"enabled" json:"enabled"`
+	SMTPHost  string `yaml:"smtp_host" json:"smtp_host"`
+	SMTPPort  int    `yaml:"smtp_port" json:"smtp_port"`
+	Username  string `yaml:"username" json:"username"`
+	Password  string `yaml:"password" json:"password"`
+	FromEmail string `yaml:"from_email" json:"from_email"`
+	FromName  string `yaml:"from_name" json:"from_name"`
+	UseTLS    bool   `yaml:"use_tls" json:"use_tls"`
+	UseSSL    bool   `yaml:"use_ssl" json:"use_ssl"`
 }
 
 // SMSConfig configuración de SMS
 type SMSConfig struct {
-	Enabled   bool   `yaml:"enabled" json:"enabled"`
-	Provider  string `yaml:"provider" json:"provider"` // "twilio", "aws"
-	APIKey    string `yaml:"api_key" json:"api_key"`
-	APISecret string `yaml:"api_secret" json:"api_secret"`
+	Enabled    bool   `yaml:"enabled" json:"enabled"`
+	Provider   string `yaml:"provider" json:"provider"` // "twilio", "aws"
+	APIKey     string `yaml:"api_key" json:"api_key"`
+	APISecret  string `yaml:"api_secret" json:"api_secret"`
 	FromNumber string `yaml:"from_number" json:"from_number"`
 }
 
 // StorageConfig configuración de almacenamiento
 type StorageConfig struct {
-	Type        string `yaml:"type" json:"type"` // "local", "s3", "gcs"
-	BasePath    string `yaml:"base_path" json:"base_path"`
-	MaxFileSize int    `yaml:"max_file_size" json:"max_file_size"` // MB
+	Type              string   `yaml:"type" json:"type"` // "local", "s3", "gcs"
+	BasePath          string   `yaml:"base_path" json:"base_path"`
+	MaxFileSize       int      `yaml:"max_file_size" json:"max_file_size"` // MB
 	AllowedExtensions []string `yaml:"allowed_extensions" json:"allowed_extensions"`
-	
+
 	// S3 Config
 	S3Bucket    string `yaml:"s3_bucket" json:"s3_bucket"`
 	S3Region    string `yaml:"s3_region" json:"s3_region"`
@@ -264,10 +265,10 @@ func (cm *ConfigManager) LoadConfig() error {
 	}
 
 	cm.config = &config
-	
+
 	// Notificar watchers
 	cm.notifyWatchers()
-	
+
 	return nil
 }
 
@@ -313,15 +314,15 @@ func (cm *ConfigManager) UpdateConfig(newConfig *Config) error {
 	defer cm.mutex.Unlock()
 
 	cm.config = newConfig
-	
+
 	// Guardar cambios
 	if err := cm.SaveConfig(); err != nil {
 		return err
 	}
-	
+
 	// Notificar watchers
 	cm.notifyWatchers()
-	
+
 	return nil
 }
 
@@ -549,14 +550,14 @@ func DefaultConfig() *Config {
 			FromNumber: "",
 		},
 		Storage: StorageConfig{
-			Type:        "local",
-			BasePath:    "/var/lib/ferre-pos/storage",
-			MaxFileSize: 10, // 10MB
+			Type:              "local",
+			BasePath:          "/var/lib/ferre-pos/storage",
+			MaxFileSize:       10, // 10MB
 			AllowedExtensions: []string{".pdf", ".png", ".jpg", ".jpeg", ".xlsx", ".csv"},
-			S3Bucket:    "",
-			S3Region:    "us-east-1",
-			S3AccessKey: "",
-			S3SecretKey: "",
+			S3Bucket:          "",
+			S3Region:          "us-east-1",
+			S3AccessKey:       "",
+			S3SecretKey:       "",
 		},
 		Monitoring: MonitoringConfig{
 			Enabled:         true,
@@ -613,40 +614,39 @@ func DefaultSyncConfig() SyncConfig {
 // DefaultLabelsConfig configuración por defecto para API Labels
 func DefaultLabelsConfig() LabelsConfig {
 	return LabelsConfig{
-		Enabled:           true,
-		BasePath:          "/api/labels",
-		MaxConcurrentJobs: 10,
-		MaxLabelsPerBatch: 1000,
+		Enabled:            true,
+		BasePath:           "/api/labels",
+		MaxConcurrentJobs:  10,
+		MaxLabelsPerBatch:  1000,
 		DefaultLabelFormat: "pdf",
-		SupportedFormats:  []string{"pdf", "png", "jpg"},
-		MaxLabelSize:      5120, // 5MB
-		CacheTemplatesTTL: 2 * time.Hour,
-		StoragePath:       "/var/lib/ferre-pos/labels",
-		CleanupInterval:   24 * time.Hour,
-		FileRetentionDays: 30,
-		EnablePreview:     true,
-		PreviewTimeout:    30 * time.Second,
+		SupportedFormats:   []string{"pdf", "png", "jpg"},
+		MaxLabelSize:       5120, // 5MB
+		CacheTemplatesTTL:  2 * time.Hour,
+		StoragePath:        "/var/lib/ferre-pos/labels",
+		CleanupInterval:    24 * time.Hour,
+		FileRetentionDays:  30,
+		EnablePreview:      true,
+		PreviewTimeout:     30 * time.Second,
 	}
 }
 
 // DefaultReportsConfig configuración por defecto para API Reports
 func DefaultReportsConfig() ReportsConfig {
 	return ReportsConfig{
-		Enabled:               true,
-		BasePath:              "/api/reports",
-		MaxConcurrentReports:  5,
-		MaxReportSize:         100, // 100MB
-		DefaultFormat:         "pdf",
-		SupportedFormats:      []string{"pdf", "excel", "csv", "json"},
-		CacheReportsTTL:       1 * time.Hour,
-		StoragePath:           "/var/lib/ferre-pos/reports",
-		CleanupInterval:       24 * time.Hour,
-		FileRetentionDays:     90,
+		Enabled:                true,
+		BasePath:               "/api/reports",
+		MaxConcurrentReports:   5,
+		MaxReportSize:          100, // 100MB
+		DefaultFormat:          "pdf",
+		SupportedFormats:       []string{"pdf", "excel", "csv", "json"},
+		CacheReportsTTL:        1 * time.Hour,
+		StoragePath:            "/var/lib/ferre-pos/reports",
+		CleanupInterval:        24 * time.Hour,
+		FileRetentionDays:      90,
 		EnableScheduledReports: true,
-		MaxScheduledReports:   50,
-		ReportTimeout:         10 * time.Minute,
-		EnableDashboards:      true,
-		DashboardRefreshRate:  5 * time.Minute,
+		MaxScheduledReports:    50,
+		ReportTimeout:          10 * time.Minute,
+		EnableDashboards:       true,
+		DashboardRefreshRate:   5 * time.Minute,
 	}
 }
-

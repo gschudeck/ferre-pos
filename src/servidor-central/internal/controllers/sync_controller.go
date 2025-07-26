@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"ferre-pos-servidor-central/internal/models"
 	"ferre-pos-servidor-central/internal/services"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // SyncController maneja las operaciones del API de Sincronización
@@ -478,7 +479,7 @@ func (sc *SyncController) ResolverConflicto(c *gin.Context) {
 	}
 
 	sc.LogActivity(c, "resolver_conflicto", gin.H{
-		"conflicto_id":     conflictoID,
+		"conflicto_id":    conflictoID,
 		"tipo_resolucion": resolucionDTO.TipoResolucion,
 	})
 
@@ -775,4 +776,3 @@ func (sc *SyncController) GetResumenSincronizacion(c *gin.Context) {
 	sc.SetCacheHeaders(c, 120) // Cache por 2 minutos
 	sc.ResponseSuccess(c, resumen)
 }
-

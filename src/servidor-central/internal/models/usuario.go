@@ -39,13 +39,13 @@ type Usuario struct {
 
 // ConfiguracionPersonal contiene configuraciones específicas del usuario
 type ConfiguracionPersonal struct {
-	IdiomaPreferido        string            `json:"idioma_preferido"`
-	ZonaHoraria            string            `json:"zona_horaria"`
-	FormatoFecha           string            `json:"formato_fecha"`
-	FormatoHora            string            `json:"formato_hora"`
-	NotificacionesEmail    bool              `json:"notificaciones_email"`
-	NotificacionesPush     bool              `json:"notificaciones_push"`
-	TemaInterfaz           string            `json:"tema_interfaz"` // "claro", "oscuro", "auto"
+	IdiomaPreferido               string                 `json:"idioma_preferido"`
+	ZonaHoraria                   string                 `json:"zona_horaria"`
+	FormatoFecha                  string                 `json:"formato_fecha"`
+	FormatoHora                   string                 `json:"formato_hora"`
+	NotificacionesEmail           bool                   `json:"notificaciones_email"`
+	NotificacionesPush            bool                   `json:"notificaciones_push"`
+	TemaInterfaz                  string                 `json:"tema_interfaz"` // "claro", "oscuro", "auto"
 	ConfiguracionesPersonalizadas map[string]interface{} `json:"configuraciones_personalizadas,omitempty"`
 }
 
@@ -73,13 +73,13 @@ type CachePermisos struct {
 
 // PreferenciasUI contiene preferencias de interfaz de usuario
 type PreferenciasUI struct {
-	TamañoFuente           string            `json:"tamaño_fuente"`
-	ColorTema              string            `json:"color_tema"`
-	MostrarAyudas          bool              `json:"mostrar_ayudas"`
-	SonidosHabilitados     bool              `json:"sonidos_habilitados"`
-	AnimacionesHabilitadas bool              `json:"animaciones_habilitadas"`
+	TamañoFuente           string                 `json:"tamaño_fuente"`
+	ColorTema              string                 `json:"color_tema"`
+	MostrarAyudas          bool                   `json:"mostrar_ayudas"`
+	SonidosHabilitados     bool                   `json:"sonidos_habilitados"`
+	AnimacionesHabilitadas bool                   `json:"animaciones_habilitadas"`
 	LayoutPersonalizado    map[string]interface{} `json:"layout_personalizado,omitempty"`
-	AtajosPersonalizados   map[string]string `json:"atajos_personalizados,omitempty"`
+	AtajosPersonalizados   map[string]string      `json:"atajos_personalizados,omitempty"`
 }
 
 // Implementar driver.Valuer para tipos JSON personalizados
@@ -190,18 +190,18 @@ type UsuarioResponseDTO struct {
 }
 
 type UsuarioListDTO struct {
-	ID                uuid.UUID    `json:"id"`
-	Rut               string       `json:"rut"`
-	Nombre            string       `json:"nombre"`
-	Apellido          *string      `json:"apellido,omitempty"`
-	Email             *string      `json:"email,omitempty"`
-	Rol               RolUsuario   `json:"rol"`
-	SucursalID        *uuid.UUID   `json:"sucursal_id,omitempty"`
-	Activo            bool         `json:"activo"`
-	UltimoAcceso      *time.Time   `json:"ultimo_acceso,omitempty"`
-	FechaCreacion     time.Time    `json:"fecha_creacion"`
-	FechaModificacion time.Time    `json:"fecha_modificacion"`
-	SucursalNombre    *string      `json:"sucursal_nombre,omitempty"`
+	ID                uuid.UUID  `json:"id"`
+	Rut               string     `json:"rut"`
+	Nombre            string     `json:"nombre"`
+	Apellido          *string    `json:"apellido,omitempty"`
+	Email             *string    `json:"email,omitempty"`
+	Rol               RolUsuario `json:"rol"`
+	SucursalID        *uuid.UUID `json:"sucursal_id,omitempty"`
+	Activo            bool       `json:"activo"`
+	UltimoAcceso      *time.Time `json:"ultimo_acceso,omitempty"`
+	FechaCreacion     time.Time  `json:"fecha_creacion"`
+	FechaModificacion time.Time  `json:"fecha_modificacion"`
+	SucursalNombre    *string    `json:"sucursal_nombre,omitempty"`
 }
 
 type LoginDTO struct {
@@ -239,13 +239,13 @@ type UsuarioFilter struct {
 func (u *Usuario) SetPassword(password string) error {
 	// Generar salt
 	salt := uuid.New().String()
-	
+
 	// Generar hash con bcrypt
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password+salt), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	
+
 	u.Salt = salt
 	u.PasswordHash = string(hashedPassword)
 	return nil
@@ -285,7 +285,7 @@ func (u *Usuario) HasPermission(permission string) bool {
 			return perm
 		}
 	}
-	
+
 	// Lógica de permisos basada en rol
 	switch u.Rol {
 	case RolAdmin:
@@ -323,12 +323,12 @@ func (u *Usuario) ToResponseDTO() UsuarioResponseDTO {
 		FechaCreacion:         u.FechaCreacion,
 		FechaModificacion:     u.FechaModificacion,
 	}
-	
+
 	if u.Sucursal != nil {
 		sucursalDTO := u.Sucursal.ToListDTO()
 		dto.Sucursal = &sucursalDTO
 	}
-	
+
 	return dto
 }
 
@@ -346,11 +346,11 @@ func (u *Usuario) ToListDTO() UsuarioListDTO {
 		FechaCreacion:     u.FechaCreacion,
 		FechaModificacion: u.FechaModificacion,
 	}
-	
+
 	if u.Sucursal != nil {
 		dto.SucursalNombre = &u.Sucursal.Nombre
 	}
-	
+
 	return dto
 }
 
@@ -367,12 +367,12 @@ func (dto *UsuarioCreateDTO) ToModel() (*Usuario, error) {
 		ConfiguracionPersonal: dto.ConfiguracionPersonal,
 		PermisosEspeciales:    dto.PermisosEspeciales,
 	}
-	
+
 	// Establecer contraseña
 	if err := usuario.SetPassword(dto.Password); err != nil {
 		return nil, fmt.Errorf("error al establecer contraseña: %w", err)
 	}
-	
+
 	return usuario, nil
 }
 
@@ -383,7 +383,7 @@ func (u *Usuario) Validate() error {
 	if len(u.Rut) < 9 || len(u.Rut) > 12 {
 		return fmt.Errorf("formato de RUT inválido")
 	}
-	
+
 	// Validar email si está presente
 	if u.Email != nil && *u.Email != "" {
 		// Validación básica de email (en producción usar una librería)
@@ -391,7 +391,7 @@ func (u *Usuario) Validate() error {
 			return fmt.Errorf("formato de email inválido")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -408,4 +408,3 @@ func containsSubstring(s, substr string) bool {
 	}
 	return false
 }
-

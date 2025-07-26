@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"ferre-pos-servidor-central/internal/models"
 	"ferre-pos-servidor-central/internal/services"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // LabelsController maneja las operaciones del API de Etiquetas
@@ -636,7 +637,7 @@ func (lc *LabelsController) ValidarPlantilla(c *gin.Context) {
 	}
 
 	lc.ResponseSuccess(c, gin.H{
-		"valida": true,
+		"valida":  true,
 		"message": "Plantilla válida",
 	})
 }
@@ -695,4 +696,3 @@ func (lc *LabelsController) GetEstadisticasEtiquetas(c *gin.Context) {
 	lc.SetCacheHeaders(c, 300) // Cache por 5 minutos
 	lc.ResponseSuccess(c, estadisticas)
 }
-
