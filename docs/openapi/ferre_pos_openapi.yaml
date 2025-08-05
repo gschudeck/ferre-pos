@@ -1,0 +1,1287 @@
+openapi: 3.0.3
+info:
+  title: FERRE-POS APIs
+  description: |
+    Sistema integral de punto de venta para ferreterías con arquitectura de microservicios.
+    
+    ## Descripción General
+    
+    FERRE-POS es un sistema completo que incluye 4 APIs especializadas:
+    
+    - **API POS** (Puerto 8080): Operaciones de punto de venta, gestión de productos, usuarios y ventas
+    - **API Sync** (Puerto 8081): Sincronización entre terminales y servidor central
+    - **API Labels** (Puerto 8082): Generación de etiquetas y códigos de barras
+    - **API Reports** (Puerto 8083): Reportes, analytics y dashboards
+    
+    ## Autenticación
+    
+    Todas las APIs utilizan autenticación JWT Bearer Token:
+    
+    1. Obtener token mediante login en API POS o autenticación de terminal en API Sync
+    2. Incluir token en header: `Authorization: Bearer <token>`
+    3. Renovar token usando refresh token cuando sea necesario
+    
+    ## Rate Limiting
+    
+    - Límite por defecto: 100 requests por minuto por IP
+    - Burst permitido: 20 requests
+    - Headers de respuesta incluyen información de límites
+    
+    ## Códigos de Error Estándar
+    
+    - `400` Bad Request: Datos de entrada inválidos
+    - `401` Unauthorized: Token faltante o inválido
+    - `403` Forbidden: Permisos insuficientes
+    - `404` Not Found: Recurso no encontrado
+    - `409` Conflict: Conflicto de datos (ej. duplicados)
+    - `422` Unprocessable Entity: Validación de negocio fallida
+    - `429` Too Many Requests: Rate limit excedido
+    - `500` Internal Server Error: Error interno del servidor
+    
+  version: 1.0.0
+  contact:
+    name: Soporte FERRE-POS
+    email: soporte@ferrepos.com
+    url: https://ferrepos.com/soporte
+  license:
+    name: Propietario
+    url: https://ferrepos.com/licencia
+
+servers:
+  - url: http://localhost:8080
+    description: API POS - Desarrollo
+  - url: http://localhost:8081
+    description: API Sync - Desarrollo
+  - url: http://localhost:8082
+    description: API Labels - Desarrollo
+  - url: http://localhost:8083
+    description: API Reports - Desarrollo
+  - url: https://api.ferrepos.com
+    description: Producción
+
+security:
+  - BearerAuth: []
+
+paths:
+  # API POS Endpoints
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Autenticación POS
+      summary: Login de usuario
+      description: Autentica un usuario y retorna tokens JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: Nombre de usuario
+                  example: admin_test
+                password:
+                  type: string
+                  format: password
+                  description: Contraseña del usuario
+                  example: password123
+                terminal_id:
+                  type: string
+                  description: ID de la terminal (opcional)
+                  example: test-terminal-1
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                        description: Token JWT de acceso
+                      refresh_token:
+                        type: string
+                        description: Token para renovar acceso
+                      expires_in:
+                        type: integer
+                        description: Tiempo de expiración en segundos
+                        example: 86400
+                      user:
+                        $ref: '#/components/schemas/Usuario'
+                  request_id:
+                    type: string
+                    example: auth_req_001
+                  timestamp:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/v1/products:
+    get:
+      tags:
+        - Productos POS
+      summary: Listar productos
+      description: Obtiene lista paginada de productos con filtros opcionales
+      parameters:
+        - name: sucursal_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la sucursal
+          example: test-sucursal-1
+        - name: categoria_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por categoría
+        - name: activo
+          in: query
+          schema:
+            type: boolean
+          description: Filtrar por estado activo
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Búsqueda por nombre o código
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Número de página
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Elementos por página
+      responses:
+        '200':
+          description: Lista de productos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Producto'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  request_id:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Productos POS
+      summary: Crear producto
+      description: Crea un nuevo producto en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoCreate'
+      responses:
+        '201':
+          description: Producto creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Producto'
+                  request_id:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/products/{id}:
+    get:
+      tags:
+        - Productos POS
+      summary: Obtener producto
+      description: Obtiene detalles de un producto específico
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del producto
+        - name: sucursal_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la sucursal
+      responses:
+        '200':
+          description: Detalles del producto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Producto'
+                  request_id:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/sales:
+    post:
+      tags:
+        - Ventas POS
+      summary: Crear venta
+      description: Procesa una nueva venta en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VentaCreate'
+      responses:
+        '201':
+          description: Venta creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Venta'
+                  request_id:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  # API Sync Endpoints
+  /api/v1/sync/auth/terminal:
+    post:
+      tags:
+        - Autenticación Sync
+      summary: Autenticación de terminal
+      description: Autentica una terminal para sincronización
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - terminal_id
+                - terminal_secret
+              properties:
+                terminal_id:
+                  type: string
+                  description: ID único de la terminal
+                  example: test-terminal-1
+                terminal_secret:
+                  type: string
+                  description: Clave secreta de la terminal
+                  example: secret_key_for_terminal_1
+                mac_address:
+                  type: string
+                  description: Dirección MAC de la terminal
+                  example: "00:11:22:33:44:55"
+                ip_address:
+                  type: string
+                  description: Dirección IP de la terminal
+                  example: "192.168.1.100"
+                software_version:
+                  type: string
+                  description: Versión del software de terminal
+                  example: "FERRE-POS Terminal v1.0.5"
+      responses:
+        '200':
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+                      expires_in:
+                        type: integer
+                        example: 86400
+                      terminal:
+                        $ref: '#/components/schemas/Terminal'
+
+  /api/v1/sync/pull:
+    post:
+      tags:
+        - Sincronización
+      summary: Descargar cambios
+      description: Descarga cambios desde el servidor central
+      parameters:
+        - name: X-Terminal-ID
+          in: header
+          required: true
+          schema:
+            type: string
+          description: ID de la terminal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                last_sync_timestamp:
+                  type: string
+                  format: date-time
+                  description: Timestamp de última sincronización
+                sync_types:
+                  type: array
+                  items:
+                    type: string
+                    enum: [productos, precios, categorias, usuarios]
+                  description: Tipos de datos a sincronizar
+                filters:
+                  type: object
+                  description: Filtros adicionales
+      responses:
+        '200':
+          description: Cambios descargados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+
+  # API Labels Endpoints
+  /api/v1/templates:
+    get:
+      tags:
+        - Plantillas Labels
+      summary: Listar plantillas
+      description: Obtiene lista de plantillas de etiquetas disponibles
+      responses:
+        '200':
+          description: Lista de plantillas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PlantillaEtiqueta'
+
+  /api/v1/labels/generate:
+    post:
+      tags:
+        - Generación Labels
+      summary: Generar etiquetas
+      description: Genera etiquetas para productos especificados
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - plantilla_id
+                - productos
+              properties:
+                plantilla_id:
+                  type: string
+                  description: ID de la plantilla a usar
+                  example: template-basic
+                productos:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      producto_id:
+                        type: string
+                        format: uuid
+                      cantidad:
+                        type: integer
+                        minimum: 1
+                opciones:
+                  type: object
+                  properties:
+                    formato_salida:
+                      type: string
+                      enum: [pdf, png, jpg]
+                      default: pdf
+                    etiquetas_por_hoja:
+                      type: integer
+                      default: 12
+      responses:
+        '202':
+          description: Generación iniciada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      job_id:
+                        type: string
+                        description: ID del trabajo de generación
+                      status:
+                        type: string
+                        enum: [processing, completed, failed]
+                      download_url:
+                        type: string
+                        description: URL de descarga (cuando esté listo)
+
+  # API Reports Endpoints
+  /api/v1/reports/sales/summary:
+    get:
+      tags:
+        - Reportes Ventas
+      summary: Resumen de ventas
+      description: Obtiene resumen ejecutivo de ventas para un período
+      parameters:
+        - name: fecha_inicio
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Fecha de inicio del período
+          example: "2025-01-01"
+        - name: fecha_fin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Fecha de fin del período
+          example: "2025-01-08"
+        - name: sucursal_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por sucursal específica
+        - name: comparar_periodo_anterior
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Incluir comparación con período anterior
+      responses:
+        '200':
+          description: Resumen de ventas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/ResumenVentas'
+
+  /api/v1/reports/dashboard/executive:
+    get:
+      tags:
+        - Dashboard Reports
+      summary: Dashboard ejecutivo
+      description: Obtiene métricas clave para dashboard ejecutivo
+      parameters:
+        - name: periodo
+          in: query
+          schema:
+            type: string
+            enum: [hoy, semana, mes, trimestre]
+            default: mes
+          description: Período del dashboard
+      responses:
+        '200':
+          description: Datos del dashboard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/DashboardEjecutivo'
+
+  # Health Check Endpoints
+  /health:
+    get:
+      tags:
+        - Health Check
+      summary: Verificación de estado
+      description: Verifica el estado de salud de la API
+      security: []
+      responses:
+        '200':
+          description: Servicio saludable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  uptime:
+                    type: integer
+                    description: Tiempo de actividad en segundos
+                  dependencies:
+                    type: object
+                    properties:
+                      database:
+                        type: string
+                        enum: [healthy, unhealthy]
+                      redis:
+                        type: string
+                        enum: [healthy, unhealthy]
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtenido del endpoint de login
+
+  schemas:
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: test-user-1
+        username:
+          type: string
+          example: admin_test
+        nombre:
+          type: string
+          example: Administrador Test
+        email:
+          type: string
+          format: email
+          example: admin@test.com
+        rol:
+          type: string
+          enum: [admin, supervisor, vendedor, cajero, etiquetas]
+          example: admin
+        sucursal_id:
+          type: string
+          format: uuid
+          example: test-sucursal-1
+        activo:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Producto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: test-product-1
+        codigo:
+          type: string
+          example: TEST001
+        codigo_barras:
+          type: string
+          example: "1234567890123"
+        nombre:
+          type: string
+          example: Martillo Test 500g
+        descripcion:
+          type: string
+          example: Martillo de acero con mango de madera
+        categoria_id:
+          type: string
+          format: uuid
+          example: test-category-1
+        categoria_nombre:
+          type: string
+          example: Test Herramientas
+        precio:
+          type: number
+          format: decimal
+          example: 15000.00
+        costo:
+          type: number
+          format: decimal
+          example: 8000.00
+        stock_actual:
+          type: integer
+          example: 25
+        stock_minimo:
+          type: integer
+          example: 5
+        stock_maximo:
+          type: integer
+          example: 100
+        activo:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ProductoCreate:
+      type: object
+      required:
+        - codigo
+        - nombre
+        - categoria_id
+        - precio
+        - costo
+      properties:
+        codigo:
+          type: string
+          example: TEST009
+        codigo_barras:
+          type: string
+          example: "1234567890131"
+        nombre:
+          type: string
+          example: Taladro Inalámbrico 18V
+        descripcion:
+          type: string
+          example: Taladro inalámbrico profesional
+        categoria_id:
+          type: string
+          format: uuid
+          example: test-category-1
+        precio:
+          type: number
+          format: decimal
+          minimum: 0
+          example: 85000.00
+        costo:
+          type: number
+          format: decimal
+          minimum: 0
+          example: 55000.00
+        stock_minimo:
+          type: integer
+          minimum: 0
+          default: 0
+          example: 3
+        stock_maximo:
+          type: integer
+          minimum: 0
+          example: 50
+        activo:
+          type: boolean
+          default: true
+
+    Venta:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: test-venta-1
+        numero_documento:
+          type: string
+          example: TEST-V-001
+        fecha_venta:
+          type: string
+          format: date-time
+        sucursal_id:
+          type: string
+          format: uuid
+        terminal_id:
+          type: string
+          example: test-terminal-1
+        cajero_id:
+          type: string
+          format: uuid
+        vendedor_id:
+          type: string
+          format: uuid
+        cliente:
+          type: object
+          properties:
+            nombre:
+              type: string
+            email:
+              type: string
+              format: email
+        tipo_documento:
+          type: string
+          enum: [boleta, factura]
+        subtotal:
+          type: number
+          format: decimal
+        descuentos:
+          type: number
+          format: decimal
+        impuestos:
+          type: number
+          format: decimal
+        total:
+          type: number
+          format: decimal
+        estado:
+          type: string
+          enum: [completada, anulada, pendiente]
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/VentaItem'
+        medios_pago:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedioPago'
+
+    VentaCreate:
+      type: object
+      required:
+        - sucursal_id
+        - terminal_id
+        - cajero_id
+        - items
+        - medios_pago
+      properties:
+        sucursal_id:
+          type: string
+          format: uuid
+        terminal_id:
+          type: string
+        cajero_id:
+          type: string
+          format: uuid
+        vendedor_id:
+          type: string
+          format: uuid
+        cliente:
+          type: object
+          properties:
+            nombre:
+              type: string
+            email:
+              type: string
+              format: email
+        tipo_documento:
+          type: string
+          enum: [boleta, factura]
+          default: boleta
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - producto_id
+              - cantidad
+              - precio_unitario
+            properties:
+              producto_id:
+                type: string
+                format: uuid
+              cantidad:
+                type: integer
+                minimum: 1
+              precio_unitario:
+                type: number
+                format: decimal
+                minimum: 0
+        medios_pago:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - medio_pago
+              - monto
+            properties:
+              medio_pago:
+                type: string
+                enum: [efectivo, tarjeta_credito, tarjeta_debito, transferencia]
+              monto:
+                type: number
+                format: decimal
+                minimum: 0
+
+    VentaItem:
+      type: object
+      properties:
+        producto_id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+        nombre:
+          type: string
+        cantidad:
+          type: integer
+        precio_unitario:
+          type: number
+          format: decimal
+        subtotal:
+          type: number
+          format: decimal
+
+    MedioPago:
+      type: object
+      properties:
+        medio_pago:
+          type: string
+          enum: [efectivo, tarjeta_credito, tarjeta_debito, transferencia]
+        monto:
+          type: number
+          format: decimal
+
+    Terminal:
+      type: object
+      properties:
+        id:
+          type: string
+          example: test-terminal-1
+        nombre:
+          type: string
+          example: Terminal Principal
+        sucursal_id:
+          type: string
+          format: uuid
+        ip_address:
+          type: string
+          example: "192.168.1.100"
+        mac_address:
+          type: string
+          example: "00:11:22:33:44:55"
+        estado:
+          type: string
+          enum: [online, offline, mantenimiento]
+        ultimo_heartbeat:
+          type: string
+          format: date-time
+        software_version:
+          type: string
+          example: "FERRE-POS Terminal v1.0.5"
+
+    PlantillaEtiqueta:
+      type: object
+      properties:
+        id:
+          type: string
+          example: template-basic
+        nombre:
+          type: string
+          example: Plantilla Básica
+        descripcion:
+          type: string
+          example: Plantilla básica para etiquetas de productos
+        ancho_mm:
+          type: number
+          format: decimal
+          example: 50.0
+        alto_mm:
+          type: number
+          format: decimal
+          example: 30.0
+        elementos:
+          type: array
+          items:
+            type: object
+            properties:
+              tipo:
+                type: string
+                enum: [texto, codigo_barras, imagen]
+              posicion_x:
+                type: number
+              posicion_y:
+                type: number
+              ancho:
+                type: number
+              alto:
+                type: number
+
+    SyncResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            sync_id:
+              type: string
+              example: sync_001
+            timestamp:
+              type: string
+              format: date-time
+            changes:
+              type: object
+              properties:
+                productos:
+                  type: object
+                  properties:
+                    created:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Producto'
+                    updated:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Producto'
+                    deleted:
+                      type: array
+                      items:
+                        type: string
+                        format: uuid
+
+    ResumenVentas:
+      type: object
+      properties:
+        periodo:
+          type: object
+          properties:
+            fecha_inicio:
+              type: string
+              format: date
+            fecha_fin:
+              type: string
+              format: date
+            dias_incluidos:
+              type: integer
+        metricas_principales:
+          type: object
+          properties:
+            total_ventas:
+              type: number
+              format: decimal
+            cantidad_transacciones:
+              type: integer
+            ticket_promedio:
+              type: number
+              format: decimal
+            productos_vendidos:
+              type: integer
+            margen_bruto:
+              type: number
+              format: decimal
+            margen_porcentaje:
+              type: number
+              format: decimal
+
+    DashboardEjecutivo:
+      type: object
+      properties:
+        periodo:
+          type: object
+          properties:
+            tipo:
+              type: string
+              enum: [hoy, semana, mes, trimestre]
+            fecha_inicio:
+              type: string
+              format: date
+            fecha_fin:
+              type: string
+              format: date
+        kpis_principales:
+          type: object
+          properties:
+            ventas_totales:
+              type: object
+              properties:
+                valor:
+                  type: number
+                  format: decimal
+                objetivo:
+                  type: number
+                  format: decimal
+                progreso_porcentual:
+                  type: number
+                  format: decimal
+                tendencia:
+                  type: string
+                  enum: [positiva, negativa, estable]
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 150
+        total_pages:
+          type: integer
+          example: 8
+
+    APIError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: Los datos proporcionados no son válidos
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+        request_id:
+          type: string
+          example: req_123456789
+        timestamp:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+          example:
+            success: false
+            error:
+              code: BAD_REQUEST
+              message: Los parámetros de la solicitud son inválidos
+            request_id: req_123456789
+            timestamp: "2025-01-08T16:00:00Z"
+
+    Unauthorized:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+          example:
+            success: false
+            error:
+              code: UNAUTHORIZED
+              message: Token de acceso requerido
+            request_id: req_123456789
+            timestamp: "2025-01-08T16:00:00Z"
+
+    Forbidden:
+      description: Acceso prohibido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+          example:
+            success: false
+            error:
+              code: FORBIDDEN
+              message: Permisos insuficientes para esta operación
+            request_id: req_123456789
+            timestamp: "2025-01-08T16:00:00Z"
+
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+          example:
+            success: false
+            error:
+              code: NOT_FOUND
+              message: El recurso solicitado no existe
+            request_id: req_123456789
+            timestamp: "2025-01-08T16:00:00Z"
+
+    Conflict:
+      description: Conflicto de datos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+          example:
+            success: false
+            error:
+              code: CONFLICT
+              message: Ya existe un recurso con estos datos
+            request_id: req_123456789
+            timestamp: "2025-01-08T16:00:00Z"
+
+    ValidationError:
+      description: Error de validación
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+          example:
+            success: false
+            error:
+              code: VALIDATION_ERROR
+              message: Los datos no cumplen con las reglas de validación
+              details:
+                - field: email
+                  message: Formato de email inválido
+                - field: precio
+                  message: El precio debe ser mayor a 0
+            request_id: req_123456789
+            timestamp: "2025-01-08T16:00:00Z"
+
+    TooManyRequests:
+      description: Demasiadas solicitudes
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Límite de requests por minuto
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Requests restantes en la ventana actual
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Timestamp cuando se resetea el límite
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+          example:
+            success: false
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Límite de solicitudes excedido
+            request_id: req_123456789
+            timestamp: "2025-01-08T16:00:00Z"
+
+tags:
+  - name: Autenticación POS
+    description: Endpoints de autenticación para usuarios del sistema POS
+  - name: Productos POS
+    description: Gestión de productos en el sistema POS
+  - name: Ventas POS
+    description: Procesamiento de ventas y transacciones
+  - name: Autenticación Sync
+    description: Autenticación de terminales para sincronización
+  - name: Sincronización
+    description: Endpoints para sincronización de datos entre terminales
+  - name: Plantillas Labels
+    description: Gestión de plantillas de etiquetas
+  - name: Generación Labels
+    description: Generación de etiquetas y códigos de barras
+  - name: Reportes Ventas
+    description: Reportes y análisis de ventas
+  - name: Dashboard Reports
+    description: Dashboards ejecutivos y métricas clave
+  - name: Health Check
+    description: Verificación de estado de las APIs
+
+externalDocs:
+  description: Documentación completa de FERRE-POS
+  url: https://docs.ferrepos.com
+

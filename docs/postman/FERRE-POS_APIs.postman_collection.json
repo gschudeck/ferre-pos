@@ -1,0 +1,959 @@
+{
+  "info": {
+    "name": "FERRE-POS APIs",
+    "description": "Colección completa de endpoints para el sistema FERRE-POS\n\nEsta colección incluye todos los endpoints de las 4 APIs:\n- API POS (Puerto 8080): Operaciones de punto de venta\n- API Sync (Puerto 8081): Sincronización entre terminales\n- API Labels (Puerto 8082): Generación de etiquetas\n- API Reports (Puerto 8083): Reportes y analytics\n\nPara usar esta colección:\n1. Importar en Postman\n2. Configurar variables de entorno\n3. Ejecutar login para obtener token\n4. Usar endpoints según necesidades\n\nAutor: Manus AI\nVersión: 1.0.0\nFecha: Enero 2025",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost",
+      "type": "string",
+      "description": "URL base del servidor FERRE-POS"
+    },
+    {
+      "key": "api_pos_port",
+      "value": "8080",
+      "type": "string",
+      "description": "Puerto de la API POS"
+    },
+    {
+      "key": "api_sync_port",
+      "value": "8081",
+      "type": "string",
+      "description": "Puerto de la API Sync"
+    },
+    {
+      "key": "api_labels_port",
+      "value": "8082",
+      "type": "string",
+      "description": "Puerto de la API Labels"
+    },
+    {
+      "key": "api_reports_port",
+      "value": "8083",
+      "type": "string",
+      "description": "Puerto de la API Reports"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string",
+      "description": "Token de acceso JWT (se obtiene del login)"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string",
+      "description": "Token de refresh (se obtiene del login)"
+    },
+    {
+      "key": "terminal_id",
+      "value": "test-terminal-1",
+      "type": "string",
+      "description": "ID de terminal para API Sync"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "API POS",
+      "description": "Endpoints de la API POS para operaciones de punto de venta",
+      "item": [
+        {
+          "name": "Autenticación",
+          "item": [
+            {
+              "name": "Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    if (response.success && response.data.access_token) {",
+                      "        pm.collectionVariables.set('access_token', response.data.access_token);",
+                      "        pm.collectionVariables.set('refresh_token', response.data.refresh_token);",
+                      "        console.log('Tokens guardados exitosamente');",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"admin_test\",\n  \"password\": \"password123\",\n  \"terminal_id\": \"test-terminal-1\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_pos_port}}/api/v1/auth/login",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_pos_port}}",
+                  "path": ["api", "v1", "auth", "login"]
+                },
+                "description": "Autentica un usuario y obtiene tokens JWT"
+              }
+            },
+            {
+              "name": "Refresh Token",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_pos_port}}/api/v1/auth/refresh",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_pos_port}}",
+                  "path": ["api", "v1", "auth", "refresh"]
+                },
+                "description": "Renueva el token de acceso usando el refresh token"
+              }
+            },
+            {
+              "name": "Logout",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_pos_port}}/api/v1/auth/logout",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_pos_port}}",
+                  "path": ["api", "v1", "auth", "logout"]
+                },
+                "description": "Cierra la sesión del usuario actual"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Productos",
+          "item": [
+            {
+              "name": "Listar Productos",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_pos_port}}/api/v1/products?sucursal_id=test-sucursal-1&page=1&per_page=20",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_pos_port}}",
+                  "path": ["api", "v1", "products"],
+                  "query": [
+                    {
+                      "key": "sucursal_id",
+                      "value": "test-sucursal-1"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Obtiene lista paginada de productos"
+              }
+            },
+            {
+              "name": "Obtener Producto",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_pos_port}}/api/v1/products/test-product-1?sucursal_id=test-sucursal-1",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_pos_port}}",
+                  "path": ["api", "v1", "products", "test-product-1"],
+                  "query": [
+                    {
+                      "key": "sucursal_id",
+                      "value": "test-sucursal-1"
+                    }
+                  ]
+                },
+                "description": "Obtiene detalles de un producto específico"
+              }
+            },
+            {
+              "name": "Buscar por Código de Barras",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_pos_port}}/api/v1/products/barcode/1234567890123?sucursal_id=test-sucursal-1",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_pos_port}}",
+                  "path": ["api", "v1", "products", "barcode", "1234567890123"],
+                  "query": [
+                    {
+                      "key": "sucursal_id",
+                      "value": "test-sucursal-1"
+                    }
+                  ]
+                },
+                "description": "Busca un producto por su código de barras"
+              }
+            },
+            {
+              "name": "Crear Producto",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"codigo\": \"TEST009\",\n  \"codigo_barras\": \"1234567890131\",\n  \"nombre\": \"Taladro Inalámbrico 18V\",\n  \"descripcion\": \"Taladro inalámbrico profesional con batería de litio\",\n  \"categoria_id\": \"test-category-1\",\n  \"precio\": 85000.00,\n  \"costo\": 55000.00,\n  \"stock_minimo\": 3,\n  \"activo\": true\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_pos_port}}/api/v1/products",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_pos_port}}",
+                  "path": ["api", "v1", "products"]
+                },
+                "description": "Crea un nuevo producto"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ventas",
+          "item": [
+            {
+              "name": "Crear Venta",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sucursal_id\": \"test-sucursal-1\",\n  \"terminal_id\": \"test-terminal-1\",\n  \"cajero_id\": \"test-user-3\",\n  \"vendedor_id\": \"test-user-2\",\n  \"cliente\": {\n    \"nombre\": \"Juan Pérez\",\n    \"email\": \"juan.perez@email.com\"\n  },\n  \"tipo_documento\": \"boleta\",\n  \"items\": [\n    {\n      \"producto_id\": \"test-product-1\",\n      \"cantidad\": 2,\n      \"precio_unitario\": 15000.00\n    }\n  ],\n  \"medios_pago\": [\n    {\n      \"medio_pago\": \"efectivo\",\n      \"monto\": 30000.00\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_pos_port}}/api/v1/sales",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_pos_port}}",
+                  "path": ["api", "v1", "sales"]
+                },
+                "description": "Crea una nueva venta"
+              }
+            },
+            {
+              "name": "Listar Ventas",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_pos_port}}/api/v1/sales?page=1&per_page=20",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_pos_port}}",
+                  "path": ["api", "v1", "sales"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Obtiene lista de ventas"
+              }
+            },
+            {
+              "name": "Obtener Venta",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_pos_port}}/api/v1/sales/test-venta-1",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_pos_port}}",
+                  "path": ["api", "v1", "sales", "test-venta-1"]
+                },
+                "description": "Obtiene detalles de una venta específica"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{api_pos_port}}/health",
+              "host": ["{{base_url}}"],
+              "port": "{{api_pos_port}}",
+              "path": ["health"]
+            },
+            "description": "Verifica el estado de la API POS"
+          }
+        }
+      ]
+    },
+    {
+      "name": "API Sync",
+      "description": "Endpoints de la API Sync para sincronización entre terminales",
+      "item": [
+        {
+          "name": "Autenticación Terminal",
+          "item": [
+            {
+              "name": "Login Terminal",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    if (response.success && response.data.access_token) {",
+                      "        pm.collectionVariables.set('access_token', response.data.access_token);",
+                      "        pm.collectionVariables.set('refresh_token', response.data.refresh_token);",
+                      "        console.log('Tokens de terminal guardados exitosamente');",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"terminal_id\": \"test-terminal-1\",\n  \"terminal_secret\": \"secret_key_for_terminal_1\",\n  \"mac_address\": \"00:11:22:33:44:55\",\n  \"ip_address\": \"192.168.1.100\",\n  \"software_version\": \"FERRE-POS Terminal v1.0.5\",\n  \"location\": {\n    \"sucursal_id\": \"test-sucursal-1\",\n    \"zona\": \"Caja Principal\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_sync_port}}/api/v1/sync/auth/terminal",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_sync_port}}",
+                  "path": ["api", "v1", "sync", "auth", "terminal"]
+                },
+                "description": "Autentica una terminal para sincronización"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sincronización",
+          "item": [
+            {
+              "name": "Pull Changes",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Terminal-ID",
+                    "value": "{{terminal_id}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"last_sync_timestamp\": \"2025-01-08T12:00:00Z\",\n  \"sync_types\": [\"productos\", \"precios\", \"categorias\"],\n  \"filters\": {\n    \"sucursal_id\": \"test-sucursal-1\",\n    \"only_active\": true\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_sync_port}}/api/v1/sync/pull",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_sync_port}}",
+                  "path": ["api", "v1", "sync", "pull"]
+                },
+                "description": "Descarga cambios desde el servidor central"
+              }
+            },
+            {
+              "name": "Push Changes",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Terminal-ID",
+                    "value": "{{terminal_id}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"terminal_id\": \"test-terminal-1\",\n  \"sync_timestamp\": \"2025-01-08T13:20:00Z\",\n  \"changes\": {\n    \"ventas\": {\n      \"created\": [\n        {\n          \"id\": \"local-sale-001\",\n          \"numero_documento\": \"LOCAL-001\",\n          \"fecha_venta\": \"2025-01-08T13:15:00Z\",\n          \"total\": 18500.00,\n          \"created_offline\": true\n        }\n      ]\n    }\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_sync_port}}/api/v1/sync/push",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_sync_port}}",
+                  "path": ["api", "v1", "sync", "push"]
+                },
+                "description": "Carga cambios desde la terminal al servidor"
+              }
+            },
+            {
+              "name": "Heartbeat",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Terminal-ID",
+                    "value": "{{terminal_id}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"terminal_id\": \"test-terminal-1\",\n  \"timestamp\": \"2025-01-08T13:45:00Z\",\n  \"status\": \"online\",\n  \"health\": {\n    \"cpu_usage\": 15.2,\n    \"memory_usage\": 68.5,\n    \"pending_transactions\": 0\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_sync_port}}/api/v1/sync/heartbeat",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_sync_port}}",
+                  "path": ["api", "v1", "sync", "heartbeat"]
+                },
+                "description": "Envía señal de vida de la terminal"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Conflictos",
+          "item": [
+            {
+              "name": "Listar Conflictos",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Terminal-ID",
+                    "value": "{{terminal_id}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}:{{api_sync_port}}/api/v1/sync/conflicts",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_sync_port}}",
+                  "path": ["api", "v1", "sync", "conflicts"]
+                },
+                "description": "Obtiene conflictos pendientes de resolución"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API Labels",
+      "description": "Endpoints de la API Labels para generación de etiquetas",
+      "item": [
+        {
+          "name": "Plantillas",
+          "item": [
+            {
+              "name": "Listar Plantillas",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_labels_port}}/api/v1/templates",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_labels_port}}",
+                  "path": ["api", "v1", "templates"]
+                },
+                "description": "Obtiene lista de plantillas de etiquetas"
+              }
+            },
+            {
+              "name": "Obtener Plantilla",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_labels_port}}/api/v1/templates/template-basic",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_labels_port}}",
+                  "path": ["api", "v1", "templates", "template-basic"]
+                },
+                "description": "Obtiene detalles de una plantilla específica"
+              }
+            },
+            {
+              "name": "Preview Plantilla",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_labels_port}}/api/v1/templates/template-basic/preview?formato=png",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_labels_port}}",
+                  "path": ["api", "v1", "templates", "template-basic", "preview"],
+                  "query": [
+                    {
+                      "key": "formato",
+                      "value": "png"
+                    }
+                  ]
+                },
+                "description": "Genera preview de una plantilla"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Generación",
+          "item": [
+            {
+              "name": "Generar Etiqueta Individual",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"plantilla_id\": \"template-basic\",\n  \"producto_id\": \"test-product-1\",\n  \"formato_salida\": \"png\",\n  \"dpi\": 300\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_labels_port}}/api/v1/labels/generate/single",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_labels_port}}",
+                  "path": ["api", "v1", "labels", "generate", "single"]
+                },
+                "description": "Genera una etiqueta individual"
+              }
+            },
+            {
+              "name": "Generar Etiquetas Múltiples",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"plantilla_id\": \"template-basic\",\n  \"productos\": [\n    {\n      \"producto_id\": \"test-product-1\",\n      \"cantidad\": 10\n    },\n    {\n      \"producto_id\": \"test-product-2\",\n      \"cantidad\": 25\n    }\n  ],\n  \"opciones\": {\n    \"formato_salida\": \"pdf\",\n    \"etiquetas_por_hoja\": 12\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_labels_port}}/api/v1/labels/generate",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_labels_port}}",
+                  "path": ["api", "v1", "labels", "generate"]
+                },
+                "description": "Genera múltiples etiquetas"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Códigos de Barras",
+          "item": [
+            {
+              "name": "Generar Códigos de Barras",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"codigos\": [\n    {\n      \"valor\": \"1234567890123\",\n      \"tipo\": \"EAN13\",\n      \"formato_salida\": \"png\"\n    }\n  ],\n  \"opciones\": {\n    \"ancho_mm\": 40.0,\n    \"alto_mm\": 15.0,\n    \"mostrar_texto\": true\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_labels_port}}/api/v1/barcodes/generate",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_labels_port}}",
+                  "path": ["api", "v1", "barcodes", "generate"]
+                },
+                "description": "Genera códigos de barras"
+              }
+            },
+            {
+              "name": "Validar Códigos de Barras",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"codigos\": [\n    {\n      \"valor\": \"1234567890123\",\n      \"tipo\": \"EAN13\"\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_labels_port}}/api/v1/barcodes/validate",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_labels_port}}",
+                  "path": ["api", "v1", "barcodes", "validate"]
+                },
+                "description": "Valida códigos de barras"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API Reports",
+      "description": "Endpoints de la API Reports para reportes y analytics",
+      "item": [
+        {
+          "name": "Reportes de Ventas",
+          "item": [
+            {
+              "name": "Resumen de Ventas",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_reports_port}}/api/v1/reports/sales/summary?fecha_inicio=2025-01-01&fecha_fin=2025-01-08&comparar_periodo_anterior=true",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_reports_port}}",
+                  "path": ["api", "v1", "reports", "sales", "summary"],
+                  "query": [
+                    {
+                      "key": "fecha_inicio",
+                      "value": "2025-01-01"
+                    },
+                    {
+                      "key": "fecha_fin",
+                      "value": "2025-01-08"
+                    },
+                    {
+                      "key": "comparar_periodo_anterior",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Obtiene resumen ejecutivo de ventas"
+              }
+            },
+            {
+              "name": "Reporte Detallado de Ventas",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_reports_port}}/api/v1/reports/sales/detailed?fecha_inicio=2025-01-01&fecha_fin=2025-01-08&incluir_costos=true",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_reports_port}}",
+                  "path": ["api", "v1", "reports", "sales", "detailed"],
+                  "query": [
+                    {
+                      "key": "fecha_inicio",
+                      "value": "2025-01-01"
+                    },
+                    {
+                      "key": "fecha_fin",
+                      "value": "2025-01-08"
+                    },
+                    {
+                      "key": "incluir_costos",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Obtiene reporte detallado de ventas"
+              }
+            },
+            {
+              "name": "Análisis de Tendencias",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_reports_port}}/api/v1/reports/sales/trends?periodo=mes&incluir_proyeccion=true",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_reports_port}}",
+                  "path": ["api", "v1", "reports", "sales", "trends"],
+                  "query": [
+                    {
+                      "key": "periodo",
+                      "value": "mes"
+                    },
+                    {
+                      "key": "incluir_proyeccion",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Analiza tendencias de ventas"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes de Inventario",
+          "item": [
+            {
+              "name": "Estado de Inventario",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_reports_port}}/api/v1/reports/inventory/status?incluir_valorizacion=true",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_reports_port}}",
+                  "path": ["api", "v1", "reports", "inventory", "status"],
+                  "query": [
+                    {
+                      "key": "incluir_valorizacion",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Obtiene estado actual del inventario"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes Financieros",
+          "item": [
+            {
+              "name": "Análisis de Rentabilidad",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_reports_port}}/api/v1/reports/financial/profitability?fecha_inicio=2025-01-01&fecha_fin=2025-01-08",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_reports_port}}",
+                  "path": ["api", "v1", "reports", "financial", "profitability"],
+                  "query": [
+                    {
+                      "key": "fecha_inicio",
+                      "value": "2025-01-01"
+                    },
+                    {
+                      "key": "fecha_fin",
+                      "value": "2025-01-08"
+                    }
+                  ]
+                },
+                "description": "Analiza rentabilidad del negocio"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard",
+          "item": [
+            {
+              "name": "Dashboard Ejecutivo",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}:{{api_reports_port}}/api/v1/reports/dashboard/executive?periodo=mes",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_reports_port}}",
+                  "path": ["api", "v1", "reports", "dashboard", "executive"],
+                  "query": [
+                    {
+                      "key": "periodo",
+                      "value": "mes"
+                    }
+                  ]
+                },
+                "description": "Obtiene dashboard ejecutivo"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Exportación",
+          "item": [
+            {
+              "name": "Exportar Reporte",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipo_reporte\": \"sales_summary\",\n  \"parametros\": {\n    \"fecha_inicio\": \"2025-01-01\",\n    \"fecha_fin\": \"2025-01-08\"\n  },\n  \"formato_exportacion\": \"pdf\",\n  \"opciones\": {\n    \"incluir_graficos\": true,\n    \"orientacion\": \"landscape\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}:{{api_reports_port}}/api/v1/reports/export",
+                  "host": ["{{base_url}}"],
+                  "port": "{{api_reports_port}}",
+                  "path": ["api", "v1", "reports", "export"]
+                },
+                "description": "Exporta un reporte en formato específico"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health Checks",
+      "description": "Endpoints de verificación de estado para todas las APIs",
+      "item": [
+        {
+          "name": "Health Check API POS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{api_pos_port}}/health",
+              "host": ["{{base_url}}"],
+              "port": "{{api_pos_port}}",
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Health Check API Sync",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{api_sync_port}}/health",
+              "host": ["{{base_url}}"],
+              "port": "{{api_sync_port}}",
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Health Check API Labels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{api_labels_port}}/health",
+              "host": ["{{base_url}}"],
+              "port": "{{api_labels_port}}",
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Health Check API Reports",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}:{{api_reports_port}}/health",
+              "host": ["{{base_url}}"],
+              "port": "{{api_reports_port}}",
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-refresh token si está próximo a expirar",
+          "const token = pm.collectionVariables.get('access_token');",
+          "if (token) {",
+          "    try {",
+          "        const payload = JSON.parse(atob(token.split('.')[1]));",
+          "        const exp = payload.exp * 1000;",
+          "        const now = Date.now();",
+          "        const timeUntilExpiry = exp - now;",
+          "        ",
+          "        // Si expira en menos de 5 minutos, intentar refresh",
+          "        if (timeUntilExpiry < 300000) {",
+          "            console.log('Token próximo a expirar, considerar refresh');",
+          "        }",
+          "    } catch (e) {",
+          "        console.log('Error al verificar expiración del token');",
+          "    }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Logging automático de respuestas",
+          "if (pm.response.code >= 400) {",
+          "    console.log('Error en request:', pm.response.status);",
+          "    console.log('Response:', pm.response.text());",
+          "}"
+        ]
+      }
+    }
+  ]
+}
+
