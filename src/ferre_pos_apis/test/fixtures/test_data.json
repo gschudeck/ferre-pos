@@ -1,0 +1,172 @@
+{
+  "usuarios": [
+    {
+      "id": "test-user-1",
+      "username": "admin_test",
+      "email": "admin@test.com",
+      "password_hash": "$2a$10$test.hash.for.testing.only",
+      "rol": "admin",
+      "activo": true,
+      "sucursal_id": "test-sucursal-1",
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "test-user-2",
+      "username": "vendedor_test",
+      "email": "vendedor@test.com",
+      "password_hash": "$2a$10$test.hash.for.testing.only",
+      "rol": "vendedor",
+      "activo": true,
+      "sucursal_id": "test-sucursal-1",
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "productos": [
+    {
+      "id": "test-product-1",
+      "codigo": "TEST001",
+      "codigo_barras": "1234567890123",
+      "nombre": "Producto Test 1",
+      "descripcion": "Descripción del producto test 1",
+      "categoria_id": "test-category-1",
+      "precio": 100.00,
+      "costo": 60.00,
+      "stock": 50,
+      "stock_minimo": 10,
+      "activo": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "test-product-2",
+      "codigo": "TEST002",
+      "codigo_barras": "1234567890124",
+      "nombre": "Producto Test 2",
+      "descripcion": "Descripción del producto test 2",
+      "categoria_id": "test-category-2",
+      "precio": 200.00,
+      "costo": 120.00,
+      "stock": 25,
+      "stock_minimo": 5,
+      "activo": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "categorias": [
+    {
+      "id": "test-category-1",
+      "nombre": "Categoría Test 1",
+      "descripcion": "Descripción de categoría test 1",
+      "activa": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "test-category-2",
+      "nombre": "Categoría Test 2",
+      "descripcion": "Descripción de categoría test 2",
+      "activa": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "sucursales": [
+    {
+      "id": "test-sucursal-1",
+      "nombre": "Sucursal Test",
+      "direccion": "Dirección Test 123",
+      "telefono": "+56912345678",
+      "email": "sucursal@test.com",
+      "activa": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "ventas": [
+    {
+      "id": "test-venta-1",
+      "numero_documento": "V001",
+      "tipo_documento": "boleta",
+      "usuario_id": "test-user-2",
+      "sucursal_id": "test-sucursal-1",
+      "subtotal": 300.00,
+      "impuestos": 57.00,
+      "descuentos": 0.00,
+      "total": 357.00,
+      "estado": "completada",
+      "metodo_pago": "efectivo",
+      "fecha_venta": "2024-01-01T10:00:00Z",
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  ],
+  "detalle_ventas": [
+    {
+      "id": "test-detalle-1",
+      "venta_id": "test-venta-1",
+      "producto_id": "test-product-1",
+      "cantidad": 2,
+      "precio_unitario": 100.00,
+      "descuento": 0.00,
+      "subtotal": 200.00,
+      "created_at": "2024-01-01T10:00:00Z"
+    },
+    {
+      "id": "test-detalle-2",
+      "venta_id": "test-venta-1",
+      "producto_id": "test-product-2",
+      "cantidad": 1,
+      "precio_unitario": 100.00,
+      "descuento": 0.00,
+      "subtotal": 100.00,
+      "created_at": "2024-01-01T10:00:00Z"
+    }
+  ],
+  "terminales": [
+    {
+      "id": "test-terminal-1",
+      "codigo": "TERM001",
+      "nombre": "Terminal Test 1",
+      "sucursal_id": "test-sucursal-1",
+      "ip_address": "192.168.1.100",
+      "activo": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "auth_tokens": [
+    {
+      "user_id": "test-user-1",
+      "token": "test-admin-token",
+      "role": "admin",
+      "expires_at": "2024-12-31T23:59:59Z"
+    },
+    {
+      "user_id": "test-user-2",
+      "token": "test-vendedor-token",
+      "role": "vendedor",
+      "expires_at": "2024-12-31T23:59:59Z"
+    }
+  ],
+  "api_responses": {
+    "success": {
+      "success": true,
+      "data": {},
+      "request_id": "test-request-id",
+      "timestamp": "2024-01-01T00:00:00Z"
+    },
+    "error": {
+      "success": false,
+      "error": {
+        "code": "TEST_ERROR",
+        "message": "Error de prueba"
+      },
+      "request_id": "test-request-id",
+      "timestamp": "2024-01-01T00:00:00Z"
+    }
+  }
+}
+
